@@ -2,24 +2,25 @@
 using AutoMapper;
 using drinking_be.Dtos.CategoryDtos;
 using drinking_be.Interfaces.CategoryInerfaces;
+using drinking_be.Interfaces.ProductInterfaces;
 using drinking_be.Models;
-using drinking_be.Repositories;
 using drinking_be.Utils; // Giả định có SlugGenerator (hoặc dùng hàm tiện ích)
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace drinking_be.Services
 {
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categoryRepo;
+        private readonly IProductRepository _productRepo;
         private readonly IMapper _mapper;
+        private readonly DBDrinkContext _context;
 
-        public CategoryService(ICategoryRepository categoryRepo, IMapper mapper)
+        public CategoryService(ICategoryRepository categoryRepo, IMapper mapper, DBDrinkContext context)
         {
             _categoryRepo = categoryRepo;
             _mapper = mapper;
+            _context = context;
         }
 
         // --- LOGIC XỬ LÝ CÂY (RECURSIVE MAPPING) ---
@@ -41,7 +42,7 @@ namespace drinking_be.Services
         // ⭐️ Lấy Categories dưới dạng cấu trúc cây
         public async Task<IEnumerable<CategoryReadDto>> GetCategoryTreeAsync()
         {
-            var categories = await _categoryRepo.GetAllCategoriesAsync();
+            var categories = await _categoryRepo.GetAllCategoriesAsync(null);
             var categoryDtos = _mapper.Map<List<CategoryReadDto>>(categories);
 
             // Bắt đầu xây dựng cây từ các nút gốc (ParentId == null)
@@ -49,9 +50,9 @@ namespace drinking_be.Services
         }
 
         // ⭐️ Lấy tất cả (phẳng)
-        public async Task<IEnumerable<CategoryReadDto>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<CategoryReadDto>> GetAllCategoriesAsync(string? searchQuery)
         {
-            var categories = await _categoryRepo.GetAllCategoriesAsync();
+            var categories = await _categoryRepo.GetAllCategoriesAsync(searchQuery);
             return _mapper.Map<IEnumerable<CategoryReadDto>>(categories);
         }
 
@@ -130,13 +131,23 @@ namespace drinking_be.Services
             var category = await _categoryRepo.GetByIdAsync(id);
             if (category == null) return false;
 
-            // TODO: Cần thêm logic kiểm tra xem Category này có children hoặc products không
-            // Nếu có, cần chặn xóa hoặc chuyển Product/Children sang ParentId khác.
+            // ⭐️ 1. KIỂM TRA SẢN PHẨM LIÊN QUAN ⭐️
+            var productCount = await _productRepo.CountProductsInCategoryAsync(id);
 
-            // Thực hiện xóa
+            if (productCount > 0)
+            {
+                // ⭐️ Ném Exception với thông báo cụ thể cho Frontend
+                throw new Exception($"Danh mục '{category.Name}' đang có {productCount} sản phẩm. Vui lòng xóa hết sản phẩm hoặc chuyển chúng sang danh mục khác trước khi xóa.");
+            }
+
+            // 2. Nếu không có sản phẩm, thực hiện xóa
             _categoryRepo.Delete(category);
             await _categoryRepo.SaveChangesAsync();
             return true;
+        }
+        public async Task<int> CountProductsInCategoryAsync(int id)
+        {
+            return await _context.Products.CountAsync(p => p.CategoryId == id);
         }
     }
 }

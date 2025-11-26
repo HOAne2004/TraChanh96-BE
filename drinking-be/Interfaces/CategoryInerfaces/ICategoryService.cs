@@ -7,8 +7,7 @@ namespace drinking_be.Interfaces.CategoryInerfaces
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<CategoryReadDto>> GetAllCategoriesAsync();
-
+        Task<IEnumerable<CategoryReadDto>> GetAllCategoriesAsync(string? searchQuery);
         Task<CategoryReadDto?> GetCategoryByIdAsync(int id);
 
         Task<CategoryReadDto> CreateCategoryAsync(CategoryCreateDto categoryDto);
@@ -16,5 +15,6 @@ namespace drinking_be.Interfaces.CategoryInerfaces
         Task<bool> DeleteCategoryAsync(int id);
 
         Task<IEnumerable<CategoryReadDto>> GetCategoryTreeAsync();
+        Task<int> CountProductsInCategoryAsync(int id);
     }
 }

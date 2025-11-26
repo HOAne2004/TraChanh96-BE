@@ -1,7 +1,8 @@
-﻿create database DBDrink
-go
-use DBDrink
-go
+﻿--DROP DATABASE DBDrink
+--create database DBDrink
+--go
+--use DBDrink
+--go
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[TenBang]') AND type in (N'U'))
 BEGIN
@@ -11,6 +12,10 @@ CREATE TABLE Category (
     parent_id INT NULL,
     slug VARCHAR(100) UNIQUE NOT NULL,
     name NVARCHAR(100) NOT NULL,
+    is_active BIT DEFAULT 1,
+    sort_order TINYINT DEFAULT 0,
+
+
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (parent_id) REFERENCES Category(id)
@@ -31,7 +36,7 @@ CREATE TABLE Product (
     product_type NVARCHAR(20) NOT NULL,     -- Loại sản phẩm: 'Beverage', 'Topping' (Đã chuẩn hóa)
     
     -- Giá & Mô tả
-    base_price DECIMAL(10, 2) NOT NULL,     -- Giá cơ bản (10 chữ số, 2 chữ số thập phân)
+    base_price DECIMAL(18, 2) NOT NULL,     -- Giá cơ bản (10 chữ số, 2 chữ số thập phân)
     image_url VARCHAR(500),                 -- Đường dẫn ảnh
     description NVARCHAR(MAX),              -- Mô tả chi tiết (Văn bản dài, hỗ trợ Tiếng Việt)
     ingredient NVARCHAR(MAX),               -- Thành phần (Hỗ trợ Tiếng Việt)
@@ -40,11 +45,14 @@ CREATE TABLE Product (
     status NVARCHAR(20) NOT NULL,           -- Trạng thái: 'Active', 'Draft', 'Archived'
     total_rating FLOAT DEFAULT 0,           -- Tổng sao đánh giá trung bình
     total_sold INT DEFAULT 0,               -- Tổng số lượng đã bán (Dữ liệu tính toán)
+    search_vector VARBINARY(MAX),
 
     -- Dấu thời gian
     launch_date_time DATETIME,              -- Ngày giờ ra mắt/mở bán
     created_at DATETIME DEFAULT GETDATE(),  -- Thời gian tạo bản ghi
     updated_at DATETIME
+
+    FOREIGN KEY (category_id) REFERENCES Category(id)
 );
 
 ALTER TABLE Product
@@ -96,6 +104,8 @@ create table Store(
     open_time TIME,
     close_time TIME,
     is_active BIT DEFAULT 1,
+    sort_order TINYINT DEFAULT 0,
+    map_verified BIT DEFAULT 0,
 
     created_at DATETIME DEFAULT GETDATE(),
 
@@ -118,15 +128,6 @@ create table Policy(
     FOREIGN KEY (brand_id) REFERENCES Brand(id),
 );
 
--- News Categories
-CREATE TABLE News_Category (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(100) NOT NULL,
-    slug NVARCHAR(100) UNIQUE NOT NULL,
-    is_active BIT DEFAULT 1,
-    created_at DATETIME DEFAULT GETDATE()
-);
-
 -- Users
 create table [User](
     id INT IDENTITY(1,1) PRIMARY KEY,
@@ -140,6 +141,7 @@ create table [User](
     password_hash VARCHAR(255) NOT NULL,
     current_coins INT DEFAULT 0 CHECK (current_coins >= 0),
     email_verified BIT DEFAULT 0,
+    status TINYINT NOT NULL DEFAULT 1 CHECK (status IN (1, 2, 3)),
 
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
@@ -152,7 +154,7 @@ create table News(
     public_id UNIQUEIDENTIFIER DEFAULT NEWSEQUENTIALID() UNIQUE,
     slug nvarchar(200) unique,
     
-    category_id int not null,
+   type NVARCHAR(50) NOT NULL,
     user_id int not null,
 
     title nvarchar(255) not null,
@@ -160,11 +162,13 @@ create table News(
     thumbnail_url varchar(500),
     status NVARCHAR(20) DEFAULT 'Draft' CHECK (status IN ('Draft', 'Published', 'Archived')),
     
+    is_featured BIT DEFAULT 0,
+    seo_description NVARCHAR(255),
+
     published_date DATETIME,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
 
-    FOREIGN KEY (category_id) REFERENCES News_category(id),
     FOREIGN KEY (user_id) REFERENCES [User](id)
 );
 
@@ -176,6 +180,8 @@ CREATE TABLE User_Address (
     is_default BIT DEFAULT 0,
 
     created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+
 
     FOREIGN KEY (user_id) REFERENCES [User](id) ON DELETE CASCADE
 );
@@ -188,10 +194,14 @@ CREATE TABLE Review (
     content NVARCHAR(MAX),
     rating TINYINT NOT NULL CHECK (rating >= 1 AND rating <= 5),
     status NVARCHAR(20) DEFAULT 'Pending' CHECK (status IN ('Pending', 'Approved', 'Rejected')),
+    media_url VARCHAR(500),
+    admin_response NVARCHAR(MAX),
+
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (product_id) REFERENCES Product(id),
     FOREIGN KEY (user_id) REFERENCES [User](id)
 );
+
 
 -- News Comments
 CREATE TABLE Comment (
@@ -200,7 +210,9 @@ CREATE TABLE Comment (
     user_id int NOT NULL,
     news_id INT NOT NULL,
     content NVARCHAR(500) NOT NULL,
+    status NVARCHAR(20) DEFAULT 'Pending',
     created_at DATETIME DEFAULT GETDATE(),
+
     FOREIGN KEY (parent_id) REFERENCES Comment(id),
     FOREIGN KEY (user_id) REFERENCES [User](id),
     FOREIGN KEY (news_id) REFERENCES News(id)
@@ -210,21 +222,24 @@ CREATE TABLE Comment (
 CREATE TABLE Size (
     id SMALLINT IDENTITY(1,1) PRIMARY KEY,
     label NVARCHAR(20) NOT NULL,
-    price_modifier DECIMAL(5,2) DEFAULT 0 CHECK (price_modifier >= 0)
+    price_modifier DECIMAL(18, 2) DEFAULT 0 CHECK (price_modifier >= 0),
+    is_active BIT DEFAULT 1,
 );
 
 -- Ice Levels
 CREATE TABLE Ice_Level (
     id SMALLINT IDENTITY(1,1) PRIMARY KEY,
     label NVARCHAR(20) NOT NULL,
-    value SMALLINT NOT NULL CHECK (value >= 0 AND value <= 100)
+    value SMALLINT NOT NULL CHECK (value >= -1 AND value <= 100),
+    is_active BIT DEFAULT 1,
 );
 
 -- Sugar Levels
 CREATE TABLE Sugar_Level (
     id SMALLINT IDENTITY(1,1) PRIMARY KEY,
     label NVARCHAR(20) NOT NULL,
-    value SMALLINT NOT NULL CHECK (value >= 0 AND value <= 100)
+    value SMALLINT NOT NULL CHECK ( value >= -1 AND value <= 100),
+    is_active BIT DEFAULT 1,
 );
 
 -- Payment Methods
@@ -232,16 +247,19 @@ CREATE TABLE Payment_Method (
     id INT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(50) NOT NULL,
     image_url VARCHAR(500),
-    is_active BIT DEFAULT 1
+    is_active BIT DEFAULT 1,
+    sort_order TINYINT DEFAULT 0,
+    processing_fee DECIMAL(5, 2) DEFAULT 0,
 );
 
--- Order_items
+-- Order
 create table [Order](
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     order_code VARCHAR(50) UNIQUE NOT NULL,
     user_id int NULL, -- NULL for guest orders
     store_id INT NOT NULL,
     payment_method_id INT NULL,
+    
     order_date DATETIME DEFAULT GETDATE(),
     delivery_date DATETIME,
     total_amount DECIMAL(10,2) NOT NULL CHECK (total_amount >= 0),
@@ -254,7 +272,11 @@ create table [Order](
     customer_phone VARCHAR(20) NOT NULL,
     customer_name NVARCHAR(100) NOT NULL,
     voucher_code_used VARCHAR(20),
+    store_name NVARCHAR(200),
+    user_notes NVARCHAR(500),
+
     created_at DATETIME DEFAULT GETDATE(),
+
     FOREIGN KEY (user_id) REFERENCES [User](id),
     FOREIGN KEY (store_id) REFERENCES Store(id),
     FOREIGN KEY (payment_method_id) REFERENCES Payment_Method(id)
@@ -341,6 +363,9 @@ CREATE TABLE Membership (
     total_spent DECIMAL(12,2) DEFAULT 0 CHECK (total_spent >= 0),
     level_start_date DATE DEFAULT CAST(GETDATE() AS DATE),
     level_end_date DATE NOT NULL,
+    last_level_spent_reset DATE NULL,
+    status TINYINT DEFAULT 1,
+
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (user_id) REFERENCES [User](id) ON DELETE CASCADE,
     FOREIGN KEY (level_id) REFERENCES Membership_Level(id)
@@ -351,6 +376,7 @@ CREATE TABLE Voucher_Template (
     id INT IDENTITY(1,1) PRIMARY KEY,
     name NVARCHAR(100) NOT NULL,
     level_id TINYINT NULL, -- NULL if voucher is for all levels
+    
     discount_value DECIMAL(5,2) NOT NULL CHECK (discount_value > 0),
     discount_type VARCHAR(10) NOT NULL CHECK (discount_type IN ('Percent', 'Fixed')),
     min_order_value DECIMAL(10,2) DEFAULT 0 CHECK (min_order_value >= 0),
@@ -359,6 +385,9 @@ CREATE TABLE Voucher_Template (
     usage_limit INT NULL CHECK (usage_limit >= 0),
     used_count INT DEFAULT 0 CHECK (used_count >= 0),
     is_active BIT DEFAULT 1,
+    usage_limit_per_user TINYINT NULL,
+    coupon_code	VARCHAR(20) NULL UNIQUE,
+    
     start_date DATETIME NOT NULL,
     end_date DATETIME NOT NULL,
     created_at DATETIME DEFAULT GETDATE(),
@@ -375,6 +404,8 @@ CREATE TABLE User_Voucher (
     expiry_date DATETIME NOT NULL,
     status TINYINT DEFAULT 1 CHECK (status IN (1, 2, 3)), -- 1:Unused, 2:Used, 3:Expired
     used_date DATETIME NULL,
+    order_id_used	BIGINT NULL
+    
     FOREIGN KEY (user_id) REFERENCES [User](id),
     FOREIGN KEY (voucher_template_id) REFERENCES Voucher_Template(id)
 );
@@ -416,63 +447,79 @@ CREATE TABLE Product_Sugar_Level (
     FOREIGN KEY (sugar_level_id) REFERENCES Sugar_Level(id)
 );
 
-End
+CREATE TABLE Shop_Table (
+    -- Khóa chính
+    id INT IDENTITY(1,1) PRIMARY KEY, 
+    
+    -- Thông tin cơ bản
+    store_id INT NOT NULL,              -- FK: Mã Cửa hàng
+    name NVARCHAR(50) NOT NULL,         -- Tên/Số hiệu bàn (Ví dụ: "Bàn A1", "Bàn VIP 3")
+    capacity TINYINT NOT NULL CHECK (capacity > 0), -- Sức chứa tối đa (người)
+    
+    -- Quản lý ghép bàn
+    can_be_merged BIT DEFAULT 1,        -- Có thể được ghép với bàn khác không (1=Có, 0=Không)
+    merged_with_table_id INT NULL,      -- FK: Mã bàn đang được ghép (NULL nếu không ghép)
+    
+    -- Trạng thái
+    is_active BIT DEFAULT 1,            -- Trạng thái hoạt động (1=Hoạt động, 0=Tạm ẩn)
 
---- Nội dung phụ ---
----------------------------------------------------
--- Xóa UNIQUE 
---SELECT 
---    i.name AS ConstraintOrIndexName,
---    i.is_unique,
---    c.name AS ColumnName
---FROM sys.indexes i
---JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
---JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
---WHERE i.object_id = OBJECT_ID('[User]')
--- AND i.is_unique = 1               -- chỉ lấy unique
---  AND c.name = 'username';          -- chỉ lấy cho username
+    -- Dấu thời gian
+    created_at DATETIME DEFAULT GETDATE(),
 
---ALTER TABLE [User]
---DROP CONSTRAINT [UQ__User__F3DBC572914F5728];
-
-
-SELECT * FROM [User]    
-SELECT * FROM [Membership]
-SELECT * FROM [Membership_Level]   
-DELETE FROM [User] WHERE Email = 'admin@example.com';
-UPDATE [User]
-SET role_id = 2
-WHERE email = 'admin@abc.com';
-
-
-ALTER TABLE Membership_Level
-DROP CONSTRAINT CK__Membership__name__2FCF1A8A;
-
-ALTER TABLE Membership_Level
-ADD CONSTRAINT CK_Membership_Level_Name_Valid
-CHECK (name IN (N'Đồng', N'Bạc', N'Vàng', N'Kim Cương'));
-
-DELETE FROM Membership_Level WHERE name = 'Đồng';
-
-INSERT INTO Membership_Level (name, min_spend_required, duration_days, benefits)
-VALUES (N'Đồng', 0, 365, N'{}');
-
-INSERT INTO Brand (name, logo_url, address, hotline, email_support, tax_code, company_name, slogan, copyright_text, created_at)
-VALUES (
-    N'Trà chanh 1996', 
-    'https://via.placeholder.com/150', 
-    N'Cụm CN Bình Lục, Bình An, Ninh Bình', 
-    '1900 1234', 
-    'support@drink.vn', 
-    '0101234567', 
-    N'Công ty TNHH 1996', 
-    N'Thưởng thức từng giọt vui', 
-    N'© 2024 Trà chanh 1996. All rights reserved.',
-    GETDATE()
+    -- Khóa ngoại
+    FOREIGN KEY (store_id) REFERENCES Store(id),
+    -- Khóa ngoại tự tham chiếu cho Ghép bàn
+    FOREIGN KEY (merged_with_table_id) REFERENCES [Table](id)
 );
 
--- Lệnh này sẽ liệt kê các bảng liên quan đến Sản phẩm
-SELECT name, object_id, create_date
-FROM sys.tables 
-WHERE name LIKE '%Product%'
-ORDER BY name;
+CREATE TABLE Reservation (
+    -- Khóa chính
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    
+    -- Định danh và liên kết
+    reservation_code VARCHAR(50) UNIQUE NOT NULL, -- Mã đặt chỗ duy nhất
+    user_id INT NULL,                           -- FK: Mã Khách hàng (NULL cho khách vãng lai)
+    store_id INT NOT NULL,                      -- FK: Mã Cửa hàng
+    
+    -- Thời gian & Số lượng
+    reservation_datetime DATETIME NOT NULL,     -- Thời gian đặt bàn (Ngày và Giờ)
+    number_of_guests TINYINT NOT NULL CHECK (number_of_guests > 0), -- Số lượng khách
+    deposit_amount DECIMAL(18, 2) DEFAULT 0, -- Giá cọc
+    is_deposit_paid BIT DEFAULT 0 NOT NULL, -- Chuyển hay chưa
+    
+    -- Thông tin khách hàng
+    customer_name NVARCHAR(100) NOT NULL,       -- Tên khách hàng
+    customer_phone VARCHAR(20) NOT NULL,        -- SĐT khách hàng
+    note NVARCHAR(500),                         -- Ghi chú từ khách hàng
+    
+    -- Trạng thái
+    status TINYINT DEFAULT 1 CHECK (status BETWEEN 1 AND 6), -- 1:Pending, 2:Confirmed, 3:Arrived, 4:No-Show, 5:Cancelled, 6:Completed
+    
+    -- Bàn được gán (sau khi xác nhận)
+    assigned_table_id INT NULL,                 -- FK: Mã bàn được gán (Có thể là bàn đơn hoặc bàn ghép)
+    
+    -- Dấu thời gian
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+
+    -- Khóa ngoại
+    FOREIGN KEY (user_id) REFERENCES [User](id),
+    FOREIGN KEY (store_id) REFERENCES Store(id),
+    FOREIGN KEY (assigned_table_id) REFERENCES [Table](id)
+);
+End;
+
+-- Thêm thuộc tính
+ALTER TABLE Reservation
+ADD is_deposit_paid BIT DEFAULT 0 NOT NULL;
+
+-- Tra cứu bảng
+Select *from Size
+
+-- Nới rộng cột giá trong bảng Size
+ALTER TABLE Size
+ALTER COLUMN price_modifier DECIMAL(18, 2);
+
+-- Tiện tay nới luôn cho các bảng khác kẻo sau này lại lỗi tương tự
+ALTER TABLE Product
+ALTER COLUMN base_price DECIMAL(18, 2);

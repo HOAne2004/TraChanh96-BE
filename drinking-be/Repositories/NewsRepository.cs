@@ -10,7 +10,7 @@ namespace drinking_be.Repositories
 {
     public class NewsRepository : GenericRepository<News>, INewsRepository
     {
-        private readonly DBDrinkContext _context;
+        private readonly new DBDrinkContext _context;
 
         public NewsRepository(DBDrinkContext context) : base(context)
         {
@@ -22,7 +22,6 @@ namespace drinking_be.Repositories
         {
             return await _context.News // Giả định DbSet là News
                                  .Where(n => n.Status == "Published")
-                                 .Include(n => n.Category) // Eager Loading Category Name
                                  .OrderByDescending(n => n.PublishedDate)
                                  .ToListAsync();
         }
@@ -31,7 +30,6 @@ namespace drinking_be.Repositories
         public async Task<News?> GetBySlugAsync(string slug)
         {
             return await _context.News
-                                 .Include(n => n.Category) // Eager Loading Category Name
                                  .FirstOrDefaultAsync(n => n.Slug == slug);
         }
     }

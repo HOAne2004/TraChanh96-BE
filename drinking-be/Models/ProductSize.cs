@@ -10,5 +10,7 @@ namespace drinking_be.Models
         // Navigation Properties
         public Product Product { get; set; } = null!;
         public Size Size { get; set; } = null!;
+
+
     }
 }

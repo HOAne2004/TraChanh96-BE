@@ -1,4 +1,6 @@
-﻿using drinking_be.Interfaces;
+﻿using DBDrink.Repositories;
+using drinking_be.Data;
+using drinking_be.Interfaces;
 using drinking_be.Interfaces.CategoryInerfaces;
 using drinking_be.Interfaces.MembershipInterfaces;
 using drinking_be.Interfaces.NewsInterfaces;
@@ -6,6 +8,8 @@ using drinking_be.Interfaces.OptionInterfaces;
 using drinking_be.Interfaces.OrderInterfaces;
 using drinking_be.Interfaces.PolicyInterfaces;
 using drinking_be.Interfaces.ProductInterfaces;
+using drinking_be.Interfaces.ReservationInterfaces;
+using drinking_be.Interfaces.ShopTableInterfaces;
 using drinking_be.Interfaces.StoreInterfaces;
 using drinking_be.Interfaces.UserInterfaces;
 using drinking_be.Models;            // Thư mục chứa DBDrinkContext của bạn
@@ -21,6 +25,7 @@ using System.Text;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 var config = builder.Configuration; // Lấy Configuration
 
@@ -209,6 +214,20 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IUploadService, UploadService>();
 
+// Đăng ký Repository
+builder.Services.AddScoped<IShopTableRepository, ShopTableRepository>();
+
+// Đăng ký Service
+builder.Services.AddScoped<IShopTableService, ShopTableService>();
+
+// Đăng ký Repository
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+
+// Đăng ký Service
+builder.Services.AddScoped<IReservationService, ReservationService>();
+
+
+
 
 var app = builder.Build();
 
@@ -221,7 +240,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ⭐️ THÊM DÒNG NÀY ⭐️
 // Cho phép phục vụ các file trong thư mục wwwroot
 app.UseStaticFiles();
 
@@ -230,6 +248,28 @@ app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthentication(); // Xác thực trước
 app.UseAuthorization(); // Rồi mới phân quyền
 
+
+// ⭐️ GỌI INITIALIZER (SEEDER) ⭐️
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // Lấy DbContext và chạy Seeder
+        var context = services.GetRequiredService<DBDrinkContext>();
+        await DbInitializer.SeedData(context); // ⭐️ Gọi Seeder
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
+
 app.MapControllers();
+
+// QUAN TRỌNG: Sử dụng PORT từ environment variable
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Run($"http://0.0.0.0:{port}");
 
 app.Run();

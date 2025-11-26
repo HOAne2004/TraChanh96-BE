@@ -9,7 +9,7 @@ namespace drinking_be.Interfaces.CategoryInerfaces
     public interface ICategoryRepository : IGenericRepository<Category>
     {
         // ⭐️ Phương thức chuyên biệt: Lấy tất cả danh mục (có thể không cần eager loading)
-        Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        Task<IEnumerable<Category>> GetAllCategoriesAsync(string? searchQuery);
 
         // Kiểm tra Slug đã tồn tại chưa
         Task<bool> IsSlugExistsAsync(string slug, int? excludeId = null);

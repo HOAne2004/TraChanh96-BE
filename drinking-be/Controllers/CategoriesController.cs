@@ -20,9 +20,9 @@ namespace drinking_be.Controllers
         // ⭐️ GET: api/categories (Lấy danh sách phẳng)
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CategoryReadDto>))]
-        public async Task<IActionResult> GetCategories()
+        public async Task<IActionResult> GetCategories([FromQuery] string? q)
         {
-            var categories = await _categoryService.GetAllCategoriesAsync();
+            var categories = await _categoryService.GetAllCategoriesAsync(q);
             return Ok(categories);
         }
 
@@ -102,6 +102,14 @@ namespace drinking_be.Controllers
             if (!result) return NotFound($"Không tìm thấy danh mục với ID: {id}");
 
             return NoContent(); // 204 No Content
+        }
+
+        // GET: api/Categories/5/usage
+        [HttpGet("{id}/usage")]
+        public async Task<IActionResult> GetCategoryUsage(int id)
+        {
+            var count = await _categoryService.CountProductsInCategoryAsync(id);
+            return Ok(new { count });
         }
     }
 }

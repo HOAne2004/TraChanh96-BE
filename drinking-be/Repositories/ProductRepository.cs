@@ -6,7 +6,7 @@ namespace drinking_be.Repositories
 {
     public class ProductRepository : GenericRepository<Product>, IProductRepository
     {
-        private readonly DBDrinkContext _context;
+        private readonly new DBDrinkContext _context;
         public ProductRepository(DBDrinkContext context) : base(context)
         {
             _context = context;
@@ -65,9 +65,9 @@ namespace drinking_be.Repositories
         {
             var query = _context.Products
                 // ⭐️ QUAN TRỌNG: Phải Include để Service có dữ liệu map sang DTO
-                .Include(p => p.ProductSizes)
-                .Include(p => p.ProductIceLevels)
-                .Include(p => p.ProductSugarLevels)
+                //.Include(p => p.ProductSizes)
+                //.Include(p => p.ProductIceLevels)
+                //.Include(p => p.ProductSugarLevels)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(productType))
@@ -78,6 +78,11 @@ namespace drinking_be.Repositories
 
             // Sắp xếp sản phẩm mới nhất lên đầu
             return await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
+        }
+
+        public async Task<int> CountProductsInCategoryAsync(int categoryId)
+        {
+            return await _context.Products.CountAsync(p => p.CategoryId == categoryId);
         }
     }
 }

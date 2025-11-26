@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]")] // Route gốc: /api/Admin
     [ApiController]
-    [Authorize(Roles = "Admin")] // ⭐️ CHỈ ADMIN MỚI ĐƯỢC GỌI
+    [Authorize(Roles = "Admin")] // Yêu cầu quyền Admin cho mọi hành động
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
@@ -18,20 +18,52 @@ namespace drinking_be.Controllers
             _adminService = adminService;
         }
 
-        /// <summary>
-        /// [ADMIN] Lấy danh sách tất cả người dùng.
-        /// </summary>
+        // --- 1. GET ALL USERS (/api/Admin/users) ---
         [HttpGet("users")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserReadDto>))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _adminService.GetAllUsersAsync();
             return Ok(users);
         }
 
-        // TODO: Thêm [HttpPut("users/{id}")] (Cập nhật role)
-        // TODO: Thêm [HttpDelete("users/{id}")] (Xóa user)
+        // --- 2. UPDATE USER ROLE/STATUS (PATCH /api/Admin/users/{publicId}) ---
+        /// <summary>
+        /// [ADMIN] Cập nhật vai trò, trạng thái hoặc thông tin cá nhân của người dùng.
+        /// </summary>
+        [HttpPatch("users/{publicId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReadDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateUser(Guid publicId, [FromBody] UserUpdateDto updateDto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var updatedUser = await _adminService.UpdateUserByPublicIdAsync(publicId, updateDto);
+                if (updatedUser == null) return NotFound("Không tìm thấy người dùng.");
+
+                return Ok(updatedUser);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // --- 3. DELETE USER (DELETE /api/Admin/users/{publicId}) ---
+        /// <summary>
+        /// [ADMIN] Xóa hoặc vô hiệu hóa tài khoản người dùng.
+        /// </summary>
+        [HttpDelete("users/{publicId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteUser(Guid publicId)
+        {
+            var result = await _adminService.DeleteUserByPublicIdAsync(publicId);
+            if (!result) return NotFound("Không tìm thấy người dùng.");
+
+            return NoContent(); // 204 No Content
+        }
     }
 }

@@ -5,7 +5,8 @@ namespace drinking_be.Interfaces
 {
     public interface IAdminService
     {
+        Task<bool> DeleteUserByPublicIdAsync(Guid publicId);
         Task<IEnumerable<UserReadDto>> GetAllUsersAsync();
-        // (Chúng ta có thể thêm các hàm Update/Delete sau)
+        Task <UserReadDto> UpdateUserByPublicIdAsync(Guid publicId, UserUpdateDto updateDto);
     }
 }

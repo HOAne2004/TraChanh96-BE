@@ -1,7 +1,7 @@
 ﻿// Repositories/BrandRepository.cs
 using drinking_be.Interfaces;
-using drinking_be.Models;
 using Microsoft.EntityFrameworkCore;
+using drinking_be.Models;
 using System.Threading.Tasks;
 using System.Linq;
 
@@ -9,7 +9,7 @@ namespace drinking_be.Repositories
 {
     public class BrandRepository : GenericRepository<Brand>, IBrandRepository
     {
-        private readonly DBDrinkContext _context;
+        private readonly new DBDrinkContext _context;
 
         public BrandRepository(DBDrinkContext context) : base(context)
         {

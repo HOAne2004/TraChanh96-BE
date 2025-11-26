@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace drinking_be.Controllers
 {
     // Frontend gọi /api/upload
-    [Route("api/[controller]")]
+    [Route("api/upload")]
     [ApiController]
     public class UploadsController : ControllerBase
     {

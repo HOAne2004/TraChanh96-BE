@@ -16,13 +16,17 @@ namespace drinking_be.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(string? searchQuery)
         {
+            var query = _context.Categories.AsQueryable();
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                var lowerQuery = searchQuery.ToLower();
+                query = query.Where(c => c.Name.ToLower().Contains(lowerQuery) || c.Slug.ToLower().Contains(lowerQuery));
+            }
             // Eager Load children (cho việc build cây)
             // Lấy tất cả và sắp xếp theo ID (hoặc theo thứ tự tùy chỉnh)
-            return await _context.Categories
-                                 .OrderBy(c => c.Id)
-                                 .ToListAsync();
+            return await query.OrderBy(c => c.Id).ToListAsync();
         }
 
         public async Task<bool> IsSlugExistsAsync(string slug, int? excludeId = null)

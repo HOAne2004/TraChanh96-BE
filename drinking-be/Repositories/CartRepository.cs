@@ -10,7 +10,7 @@ namespace drinking_be.Repositories
 {
     public class CartRepository : GenericRepository<Cart>, ICartRepository
     {
-        private readonly DBDrinkContext _context;
+        private readonly new DBDrinkContext _context;
 
         public CartRepository(DBDrinkContext context) : base(context)
         {

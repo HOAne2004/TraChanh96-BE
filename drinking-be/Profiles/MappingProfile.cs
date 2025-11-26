@@ -10,12 +10,15 @@ using drinking_be.Dtos.OptionDtos;
 using drinking_be.Dtos.OrderDtos;
 using drinking_be.Dtos.PaymentMethodDtos;
 using drinking_be.Dtos.ProductDtos;
+using drinking_be.Dtos.ReservationDtos;
 using drinking_be.Dtos.ReviewDtos;
+using drinking_be.Dtos.ShopTableDtos;
 using drinking_be.Dtos.StoreDtos;
-using drinking_be.Dtos.VoucherDtos;
 using drinking_be.Dtos.UserDtos;
+using drinking_be.Dtos.VoucherDtos;
 using drinking_be.Enums;
 using drinking_be.Models;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 public class MappingProfile : Profile
 {
@@ -62,8 +65,7 @@ public class MappingProfile : Profile
 
         // Entity News -> NewsReadDto
         CreateMap<News, NewsReadDto>()
-             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-             .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name)); // Cần Include Category
+             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
 
         // DTO NewsCreateDto -> Entity News
         CreateMap<NewsCreateDto, News>()
@@ -215,6 +217,15 @@ public class MappingProfile : Profile
         CreateMap<SugarLevel, SugarLevelDto>();
         CreateMap<IceLevel, IceLevelDto>();
 
+        // 1. Map cho Size
+        CreateMap<SizeCreateDto, Size>();
+
+        // 2. Map cho IceLevel
+        CreateMap<IceLevelCreateDto, IceLevel>();
+
+        // 3. Map cho SugarLevel
+        CreateMap<SugarLevelCreateDto, SugarLevel>();
+
         // ----------------------------------------------------------------
         // --- User Mappings ---
         // ----------------------------------------------------------------
@@ -230,5 +241,28 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src =>
                 src.RoleId == 2 ? "Admin" : (src.RoleId == 3 ? "Manager" : "User")
             ));
+
+        // ---ShopTable Mapping-- -
+        // Map từ Entity sang ReadDto
+        CreateMap<ShopTable, ShopTableReadDto>()
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : null));
+
+        // Map từ CreateDto sang Entity
+        CreateMap<ShopTableCreateDto, ShopTable>();
+
+        // Map từ UpdateDto sang Entity
+        CreateMap<ShopTableUpdateDto, ShopTable>();
+
+        // --- Reservation Mapping ---
+        CreateMap<Reservation, ReservationReadDto>()
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : "N/A"))
+            .ForMember(dest => dest.AssignedTableName, opt => opt.MapFrom(src => src.AssignedTable != null ? src.AssignedTable.Name : null))
+            .ForMember(dest => dest.StatusLabel, opt => opt.MapFrom(src => ((ReservationStatusEnum)src.Status).ToString()));
+
+        CreateMap<ReservationCreateDto, Reservation>();
+
+        // UpdateDto map thủ công trong Service vì logic phức tạp, hoặc map fields đơn giản
+        CreateMap<ReservationUpdateDto, Reservation>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
 }
