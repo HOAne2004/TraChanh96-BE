@@ -203,12 +203,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
-                      {
-                          // ⭐️ THAY ĐỔI: Sửa cổng 5173 thành cổng Vue FE của bạn
-                          // (Nếu dùng Vite, thường là 5173. Nếu dùng Vue CLI, thường là 8080)
-                          policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-
-                      });
+        {
+            policy
+                .WithOrigins("https://tra-chanh-96.vercel.app", "http://localhost:5173") // ✅ Cho phép Vercel và Localhost
+                .AllowAnyMethod()  // Cho phép GET, POST, PUT, DELETE...
+                .AllowAnyHeader()  // Cho phép mọi Header
+                .AllowCredentials(); // Cho phép gửi cookie/auth header
+        });
 });
 
 builder.Services.AddScoped<IUploadService, UploadService>();
