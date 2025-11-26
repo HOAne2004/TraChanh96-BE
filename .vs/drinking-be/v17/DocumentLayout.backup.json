@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\railway.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\railway.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
@@ -42,7 +46,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Program.cs",
               "RelativeDocumentMoniker": "drinking-be\\Program.cs",
@@ -56,7 +60,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "MappingProfile.cs",
               "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Profiles\\MappingProfile.cs",
               "RelativeDocumentMoniker": "drinking-be\\Profiles\\MappingProfile.cs",
@@ -70,6 +74,19 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": ".gitignore",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\.gitignore",
+              "RelativeDocumentMoniker": "drinking-be\\.gitignore",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\.gitignore",
+              "RelativeToolTip": "drinking-be\\.gitignore",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-11-26T15:22:58.592Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "railway.json",
               "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\railway.json",
               "RelativeDocumentMoniker": "drinking-be\\railway.json",
@@ -82,7 +99,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "ISizeService.cs",
               "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Interfaces\\OptionInterfaces\\ISizeService.cs",
               "RelativeDocumentMoniker": "drinking-be\\Interfaces\\OptionInterfaces\\ISizeService.cs",
@@ -95,7 +112,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "CategoriesController.cs",
               "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\CategoriesController.cs",
               "RelativeDocumentMoniker": "drinking-be\\Controllers\\CategoriesController.cs",
@@ -108,7 +125,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "SugarLevelsController.cs",
               "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\SugarLevelsController.cs",
               "RelativeDocumentMoniker": "drinking-be\\Controllers\\SugarLevelsController.cs",
@@ -121,7 +138,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "SizesController.cs",
               "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\SizesController.cs",
               "RelativeDocumentMoniker": "drinking-be\\Controllers\\SizesController.cs",

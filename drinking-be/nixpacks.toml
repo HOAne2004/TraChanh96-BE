@@ -1,0 +1,12 @@
+[build.args]
+RUNTIME = "dotnet-8.0"
+SDK = "dotnet-8.0"
+
+[phases.setup]
+cmds = ["dotnet restore"]
+
+[phases.build]
+cmds = ["dotnet publish -c Release -o /app"]
+
+[start]
+cmd = "dotnet /app/drinking-be.dll"
