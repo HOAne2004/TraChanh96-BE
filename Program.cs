@@ -25,6 +25,7 @@ using System.Text;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls($"http://*:{Environment.GetEnvironmentVariable("PORT") ?? "5000"}");
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 var config = builder.Configuration; // Lấy Configuration
@@ -32,7 +33,7 @@ var config = builder.Configuration; // Lấy Configuration
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<DBDrinkContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Sau khi đăng ký DBContext
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -205,10 +206,8 @@ builder.Services.AddCors(options =>
                       {
                           // ⭐️ THAY ĐỔI: Sửa cổng 5173 thành cổng Vue FE của bạn
                           // (Nếu dùng Vite, thường là 5173. Nếu dùng Vue CLI, thường là 8080)
-                          policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
-                                .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                .AllowCredentials();
+                          policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+
                       });
 });
 
@@ -236,9 +235,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
+
+
 
 // Cho phép phục vụ các file trong thư mục wwwroot
 app.UseStaticFiles();
@@ -268,8 +269,5 @@ using (var scope = app.Services.CreateScope())
 
 app.MapControllers();
 
-// QUAN TRỌNG: Sử dụng PORT từ environment variable
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-app.Run($"http://0.0.0.0:{port}");
 
 app.Run();
