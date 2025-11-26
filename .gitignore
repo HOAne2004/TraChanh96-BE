@@ -72,3 +72,4 @@ npm-debug.log
 # Others
 *.swp
 *.tmp
+*.user
