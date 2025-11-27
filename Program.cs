@@ -33,8 +33,24 @@ var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://*:{port}");
 
 // 2. KẾT NỐI DATABASE (OK)
+//builder.Services.AddDbContext<DBDrinkContext>(options =>
+//    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 👇 SỬA ĐOẠN NÀY: Tách biến ra và in Log
+var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// In ra Console để xem trên Railway nó đang đọc được cái quái gì
+// Dấu '' giúp bạn nhìn thấy nếu có khoảng trắng thừa ở đầu/cuối
+Console.WriteLine($"👉 [DEBUG CHECK] Connection String: '{dbConnectionString}'"); 
+
 builder.Services.AddDbContext<DBDrinkContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    // Nếu biến môi trường bị null hoặc sai, ta thử Hardcode (Dán cứng) luôn để test
+    // options.UseNpgsql("Host=shortline.proxy.rlwy.net;Port=39042;Database=railway;Username=postgres;Password=NHVSywfdYybBiGbJQZyoyLVkvaWIJSkx;");
+    
+    // Dùng biến lấy từ cấu hình
+    options.UseNpgsql(dbConnectionString);
+});
 
 // 3. CẤU HÌNH ROUTING CHỮ THƯỜNG (SỬA LỖI)
 // ⚠️ Lỗi cũ: Bạn đặt dòng này SAU khi app.Build(). Phải đặt ở đây.
