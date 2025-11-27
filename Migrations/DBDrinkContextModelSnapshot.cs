@@ -1305,7 +1305,7 @@ namespace drinking_be.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("brand_id");
 
-                    b.Property<TimeOnly?>("CloseTime")
+                    b.Property<TimeSpan?>("CloseTime")
                         .HasColumnType("time without time zone")
                         .HasColumnName("close_time");
 
@@ -1347,7 +1347,7 @@ namespace drinking_be.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
 
-                    b.Property<TimeOnly?>("OpenTime")
+                    b.Property<TimeSpan?>("OpenTime")
                         .HasColumnType("time without time zone")
                         .HasColumnName("open_time");
 
