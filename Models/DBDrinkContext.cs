@@ -68,6 +68,8 @@ public partial class DBDrinkContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Brand>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Brand__3213E83F3D8FA9ED");
@@ -1070,6 +1072,11 @@ public partial class DBDrinkContext : DbContext
         });
 
         OnModelCreatingPartial(modelBuilder);
+        
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            entity.SetTableName(entity.GetTableName().ToLower());
+        }
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
