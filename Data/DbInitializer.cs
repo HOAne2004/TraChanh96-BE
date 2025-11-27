@@ -11,9 +11,9 @@ namespace drinking_be.Data
         public static async Task SeedData(DBDrinkContext context)
         {
             // 1. Kiểm tra và Khởi tạo Membership Levels (Rất quan trọng!)
-            if (!await context.MembershipLevels.AnyAsync())
+            if (!await context.MembershipLevel.AnyAsync())
             {
-                context.MembershipLevels.AddRange(
+                context.MembershipLevel.AddRange(
                     new MembershipLevel
                     {
                         Name = "Đồng",
@@ -22,8 +22,10 @@ namespace drinking_be.Data
                         CreatedAt = DateTime.UtcNow,
                         Benefits = "{}"
                     },
-                    new MembershipLevel { Name = "Bạc", MinSpendRequired = 1000000m, DurationDays = 365, CreatedAt = DateTime.UtcNow, Benefits = "{}" }
-                    // ... thêm Vàng, Kim Cương
+                    new MembershipLevel { Name = "Bạc", MinSpendRequired = 280000m, DurationDays = 30, CreatedAt = DateTime.UtcNow, Benefits = "{}" },
+                    new MembershipLevel { Name = "Vàng", MinSpendRequired = 600000m, DurationDays = 30, CreatedAt = DateTime.UtcNow, Benefits = "{}" },
+                    new MembershipLevel { Name = "Kim Cương", MinSpendRequired = 1000000m, DurationDays = 30, CreatedAt = DateTime.UtcNow, Benefits = "{}" },
+                    
                 );
                 await context.SaveChangesAsync();
             }
@@ -34,8 +36,7 @@ namespace drinking_be.Data
                 return; // Đã tồn tại
             }
 
-            var baseLevel = await context.MembershipLevels.FirstOrDefaultAsync(l => l.Name == "Đồng");
-
+            var baseLevel = await context.MembershipLevel.FirstOrDefaultAsync(l => l.Name == "Đồng");
             var adminUser = new User
             {
                 PublicId = Guid.NewGuid(),
@@ -53,7 +54,7 @@ namespace drinking_be.Data
             // 3. Tạo Membership cho Admin User
             if (baseLevel != null)
             {
-                context.Memberships.Add(new Membership
+                context.Membership.Add(new Membership
                 {
                     UserId = adminUser.Id,
                     LevelId = baseLevel.Id,
