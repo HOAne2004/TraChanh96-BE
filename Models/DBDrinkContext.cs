@@ -87,7 +87,7 @@ public partial class DBDrinkContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("copyright_text");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.EmailSupport)
@@ -127,11 +127,11 @@ public partial class DBDrinkContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
@@ -202,7 +202,7 @@ public partial class DBDrinkContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.IsActive)
@@ -220,7 +220,7 @@ public partial class DBDrinkContext : DbContext
                 .HasDefaultValue((byte)0)
                 .HasColumnName("sort_order");
             entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
 
@@ -240,7 +240,7 @@ public partial class DBDrinkContext : DbContext
                 .HasMaxLength(500)
                 .HasColumnName("content");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.NewsId).HasColumnName("news_id");
@@ -298,14 +298,14 @@ public partial class DBDrinkContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("card_code");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.LastLevelSpentReset).HasColumnName("last_level_spent_reset");
             entity.Property(e => e.LevelEndDate).HasColumnName("level_end_date");
             entity.Property(e => e.LevelId).HasColumnName("level_id");
             entity.Property(e => e.LevelStartDate)
-                .HasDefaultValueSql("(CONVERT([date],getdate()))")
+                .HasDefaultValueSql("(CONVERT([date],NOW()))")
                 .HasColumnName("level_start_date");
             entity.Property(e => e.Status)
                 .HasDefaultValue((byte)1)
@@ -339,7 +339,7 @@ public partial class DBDrinkContext : DbContext
                 .HasColumnName("id");
             entity.Property(e => e.Benefits).HasColumnName("benefits");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.DurationDays).HasColumnName("duration_days");
@@ -362,7 +362,7 @@ public partial class DBDrinkContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Content).HasColumnName("content");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.IsFeatured)
@@ -395,7 +395,7 @@ public partial class DBDrinkContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("type");
             entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
@@ -419,7 +419,7 @@ public partial class DBDrinkContext : DbContext
                 .HasDefaultValue(0)
                 .HasColumnName("coins_earned");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.CustomerName)
@@ -447,7 +447,7 @@ public partial class DBDrinkContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("order_code");
             entity.Property(e => e.OrderDate)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("order_date");
             entity.Property(e => e.PaymentMethodId).HasColumnName("payment_method_id");
@@ -577,7 +577,7 @@ public partial class DBDrinkContext : DbContext
             entity.Property(e => e.BrandId).HasColumnName("brand_id");
             entity.Property(e => e.Content).HasColumnName("content");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.IsActive)
@@ -590,7 +590,7 @@ public partial class DBDrinkContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("title");
             entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
 
@@ -616,7 +616,7 @@ public partial class DBDrinkContext : DbContext
                 .HasColumnName("base_price");
             entity.Property(e => e.CategoryId).HasColumnName("category_id");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.Description).HasColumnName("description");
@@ -684,7 +684,7 @@ public partial class DBDrinkContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AssignedTableId).HasColumnName("assigned_table_id");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.CustomerName)
@@ -710,7 +710,7 @@ public partial class DBDrinkContext : DbContext
                 .HasColumnName("status");
             entity.Property(e => e.StoreId).HasColumnName("store_id");
             entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
@@ -739,7 +739,7 @@ public partial class DBDrinkContext : DbContext
             entity.Property(e => e.AdminResponse).HasColumnName("admin_response");
             entity.Property(e => e.Content).HasColumnName("content");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.MediaUrl)
@@ -777,7 +777,7 @@ public partial class DBDrinkContext : DbContext
                 .HasColumnName("can_be_merged");
             entity.Property(e => e.Capacity).HasColumnName("capacity");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.IsActive)
@@ -836,7 +836,7 @@ public partial class DBDrinkContext : DbContext
             entity.Property(e => e.BrandId).HasColumnName("brand_id");
             entity.Property(e => e.CloseTime).HasColumnName("close_time");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.ImageUrl)
@@ -899,7 +899,7 @@ public partial class DBDrinkContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.CurrentCoins)
@@ -937,7 +937,7 @@ public partial class DBDrinkContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("thumbnail_url");
             entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
             entity.Property(e => e.Username)
@@ -954,7 +954,7 @@ public partial class DBDrinkContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.FullAddress)
@@ -964,7 +964,7 @@ public partial class DBDrinkContext : DbContext
                 .HasDefaultValue(false)
                 .HasColumnName("is_default");
             entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
@@ -987,7 +987,7 @@ public partial class DBDrinkContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("expiry_date");
             entity.Property(e => e.IssuedDate)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("issued_date");
             entity.Property(e => e.OrderIdUsed).HasColumnName("order_id_used");
@@ -1029,7 +1029,7 @@ public partial class DBDrinkContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("coupon_code");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
             entity.Property(e => e.DiscountType)

@@ -50,7 +50,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<string>("EmailSupport")
                         .HasMaxLength(100)
@@ -110,13 +110,13 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
@@ -212,7 +212,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<bool?>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -247,7 +247,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.HasKey("Id")
                         .HasName("PK__Category__3213E83F5A39BDEA");
@@ -279,7 +279,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<int>("NewsId")
                         .HasColumnType("integer")
@@ -363,7 +363,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<DateOnly?>("LastLevelSpentReset")
                         .HasColumnType("date")
@@ -381,7 +381,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
                         .HasColumnName("level_start_date")
-                        .HasDefaultValueSql("(CONVERT([date],getdate()))");
+                        .HasDefaultValueSql("(CONVERT([date],NOW()))");
 
                     b.Property<byte?>("Status")
                         .ValueGeneratedOnAdd()
@@ -430,7 +430,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<short>("DurationDays")
                         .HasColumnType("smallint")
@@ -473,7 +473,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<bool?>("IsFeatured")
                         .ValueGeneratedOnAdd()
@@ -530,7 +530,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
@@ -569,7 +569,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
@@ -615,7 +615,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("order_date")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<int?>("PaymentMethodId")
                         .HasColumnType("integer")
@@ -811,7 +811,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<bool?>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -835,7 +835,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.HasKey("Id")
                         .HasName("PK__Policy__3213E83FB49E512D");
@@ -869,7 +869,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
@@ -1016,7 +1016,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
@@ -1071,7 +1071,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<int?>("UserId")
                         .HasColumnType("integer")
@@ -1113,7 +1113,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<string>("MediaUrl")
                         .HasMaxLength(500)
@@ -1173,7 +1173,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<bool?>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -1313,7 +1313,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(255)
@@ -1426,7 +1426,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<int?>("CurrentCoins")
                         .ValueGeneratedOnAdd()
@@ -1492,7 +1492,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -1526,7 +1526,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<string>("FullAddress")
                         .IsRequired()
@@ -1544,7 +1544,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
@@ -1575,7 +1575,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("issued_date")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<long?>("OrderIdUsed")
                         .HasColumnType("bigint")
@@ -1638,7 +1638,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                        .HasDefaultValueSql("(NOW())");
 
                     b.Property<string>("DiscountType")
                         .IsRequired()
