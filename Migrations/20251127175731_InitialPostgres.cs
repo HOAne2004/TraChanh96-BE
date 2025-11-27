@@ -144,7 +144,7 @@ namespace drinking_be.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "(newsequentialid())"),
+                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "gen_random_uuid()"),
                     role_id = table.Column<byte>(type: "smallint", nullable: false, defaultValue: (byte)1),
                     username = table.Column<string>(type: "character varying(50)", unicode: false, maxLength: 50, nullable: false),
                     thumbnail_url = table.Column<string>(type: "character varying(200)", unicode: false, maxLength: 200, nullable: true),
@@ -217,7 +217,7 @@ namespace drinking_be.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "(newsequentialid())"),
+                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "gen_random_uuid()"),
                     slug = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     brand_id = table.Column<int>(type: "integer", nullable: false),
                     name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
@@ -338,7 +338,7 @@ namespace drinking_be.Migrations
                     card_code = table.Column<string>(type: "character varying(50)", unicode: false, maxLength: 50, nullable: false),
                     level_id = table.Column<byte>(type: "smallint", nullable: false),
                     total_spent = table.Column<decimal>(type: "numeric(12,2)", nullable: true, defaultValue: 0m),
-                    level_start_date = table.Column<DateOnly>(type: "date", nullable: true, defaultValueSql: "(CONVERT([date],NOW()))"),
+                    level_start_date = table.Column<DateOnly>(type: "date", nullable: true, defaultValueSql: "DATE(NOW())"),
                     level_end_date = table.Column<DateOnly>(type: "date", nullable: false),
                     last_level_spent_reset = table.Column<DateOnly>(type: "date", nullable: true),
                     status = table.Column<byte>(type: "smallint", nullable: true, defaultValue: (byte)1),
@@ -366,7 +366,7 @@ namespace drinking_be.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "(newsequentialid())"),
+                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "gen_random_uuid()"),
                     slug = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     user_id = table.Column<int>(type: "integer", nullable: false),
