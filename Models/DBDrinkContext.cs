@@ -1077,6 +1077,18 @@ public partial class DBDrinkContext : DbContext
         {
             entity.SetTableName(entity.GetTableName().ToLower());
         }
+
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entity.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetColumnType("timestamp without time zone");
+                }
+            }
+        }
+
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

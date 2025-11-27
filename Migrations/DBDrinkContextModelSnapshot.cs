@@ -48,7 +48,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -88,7 +88,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("tax_code");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
@@ -108,13 +108,13 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -210,7 +210,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -245,7 +245,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -277,7 +277,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -361,7 +361,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -428,7 +428,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -471,7 +471,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -488,7 +488,7 @@ namespace drinking_be.Migrations
                         .HasDefaultValueSql("(newsequentialid())");
 
                     b.Property<DateTime?>("PublishedDate")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("published_date");
 
                     b.Property<string>("SeoDescription")
@@ -528,7 +528,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -567,7 +567,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -591,7 +591,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("delivery_address");
 
                     b.Property<DateTime?>("DeliveryDate")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("delivery_date");
 
                     b.Property<decimal?>("DiscountAmount")
@@ -613,7 +613,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("OrderDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("order_date")
                         .HasDefaultValueSql("(getdate())");
 
@@ -809,7 +809,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -833,7 +833,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -867,7 +867,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -886,7 +886,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("ingredient");
 
                     b.Property<DateTime?>("LaunchDateTime")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("launch_date_time");
 
                     b.Property<string>("Name")
@@ -937,7 +937,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("total_sold");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
@@ -1014,7 +1014,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1054,7 +1054,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("reservation_code");
 
                     b.Property<DateTime>("ReservationDatetime")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("reservation_datetime");
 
                     b.Property<byte?>("Status")
@@ -1069,7 +1069,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1111,7 +1111,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1171,7 +1171,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1311,7 +1311,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1424,7 +1424,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1448,7 +1448,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("email_verified");
 
                     b.Property<DateTime?>("LastLogin")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("last_login");
 
                     b.Property<string>("PasswordHash")
@@ -1490,7 +1490,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1524,7 +1524,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1542,7 +1542,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("updated_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1568,12 +1568,12 @@ namespace drinking_be.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("expiry_date");
 
                     b.Property<DateTime?>("IssuedDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("issued_date")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1588,7 +1588,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("status");
 
                     b.Property<DateTime?>("UsedDate")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("used_date");
 
                     b.Property<int>("UserId")
@@ -1636,7 +1636,7 @@ namespace drinking_be.Migrations
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
@@ -1652,7 +1652,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("discount_value");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("end_date");
 
                     b.Property<bool?>("IsActive")
@@ -1686,7 +1686,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("quantity_per_level");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime")
+                        .HasColumnType("timestamp without time zone")
                         .HasColumnName("start_date");
 
                     b.Property<int?>("UsageLimit")

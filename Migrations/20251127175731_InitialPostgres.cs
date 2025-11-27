@@ -27,8 +27,8 @@ namespace drinking_be.Migrations
                     company_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     slogan = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     copyright_text = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true)
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -46,8 +46,8 @@ namespace drinking_be.Migrations
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
                     sort_order = table.Column<byte>(type: "smallint", nullable: true, defaultValue: (byte)0),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -84,7 +84,7 @@ namespace drinking_be.Migrations
                     min_spend_required = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     duration_days = table.Column<short>(type: "smallint", nullable: false),
                     benefits = table.Column<string>(type: "text", nullable: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -154,9 +154,9 @@ namespace drinking_be.Migrations
                     current_coins = table.Column<int>(type: "integer", nullable: true, defaultValue: 0),
                     email_verified = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
                     status = table.Column<byte>(type: "smallint", nullable: false, defaultValue: (byte)1),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    last_login = table.Column<DateTime>(type: "datetime", nullable: true)
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    last_login = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -174,8 +174,8 @@ namespace drinking_be.Migrations
                     title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     content = table.Column<string>(type: "text", nullable: false),
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -230,7 +230,7 @@ namespace drinking_be.Migrations
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
                     sort_order = table.Column<byte>(type: "smallint", nullable: true, defaultValue: (byte)0),
                     map_verified = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -261,9 +261,9 @@ namespace drinking_be.Migrations
                     total_rating = table.Column<double>(type: "double precision", nullable: true, defaultValue: 0.0),
                     total_sold = table.Column<int>(type: "integer", nullable: true, defaultValue: 0),
                     search_vector = table.Column<byte[]>(type: "bytea", nullable: true),
-                    launch_date_time = table.Column<DateTime>(type: "datetime", nullable: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true)
+                    launch_date_time = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -293,9 +293,9 @@ namespace drinking_be.Migrations
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
                     usage_limit_per_user = table.Column<byte>(type: "smallint", nullable: true),
                     coupon_code = table.Column<string>(type: "character varying(20)", unicode: false, maxLength: 20, nullable: true),
-                    start_date = table.Column<DateTime>(type: "datetime", nullable: false),
-                    end_date = table.Column<DateTime>(type: "datetime", nullable: false),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    start_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    end_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -314,8 +314,8 @@ namespace drinking_be.Migrations
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     user_id = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -342,7 +342,7 @@ namespace drinking_be.Migrations
                     level_end_date = table.Column<DateOnly>(type: "date", nullable: false),
                     last_level_spent_reset = table.Column<DateOnly>(type: "date", nullable: true),
                     status = table.Column<byte>(type: "smallint", nullable: true, defaultValue: (byte)1),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -376,9 +376,9 @@ namespace drinking_be.Migrations
                     status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true, defaultValue: "Draft"),
                     is_featured = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
                     seo_description = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    published_date = table.Column<DateTime>(type: "datetime", nullable: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    published_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -399,8 +399,8 @@ namespace drinking_be.Migrations
                     user_id = table.Column<int>(type: "integer", nullable: false),
                     full_address = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     is_default = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -423,8 +423,8 @@ namespace drinking_be.Migrations
                     user_id = table.Column<int>(type: "integer", nullable: true),
                     store_id = table.Column<int>(type: "integer", nullable: false),
                     payment_method_id = table.Column<int>(type: "integer", nullable: true),
-                    order_date = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    delivery_date = table.Column<DateTime>(type: "datetime", nullable: true),
+                    order_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    delivery_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     total_amount = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     discount_amount = table.Column<decimal>(type: "numeric(10,2)", nullable: true, defaultValue: 0m),
                     shipping_fee = table.Column<decimal>(type: "numeric(8,2)", nullable: true, defaultValue: 0m),
@@ -437,7 +437,7 @@ namespace drinking_be.Migrations
                     voucher_code_used = table.Column<string>(type: "character varying(20)", unicode: false, maxLength: 20, nullable: true),
                     store_name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     user_notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -471,7 +471,7 @@ namespace drinking_be.Migrations
                     can_be_merged = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
                     merged_with_table_id = table.Column<int>(type: "integer", nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -573,7 +573,7 @@ namespace drinking_be.Migrations
                     status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true, defaultValue: "Pending"),
                     media_url = table.Column<string>(type: "character varying(500)", unicode: false, maxLength: 500, nullable: true),
                     admin_response = table.Column<string>(type: "text", nullable: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -599,10 +599,10 @@ namespace drinking_be.Migrations
                     user_id = table.Column<int>(type: "integer", nullable: false),
                     voucher_template_id = table.Column<int>(type: "integer", nullable: false),
                     voucher_code = table.Column<string>(type: "character varying(20)", unicode: false, maxLength: 20, nullable: false),
-                    issued_date = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    expiry_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    issued_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    expiry_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     status = table.Column<byte>(type: "smallint", nullable: true, defaultValue: (byte)1),
-                    used_date = table.Column<DateTime>(type: "datetime", nullable: true),
+                    used_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     order_id_used = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
@@ -683,7 +683,7 @@ namespace drinking_be.Migrations
                     news_id = table.Column<int>(type: "integer", nullable: false),
                     content = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true, defaultValue: "Pending"),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
@@ -766,7 +766,7 @@ namespace drinking_be.Migrations
                     reservation_code = table.Column<string>(type: "character varying(50)", unicode: false, maxLength: 50, nullable: false),
                     user_id = table.Column<int>(type: "integer", nullable: true),
                     store_id = table.Column<int>(type: "integer", nullable: false),
-                    reservation_datetime = table.Column<DateTime>(type: "datetime", nullable: false),
+                    reservation_datetime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     number_of_guests = table.Column<byte>(type: "smallint", nullable: false),
                     customer_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     customer_phone = table.Column<string>(type: "character varying(20)", unicode: false, maxLength: 20, nullable: false),
@@ -775,8 +775,8 @@ namespace drinking_be.Migrations
                     assigned_table_id = table.Column<int>(type: "integer", nullable: true),
                     DepositAmount = table.Column<decimal>(type: "numeric", nullable: false),
                     IsDepositPaid = table.Column<bool>(type: "boolean", nullable: false),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())"),
+                    updated_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
                 {
