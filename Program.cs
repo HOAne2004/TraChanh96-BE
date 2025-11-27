@@ -25,81 +25,92 @@ using System.Text;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls($"http://*:{Environment.GetEnvironmentVariable("PORT") ?? "5000"}");
-
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-var config = builder.Configuration; // Lấy Configuration
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// 1. CẤU HÌNH PORT (OK)
+// Quan trọng: Railway sẽ inject PORT vào biến môi trường
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://*:{port}");
 
+// 2. KẾT NỐI DATABASE (OK)
 builder.Services.AddDbContext<DBDrinkContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Sau khi đăng ký DBContext
+// 3. CẤU HÌNH ROUTING CHỮ THƯỜNG (SỬA LỖI)
+// ⚠️ Lỗi cũ: Bạn đặt dòng này SAU khi app.Build(). Phải đặt ở đây.
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
+// 4. AUTO MAPPER & SERVICES
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IProductService, ProductService>();
-// Add services to the container.
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        // Tự động chuyển đổi tên thuộc tính JSON (VD: "email") 
-        // thành tên thuộc tính C# (VD: "Email") và ngược lại
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-/// Đăng ký Generic Repository. Dòng này sẽ bao hàm cả ICategoryRepository 
-// và tất cả các Repository cụ thể khác (như Product, Order) sử dụng IGenericRepository.
+// --- ĐĂNG KÝ REPOSITORIES & SERVICES ---
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
-// Dòng đăng ký riêng cho CategoryRepository vẫn cần, vì nó kế thừa thêm Interface riêng.
+// Product & Options
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ISizeRepository, SizeRepository>();
+builder.Services.AddScoped<ISizeService, SizeService>();
+builder.Services.AddScoped<ISugarLevelRepository, SugarLevelRepository>();
+builder.Services.AddScoped<ISugarLevelService, SugarLevelService>();
+builder.Services.AddScoped<IIceLevelRepository, IceLevelRepository>();
+builder.Services.AddScoped<IIceLevelService, IceLevelService>();
 
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO ORDER
-// ----------------------------------------------------------------
+// Order & Cart
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<ISizeRepository, SizeRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICartService, CartService>();
 
-builder.Services.AddScoped<ISugarLevelRepository, SugarLevelRepository>();
-builder.Services.AddScoped<IIceLevelRepository, IceLevelRepository>();
-
-// Đăng ký Service Layer
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO NEWS
-// ----------------------------------------------------------------
-
-// Repositories
-builder.Services.AddScoped<INewsRepository, NewsRepository>();
-builder.Services.AddScoped<IGenericRepository<User>, GenericRepository<User>>(); // Nếu chưa có
-
-// Service
-builder.Services.AddScoped<INewsService, NewsService>();
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO STORES
-// ----------------------------------------------------------------
-builder.Services.AddScoped<IStoreRepository, StoreRepository>();
-builder.Services.AddScoped<IStoreService, StoreService>();
-
-// ----------------------------------------------------------------
-// ĐĂNG KÝ CÁC THÀNH PHẦN USER VÀ AUTH
-// ----------------------------------------------------------------
+// User & Auth
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
-// CẦN THIẾT CHO JWT
-// ----------------------------------------------------------------
-// CẤU HÌNH AUTHENTICATION VÀ JWT BEARER
-// ----------------------------------------------------------------
-// CẤU HÌNH JWT
+builder.Services.AddScoped<IAdminService, AdminService>();
+
+// Others (News, Store, Policy, Brand, Voucher, Review, Comment...)
+builder.Services.AddScoped<INewsRepository, NewsRepository>();
+builder.Services.AddScoped<INewsService, NewsService>();
+builder.Services.AddScoped<IStoreRepository, StoreRepository>();
+builder.Services.AddScoped<IStoreService, StoreService>();
+builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
+builder.Services.AddScoped<IPolicyService, PolicyService>();
+builder.Services.AddScoped<IBrandRepository, BrandRepository>();
+builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
+builder.Services.AddScoped<IPaymentMethodService, PaymentMethodService>();
+builder.Services.AddScoped<IMembershipLevelRepository, MembershipLevelRepository>();
+builder.Services.AddScoped<IMembershipLevelService, MembershipLevelService>();
+builder.Services.AddScoped<IVoucherTemplateRepository, VoucherTemplateRepository>();
+builder.Services.AddScoped<IVoucherService, VoucherService>();
+builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
+builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
+builder.Services.AddScoped<IMembershipService, MembershipService>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IUploadService, UploadService>();
+builder.Services.AddScoped<IShopTableRepository, ShopTableRepository>();
+builder.Services.AddScoped<IShopTableService, ShopTableService>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
+
+// 5. JSON OPTIONS
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
+
+// 6. SWAGGER
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// 7. CẤU HÌNH JWT
+var config = builder.Configuration;
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!));
 
 builder.Services.AddAuthentication(options =>
@@ -113,153 +124,65 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = key,
-
-        // ⭐️ 2. Bật kiểm tra Issuer và Audience để bảo mật hơn
         ValidateIssuer = true,
-        ValidIssuer = config["JwtSettings:Issuer"], // Phải khớp appsettings
-
+        ValidIssuer = config["JwtSettings:Issuer"],
         ValidateAudience = true,
-        ValidAudience = config["JwtSettings:Audience"], // Phải khớp appsettings
-
+        ValidAudience = config["JwtSettings:Audience"],
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
 });
-// ----------------------------------------------------------------
 
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO POLICIES
-// ----------------------------------------------------------------
-builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
-builder.Services.AddScoped<IPolicyService, PolicyService>();
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO BRAND
-// ----------------------------------------------------------------
-builder.Services.AddScoped<IBrandRepository, BrandRepository>();
-builder.Services.AddScoped<IBrandService, BrandService>();
-
-// THÊM ĐĂNG KÝ CHO PAYMENT METHODS
-// ----------------------------------------------------------------
-builder.Services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
-builder.Services.AddScoped<IPaymentMethodService, PaymentMethodService>();
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO MEMBERSHIP LEVEL
-// ----------------------------------------------------------------
-builder.Services.AddScoped<IMembershipLevelRepository, MembershipLevelRepository>();
-builder.Services.AddScoped<IMembershipLevelService, MembershipLevelService>();
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO VOUCHER
-// ----------------------------------------------------------------
-builder.Services.AddScoped<IVoucherTemplateRepository, VoucherTemplateRepository>();
-builder.Services.AddScoped<IVoucherService, VoucherService>();
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO USER VOUCHER
-// ----------------------------------------------------------------
-builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO MEMBERSHIP
-// ----------------------------------------------------------------
-builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
-builder.Services.AddScoped<IMembershipService, MembershipService>();
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO REVIEW
-// ----------------------------------------------------------------
-builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-
-// THÊM ĐĂNG KÝ CHO COMMENT
-// ----------------------------------------------------------------
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-builder.Services.AddScoped<ICommentService, CommentService>();
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO CART
-// ----------------------------------------------------------------
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICartService, CartService>();
-// Lưu ý: CartService cũng cần IProductRepository, ISizeRepository... (đã đăng ký)
-
-// Đăng ký Service Layer (Thêm 3 dòng mới)
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<ISizeService, SizeService>(); // ⭐️ THÊM MỚI
-builder.Services.AddScoped<ISugarLevelService, SugarLevelService>(); // ⭐️ THÊM MỚI
-builder.Services.AddScoped<IIceLevelService, IceLevelService>(); // ⭐️ THÊM MỚI
-
-// ----------------------------------------------------------------
-// THÊM ĐĂNG KÝ CHO ADMIN SERVICE
-// ----------------------------------------------------------------
-builder.Services.AddScoped<IAdminService, AdminService>();
-
-// ⭐️ THÊM CẤU HÌNH CORS
+// 8. CẤU HÌNH CORS (CHO PHÉP TẤT CẢ ĐỂ FIX LỖI)
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy =>
+        policy =>
         {
-            policy
-                .WithOrigins("https://tra-chanh-96.vercel.app", "http://localhost:5173") // ✅ Cho phép Vercel và Localhost
-                .AllowAnyMethod()  // Cho phép GET, POST, PUT, DELETE...
-                .AllowAnyHeader()  // Cho phép mọi Header
-                .AllowCredentials(); // Cho phép gửi cookie/auth header
+            // ⭐️ Quan trọng: Dùng SetIsOriginAllowed(origin => true) để mở hoàn toàn
+            // Thay vì liệt kê cứng link Vercel, giúp tránh lỗi sai http/https hoặc www
+            policy.SetIsOriginAllowed(origin => true) 
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
         });
 });
 
-builder.Services.AddScoped<IUploadService, UploadService>();
-
-// Đăng ký Repository
-builder.Services.AddScoped<IShopTableRepository, ShopTableRepository>();
-
-// Đăng ký Service
-builder.Services.AddScoped<IShopTableService, ShopTableService>();
-
-// Đăng ký Repository
-builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
-
-// Đăng ký Service
-builder.Services.AddScoped<IReservationService, ReservationService>();
-
-
-
-
+// =========================================================
+// BUILD APP
+// =========================================================
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseHttpsRedirection();
-}
+// 9. CẤU HÌNH PIPELINE (MIDDLEWARE)
 
+// ⭐️ SỬA LỖI SWAGGER: Đưa ra ngoài if (IsDevelopment)
+// Để Swagger chạy được trên Railway (Production)
+app.UseSwagger();
+app.UseSwaggerUI();
 
+// ⭐️ LƯU Ý: Trên Railway (Docker/Linux), đôi khi UseHttpsRedirection gây lỗi vòng lặp
+// Nếu app chạy lỗi, hãy thử comment dòng này lại. Hiện tại cứ để.
+// app.UseHttpsRedirection(); 
 
-
-// Cho phép phục vụ các file trong thư mục wwwroot
 app.UseStaticFiles();
 
+// ⭐️ CORS phải đặt giữa StaticFiles và Auth
 app.UseCors(MyAllowSpecificOrigins);
 
-app.UseAuthentication(); // Xác thực trước
-app.UseAuthorization(); // Rồi mới phân quyền
+app.UseAuthentication();
+app.UseAuthorization();
 
-
-// ⭐️ GỌI INITIALIZER (SEEDER) ⭐️
+// 10. DATABASE SEEDER
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        // Lấy DbContext và chạy Seeder
         var context = services.GetRequiredService<DBDrinkContext>();
-        await DbInitializer.SeedData(context); // ⭐️ Gọi Seeder
+        // Tự động migrate nếu chưa có DB (quan trọng cho Postgres)
+        await context.Database.MigrateAsync(); 
+        await DbInitializer.SeedData(context);
     }
     catch (Exception ex)
     {
@@ -269,6 +192,5 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapControllers();
-
 
 app.Run();
