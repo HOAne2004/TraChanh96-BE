@@ -106,5 +106,35 @@ namespace drinking_be.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
             }
         }
+
+        /// <summary>
+        /// [ADMIN] Xóa bài viết theo Id.
+        /// </summary>
+        /// <param name="id">Id của bài viết (int).</param>
+        /// <returns>NoContent nếu thành công, NotFound nếu không tìm thấy.</returns>
+        // Cần thêm [Authorize(Roles = "Admin")] nếu triển khai xác thực
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteNews(int id)
+        {
+            try
+            {
+                // Expect the service to expose a delete method:
+                // Task<bool> DeleteNewsAsync(long id) => returns true if deleted, false if not found
+                var deleted = await _newsService.DeleteNewsAsync(id);
+
+                if (!deleted)
+                    return NotFound("Không tìm thấy bài viết hoặc đã bị xóa trước đó.");
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Log exception in real implementation; return 500 for unexpected errors.
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
     }
 }

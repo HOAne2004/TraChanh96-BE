@@ -8,9 +8,9 @@ namespace drinking_be.Interfaces.OptionInterfaces
 
     public interface ISizeService
     {
-        Task<IEnumerable<SizeDto>> GetAllSizesAsync();
-        Task<SizeDto> CreateSizeAsync(SizeCreateDto sizeDto);
-        Task<SizeDto?> UpdateSizeAsync(short id, SizeCreateDto sizeDto);
+        Task<IEnumerable<SizeReadDto>> GetAllSizesAsync();
+        Task<SizeReadDto> CreateSizeAsync(SizeCreateDto sizeDto);
+        Task<SizeReadDto?> UpdateSizeAsync(short id, SizeCreateDto sizeDto);
         Task<bool> DeleteSizeAsync(short id);
         Task<int> CountProductsUsingSizeAsync(short id);
     }

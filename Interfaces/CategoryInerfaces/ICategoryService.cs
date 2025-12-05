@@ -11,7 +11,7 @@ namespace drinking_be.Interfaces.CategoryInerfaces
         Task<CategoryReadDto?> GetCategoryByIdAsync(int id);
 
         Task<CategoryReadDto> CreateCategoryAsync(CategoryCreateDto categoryDto);
-        Task<CategoryReadDto?> UpdateCategoryAsync(int id, CategoryCreateDto categoryDto);
+        Task<CategoryReadDto?> UpdateCategoryAsync(int id, CategoryUpdateDto categoryDto);
         Task<bool> DeleteCategoryAsync(int id);
 
         Task<IEnumerable<CategoryReadDto>> GetCategoryTreeAsync();

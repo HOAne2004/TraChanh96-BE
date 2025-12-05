@@ -20,29 +20,29 @@ namespace drinking_be.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<SizeDto>> GetAllSizesAsync()
+        public async Task<IEnumerable<SizeReadDto>> GetAllSizesAsync()
         {
             var sizes = await _sizeRepo.GetAllAsync();
             // Cần thêm Map trong MappingProfile
-            return _mapper.Map<IEnumerable<SizeDto>>(sizes);
+            return _mapper.Map<IEnumerable<SizeReadDto>>(sizes);
         }
 
-        public async Task<SizeDto> CreateSizeAsync(SizeCreateDto sizeDto)
+        public async Task<SizeReadDto> CreateSizeAsync(SizeCreateDto sizeDto)
         {
             var size = _mapper.Map<Size>(sizeDto);
             await _sizeRepo.AddAsync(size);
             await _sizeRepo.SaveChangesAsync(); // Lưu thay đổi vào DB
-            return _mapper.Map<SizeDto>(size);
+            return _mapper.Map<SizeReadDto>(size);
         }
 
-        public async Task<SizeDto?> UpdateSizeAsync(short id, SizeCreateDto sizeDto)
+        public async Task<SizeReadDto?> UpdateSizeAsync(short id, SizeCreateDto sizeDto)
         {
             var existingSize = await _sizeRepo.GetByIdAsync(id);
             if (existingSize == null) return null;
             _mapper.Map(sizeDto, existingSize);
             _sizeRepo.Update(existingSize); // Update is void, do not await
             await _sizeRepo.SaveChangesAsync();   // Persist changes asynchronously
-            return _mapper.Map<SizeDto>(existingSize);
+            return _mapper.Map<SizeReadDto>(existingSize);
         }
 
         public async Task<int> CountProductsUsingSizeAsync(short id)

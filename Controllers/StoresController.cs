@@ -79,7 +79,7 @@ namespace drinking_be.Controllers
         // [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StoreReadDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateStore(long id, [FromBody] StoreCreateDto storeDto)
+        public async Task<IActionResult> UpdateStore(long id, [FromBody] StoreUpdateDto storeDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 

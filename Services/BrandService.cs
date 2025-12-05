@@ -26,29 +26,29 @@ namespace drinking_be.Services
             return _mapper.Map<BrandReadDto>(brand);
         }
 
-        public async Task<BrandReadDto> CreateOrUpdateBrandAsync(BrandCreateDto brandDto)
+        public async Task<BrandReadDto> CreateBrandAsync(BrandCreateDto brandDto)
         {
             // 1. Kiểm tra Brand chính đã tồn tại chưa
             var existingBrand = await _brandRepo.GetPrimaryBrandAsync();
-
-            if (existingBrand == null)
-            {
                 // TẠO MỚI (Thường chỉ chạy lần đầu)
                 var newBrand = _mapper.Map<Brand>(brandDto);
                 await _brandRepo.AddAsync(newBrand);
                 await _brandRepo.SaveChangesAsync();
                 return _mapper.Map<BrandReadDto>(newBrand);
-            }
-            else
-            {
-                // CẬP NHẬT
-                _mapper.Map(brandDto, existingBrand);
-                existingBrand.UpdatedAt = DateTime.UtcNow;
+        }
 
-                _brandRepo.Update(existingBrand);
-                await _brandRepo.SaveChangesAsync();
-                return _mapper.Map<BrandReadDto>(existingBrand);
+        public async Task<BrandReadDto?> UpdateBrandAsync(int id, BrandUpdateDto brandDto)
+        {
+            var brand = await _brandRepo.GetByIdAsync(id);
+            if (brand == null)
+            {
+                return null;
             }
+            _mapper.Map(brandDto, brand);
+            brand.UpdatedAt = DateTime.UtcNow;
+            _brandRepo.Update(brand);
+            await _brandRepo.SaveChangesAsync();
+            return _mapper.Map<BrandReadDto>(brand);
         }
     }
 }

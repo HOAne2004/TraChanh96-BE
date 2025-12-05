@@ -70,21 +70,21 @@ namespace drinking_be.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ProductReadDto>> UpdateProduct(int id, [FromBody] ProductCreateDto productDto)
+        public async Task<ActionResult<ProductReadDto>> UpdateProduct(int id, [FromBody] ProductUpdateDto productDto)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
             {
-                return BadRequest(ModelState);
+                var updatedProduct = await _productService.UpdateProduct(id, productDto);
+                if (updatedProduct == null) return NotFound();
+                return Ok(updatedProduct);
             }
-
-            var updatedProduct = await _productService.UpdateProduct(id, productDto);
-
-            if (updatedProduct == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                // Bắt lỗi logic (ví dụ ID option không tồn tại)
+                return BadRequest(new { message = ex.Message });
             }
-
-            return Ok(updatedProduct);
         }
 
         // DELETE: api/Product/5

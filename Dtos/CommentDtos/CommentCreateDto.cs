@@ -12,9 +12,7 @@ namespace drinking_be.Dtos.CommentDtos
         [MaxLength(500)]
         public string Content { get; set; } = string.Empty;
 
-        // Dùng để trả lời bình luận khác (nếu là bình luận gốc thì để NULL)
         public int? ParentId { get; set; }
 
-        // UserId sẽ được lấy từ Token JWT
     }
 }

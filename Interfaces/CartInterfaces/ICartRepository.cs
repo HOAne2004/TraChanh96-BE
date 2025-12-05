@@ -1,18 +1,13 @@
 ﻿// Interfaces/ICartRepository.cs
+using drinking_be.Interfaces;
 using drinking_be.Models;
-using System.Threading.Tasks;
 
-namespace drinking_be.Interfaces
+public interface ICartRepository : IGenericRepository<Cart>
 {
-    public interface ICartRepository : IGenericRepository<Cart>
-    {
-        // Lấy giỏ hàng (kèm items và sub-items) bằng User ID
-        Task<Cart?> GetCartByUserIdAsync(int userId);
+    Task<Cart?> GetCartByUserIdAsync(int userId);
+    Task<CartItem?> GetCartItemByIdAsync(long cartItemId);
+    void DeleteCartItem(CartItem cartItem);
 
-        // Lấy 1 item cụ thể (để xóa/cập nhật)
-        Task<CartItem?> GetCartItemByIdAsync(long cartItemId);
-
-        // Xóa CartItem (và các topping con của nó)
-        void DeleteCartItem(CartItem cartItem);
-    }
+    // ⭐️ Thêm dòng này
+    Task ClearCartItemsAsync(long cartId);
 }

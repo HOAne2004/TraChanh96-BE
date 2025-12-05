@@ -79,7 +79,7 @@ namespace drinking_be.Services
             return MapProductToReadDto(createdProduct!);
         }
 
-        public async Task<ProductReadDto?> UpdateProduct(int id, ProductCreateDto productDto)
+        public async Task<ProductReadDto?> UpdateProduct(int id, ProductUpdateDto productDto)
         {
             // Lấy Product cũ cùng với các Dependencies (để Repository có thể xử lý việc xóa/thêm liên kết)
             var existingProduct = await _productRepository.GetProductWithDependencies(id);

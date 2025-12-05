@@ -13,7 +13,7 @@ namespace drinking_be.Interfaces.StoreInterfaces
 
         Task<StoreReadDto> CreateStoreAsync(StoreCreateDto storeDto);
 
-        Task<StoreReadDto?> UpdateStoreAsync(long id, StoreCreateDto storeDto);
+        Task<StoreReadDto?> UpdateStoreAsync(long id, StoreUpdateDto storeDto);
         Task<bool> DeleteStoreAsync(long id);
     }
 }

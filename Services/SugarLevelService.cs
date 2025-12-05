@@ -21,29 +21,29 @@ namespace drinking_be.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<SugarLevelDto>> GetAllSugarLevelsAsync()
+        public async Task<IEnumerable<SugarLevelReadDto>> GetAllSugarLevelsAsync()
         {
             var levels = await _sugarRepo.GetAllAsync();
-            return _mapper.Map<IEnumerable<SugarLevelDto>>(levels);
+            return _mapper.Map<IEnumerable<SugarLevelReadDto>>(levels);
         }
 
-        public async Task<SugarLevelDto> CreateSugarLevelAsync(SugarLevelCreateDto sugarLevelDto)
+        public async Task<SugarLevelReadDto> CreateSugarLevelAsync(SugarLevelCreateDto sugarLevelDto)
         {
             var sugarLevel = _mapper.Map<SugarLevel>(sugarLevelDto);
             await _sugarRepo.AddAsync(sugarLevel);
             // After adding, you may want to save changes and/or retrieve the entity with its generated Id.
             // For now, we assume sugarLevel is updated with its Id after AddAsync.
-            return _mapper.Map<SugarLevelDto>(sugarLevel);
+            return _mapper.Map<SugarLevelReadDto>(sugarLevel);
         }
 
-        public async Task<SugarLevelDto?> UpdateSugarLevelAsync(short id, SugarLevelCreateDto sugarLevelDto)
+        public async Task<SugarLevelReadDto?> UpdateSugarLevelAsync(short id, SugarLevelCreateDto sugarLevelDto)
         {
             var existingSugarLevel = await _sugarRepo.GetByIdAsync(id);
             if (existingSugarLevel == null) return null;
             _mapper.Map(sugarLevelDto, existingSugarLevel);
             _sugarRepo.Update(existingSugarLevel); // Update is void, do not await
             await _sugarRepo.SaveChangesAsync();   // Persist changes asynchronously
-            return _mapper.Map<SugarLevelDto>(existingSugarLevel);
+            return _mapper.Map<SugarLevelReadDto>(existingSugarLevel);
         }
 
         public async Task<int> CountProductsUsingSugarLevelAsync(short id)

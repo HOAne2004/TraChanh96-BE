@@ -59,7 +59,7 @@ namespace drinking_be.Services
         }
 
         // ⭐️ THÊM MỚI: Logic Cập nhật
-        public async Task<StoreReadDto?> UpdateStoreAsync(long id, StoreCreateDto storeDto)
+        public async Task<StoreReadDto?> UpdateStoreAsync(long id, StoreUpdateDto storeDto)
         {
             // 1. Tìm Store cũ
             var existingStore = await _storeRepo.GetByIdAsync((int)id); // Ép kiểu nếu Repo dùng int
@@ -67,9 +67,6 @@ namespace drinking_be.Services
 
             // 2. Cập nhật dữ liệu (Map từ DTO đè lên Entity cũ)
             _mapper.Map(storeDto, existingStore);
-
-            // Cập nhật lại Slug nếu tên thay đổi (Tùy chọn)
-            existingStore.Slug = GenerateSlug(storeDto.Name);
 
             // 3. Lưu thay đổi
             _storeRepo.Update(existingStore);
@@ -93,11 +90,6 @@ namespace drinking_be.Services
 
             await _storeRepo.SaveChangesAsync();
             return true;
-        }
-        // Helper đơn giản để tạo Slug
-        private string GenerateSlug(string name)
-        {
-            return name.ToLower().Replace(" ", "-") + "-" + DateTime.UtcNow.Ticks;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace drinking_be.Interfaces.ProductInterfaces
         Task<IEnumerable<ProductReadDto>> GetAllProductsAsync(string? productType);
         Task<ProductReadDto?> GetProductById(int id);
         Task<ProductReadDto> CreateProduct(ProductCreateDto productDto);
-        Task<ProductReadDto?> UpdateProduct(int id, ProductCreateDto productDto);
+        Task<ProductReadDto?> UpdateProduct(int id, ProductUpdateDto productDto);
         Task<bool> DeleteProduct(int id);
     }
 }

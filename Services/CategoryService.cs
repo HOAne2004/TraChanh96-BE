@@ -99,7 +99,7 @@ namespace drinking_be.Services
             return _mapper.Map<CategoryReadDto>(category);
         }
 
-        public async Task<CategoryReadDto?> UpdateCategoryAsync(int id, CategoryCreateDto categoryDto)
+        public async Task<CategoryReadDto?> UpdateCategoryAsync(int id, CategoryUpdateDto categoryDto)
         {
             var existingCategory = await _categoryRepo.GetByIdAsync(id);
             if (existingCategory == null) return null;

@@ -8,6 +8,8 @@ namespace drinking_be.Interfaces
     {
         Task<BrandReadDto?> GetPrimaryBrandInfoAsync();
         // Phương thức cho Admin tạo/cập nhật
-        Task<BrandReadDto> CreateOrUpdateBrandAsync(BrandCreateDto brandDto);
+        Task<BrandReadDto> CreateBrandAsync(BrandCreateDto brandDto);
+
+        Task<BrandReadDto?> UpdateBrandAsync(int id, BrandUpdateDto brandDto);
     }
 }

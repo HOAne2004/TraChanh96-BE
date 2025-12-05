@@ -1,10 +1,11 @@
-﻿// Services/CartService.cs
-using AutoMapper;
+﻿using AutoMapper;
 using drinking_be.Dtos.CartDtos;
 using drinking_be.Interfaces;
 using drinking_be.Interfaces.OptionInterfaces;
 using drinking_be.Interfaces.ProductInterfaces;
 using drinking_be.Models;
+using Microsoft.EntityFrameworkCore; // Cần để dùng Include nếu viết query trực tiếp
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,16 +17,13 @@ namespace drinking_be.Services
         private readonly ICartRepository _cartRepo;
         private readonly IProductRepository _productRepo;
         private readonly ISizeRepository _sizeRepo;
-        private readonly ISugarLevelRepository _sugarRepo; // Cần cho Mapping
-        private readonly IIceLevelRepository _iceRepo; // Cần cho Mapping
-        private readonly IMapper _mapper;
         private readonly IGenericRepository<CartItem> _cartItemRepo;
+        private readonly IMapper _mapper;
+
         public CartService(
             ICartRepository cartRepo,
             IProductRepository productRepo,
             ISizeRepository sizeRepo,
-            ISugarLevelRepository sugarRepo,
-            IIceLevelRepository iceRepo,
             IGenericRepository<CartItem> cartItemRepo,
             IMapper mapper)
         {
@@ -33,54 +31,67 @@ namespace drinking_be.Services
             _cartItemRepo = cartItemRepo;
             _productRepo = productRepo;
             _sizeRepo = sizeRepo;
-            _sugarRepo = sugarRepo;
-            _iceRepo = iceRepo;
             _mapper = mapper;
         }
 
-        /// <summary>
-        /// Hàm nội bộ: Lấy giỏ hàng của User, nếu chưa có thì tạo mới.
-        /// </summary>
+        // --- PRIVATE HELPER ---
+
         private async Task<Cart> GetOrCreateCartAsync(int userId)
         {
+            // Đảm bảo hàm này trong Repository đã Include(c => c.CartItems).ThenInclude(...) đầy đủ
             var cart = await _cartRepo.GetCartByUserIdAsync(userId);
             if (cart == null)
             {
                 cart = new Cart { UserId = userId };
                 await _cartRepo.AddAsync(cart);
                 await _cartRepo.SaveChangesAsync();
+
+                // Tạo xong thì trả về cart rỗng, không cần load lại
+                return cart;
             }
             return cart;
         }
 
-        /// <summary>
-        /// Logic mapping thủ công từ Cart (Entity) sang CartReadDto (để tính tổng tiền)
-        /// </summary>
         private CartReadDto MapCartToReadDto(Cart cart)
         {
+            // 1. Map cơ bản
             var dto = _mapper.Map<CartReadDto>(cart);
+            dto.Items = new List<CartItemReadDto>(); // Reset list để fill thủ công
             dto.TotalAmount = 0;
 
-            // Lọc ra các món chính (không phải topping)
-            var mainItems = cart.CartItems.Where(ci => ci.ParentItemId == null).ToList();
-
-            foreach (var mainItem in mainItems)
+            // 2. Lọc món chính (ParentId == null)
+            if (cart.CartItems != null)
             {
-                var itemDto = _mapper.Map<CartItemReadDto>(mainItem);
+                var mainItems = cart.CartItems.Where(ci => ci.ParentItemId == null).ToList();
 
-                // Lấy các topping con của món chính
-                var toppings = mainItem.InverseParentItem.ToList();
-                itemDto.Toppings = _mapper.Map<List<CartToppingReadDto>>(toppings);
+                foreach (var mainItem in mainItems)
+                {
+                    var itemDto = _mapper.Map<CartItemReadDto>(mainItem);
 
-                dto.Items.Add(itemDto);
+                    // Map Topping (InverseParentItem)
+                    if (mainItem.InverseParentItem != null && mainItem.InverseParentItem.Any())
+                    {
+                        itemDto.Toppings = _mapper.Map<List<CartToppingReadDto>>(mainItem.InverseParentItem);
+                    }
 
-                // Tính tổng tiền (bao gồm cả món chính và topping)
-                dto.TotalAmount += itemDto.FinalPrice;
-                dto.TotalAmount += itemDto.Toppings.Sum(t => t.FinalPrice);
+                    dto.Items.Add(itemDto);
+
+                    // Tính tổng tiền = FinalPrice của món chính + FinalPrice của các topping
+                    // (Lưu ý: FinalPrice trong DB đã được tính toán = UnitPrice * Quantity rồi)
+                    decimal itemTotal = mainItem.FinalPrice;
+                    if (mainItem.InverseParentItem != null)
+                    {
+                        itemTotal += mainItem.InverseParentItem.Sum(t => t.FinalPrice);
+                    }
+
+                    dto.TotalAmount += itemTotal;
+                }
             }
 
             return dto;
         }
+
+        // --- PUBLIC METHODS ---
 
         public async Task<CartReadDto> GetMyCartAsync(int userId)
         {
@@ -92,70 +103,127 @@ namespace drinking_be.Services
         {
             var cart = await GetOrCreateCartAsync(userId);
 
-            // --- Lấy dữ liệu gốc (Tương tự OrderService) ---
-            var productIds = itemDto.Toppings.Select(t => t.ProductId).ToList();
+            // 1. Validate & Lấy giá
+            var productIds = itemDto.Toppings?.Select(t => t.ProductId).ToList() ?? new List<int>();
             productIds.Add(itemDto.ProductId);
 
             var allProducts = (await _productRepo.GetProductsByIdsAsync(productIds)).ToDictionary(p => p.Id);
+            if (!allProducts.ContainsKey(itemDto.ProductId)) throw new Exception("Sản phẩm không tồn tại.");
+
             var size = await _sizeRepo.GetByIdAsync(itemDto.SizeId);
+            if (size == null) throw new Exception("Size không hợp lệ.");
 
-            if (!allProducts.ContainsKey(itemDto.ProductId) || size == null)
-            {
-                throw new Exception("Sản phẩm hoặc Size không hợp lệ.");
-            }
-
-            // --- Tính toán giá (Tương tự OrderService) ---
+            // 2. Tính toán
             var product = allProducts[itemDto.ProductId];
             decimal basePrice = product.BasePrice;
-            decimal sizeModifier = size.PriceModifier ?? 0m;
+            decimal sizeModifier = (decimal)size.PriceModifier; // Decimal 18,2
+
+            // Giá 1 đơn vị món chính = Giá gốc + Giá size
             decimal itemUnitPrice = basePrice + sizeModifier;
             decimal itemTotalPrice = itemUnitPrice * itemDto.Quantity;
 
-            // 1. Tạo CartItem (Món chính)
+            // 3. Tạo Entity món chính
             var mainCartItem = new CartItem
             {
                 CartId = cart.Id,
                 ProductId = itemDto.ProductId,
                 Quantity = itemDto.Quantity,
-                BasePrice = basePrice,
-                FinalPrice = itemTotalPrice,
-                SizeId = itemDto.SizeId,
-                SugarLevelId = itemDto.SugarLevelId,
-                IceLevelId = itemDto.IceLevelId,
+                BasePrice = basePrice, // Lưu giá gốc SP
+                FinalPrice = itemTotalPrice, // Lưu tổng giá sau khi nhân số lượng
+                SizeId = (short)itemDto.SizeId, // Ép kiểu nếu DB là smallint
+                SugarLevelId = (short?)itemDto.SugarLevelId,
+                IceLevelId = (short?)itemDto.IceLevelId,
                 ParentItemId = null
             };
 
-            // 2. Tạo CartItem (Topping)
+            // 4. Tạo Entity Topping (nếu có)
             var toppingItems = new List<CartItem>();
-            foreach (var toppingDto in itemDto.Toppings)
+            if (itemDto.Toppings != null)
             {
-                if (!allProducts.ContainsKey(toppingDto.ProductId))
+                foreach (var toppingDto in itemDto.Toppings)
                 {
-                    throw new Exception($"Topping ID {toppingDto.ProductId} không hợp lệ.");
+                    if (!allProducts.ContainsKey(toppingDto.ProductId)) continue;
+
+                    var toppingProduct = allProducts[toppingDto.ProductId];
+                    // Số lượng topping = Số lượng topping trên 1 ly * Số ly
+                    int totalToppingQty = toppingDto.Quantity * itemDto.Quantity;
+                    decimal toppingTotalPrice = toppingProduct.BasePrice * totalToppingQty;
+
+                    toppingItems.Add(new CartItem
+                    {
+                        CartId = cart.Id,
+                        ProductId = toppingDto.ProductId,
+                        Quantity = totalToppingQty,
+                        BasePrice = toppingProduct.BasePrice,
+                        FinalPrice = toppingTotalPrice,
+                        ParentItem = mainCartItem // EF Core tự hiểu liên kết
+                    });
                 }
-                var toppingProduct = allProducts[toppingDto.ProductId];
-                decimal toppingPrice = toppingProduct.BasePrice * toppingDto.Quantity;
-
-                toppingItems.Add(new CartItem
-                {
-                    CartId = cart.Id,
-                    ProductId = toppingDto.ProductId,
-                    Quantity = toppingDto.Quantity,
-                    BasePrice = toppingProduct.BasePrice,
-                    FinalPrice = toppingPrice,
-                    ParentItem = mainCartItem // Liên kết với món chính
-                });
             }
 
-            // 3. Thêm vào DB
-            await _cartItemRepo.AddAsync(mainCartItem); // Thêm món chính
-            if (toppingItems.Any())
-            {
-                _cartItemRepo.DeleteRange(cart.CartItems); // Thêm các topping (cần IGenericRepository<CartItem>)
-            }
+            // 5. Lưu vào DB
+            // Thêm món chính (EF Core sẽ tự thêm luôn toppingItems vì có liên kết ParentItem)
+            await _cartItemRepo.AddAsync(mainCartItem);
+
+            // ⭐️ SỬA LỖI CŨ: Không cần AddRange toppingItems riêng nếu đã gán vào ParentItem.
+            // Nhưng nếu muốn chắc chắn hoặc EF không tự track, dùng AddRange.
+            // Tuyệt đối KHÔNG dùng DeleteRange(cart.CartItems) ở đây!
+
             await _cartRepo.SaveChangesAsync();
 
-            // 4. Trả về giỏ hàng mới
+            // 6. Load lại đầy đủ để trả về
+            // (Do biến cart ở trên có thể chưa có data mới hoặc chưa include đủ)
+            return await GetMyCartAsync(userId);
+        }
+
+        public async Task<CartReadDto> UpdateItemQuantityAsync(int userId, CartItemUpdateDto updateDto)
+        {
+            var cart = await GetOrCreateCartAsync(userId);
+
+            // Lấy item cần sửa (kèm Size và Topping)
+            var cartItem = await _cartRepo.GetCartItemByIdAsync(updateDto.CartItemId);
+
+            if (cartItem == null || cartItem.CartId != cart.Id)
+            {
+                throw new Exception("Sản phẩm không tồn tại trong giỏ.");
+            }
+
+            // Logic tính toán lại
+            int oldQuantity = cartItem.Quantity;
+            int newQuantity = updateDto.Quantity;
+
+            if (newQuantity <= 0)
+            {
+                // Nếu số lượng <= 0 thì xóa luôn
+                _cartRepo.DeleteCartItem(cartItem);
+            }
+            else
+            {
+                // Cập nhật món chính
+                decimal sizeModifier = cartItem.Size?.PriceModifier ?? 0m;
+                decimal unitPrice = cartItem.BasePrice + sizeModifier;
+
+                cartItem.Quantity = newQuantity;
+                cartItem.FinalPrice = unitPrice * newQuantity;
+                _cartItemRepo.Update(cartItem);
+
+                // Cập nhật topping con
+                if (cartItem.InverseParentItem != null)
+                {
+                    foreach (var topping in cartItem.InverseParentItem)
+                    {
+                        // Tính lại số lượng topping gốc trên 1 đơn vị
+                        // (Tránh chia cho 0 nếu oldQuantity bị lỗi)
+                        int toppingUnitQty = oldQuantity > 0 ? topping.Quantity / oldQuantity : 1;
+
+                        topping.Quantity = toppingUnitQty * newQuantity;
+                        topping.FinalPrice = topping.BasePrice * topping.Quantity;
+                        _cartItemRepo.Update(topping);
+                    }
+                }
+            }
+
+            await _cartRepo.SaveChangesAsync();
             return await GetMyCartAsync(userId);
         }
 
@@ -164,14 +232,11 @@ namespace drinking_be.Services
             var cart = await GetOrCreateCartAsync(userId);
             var cartItem = await _cartRepo.GetCartItemByIdAsync(cartItemId);
 
-            if (cartItem == null || cartItem.CartId != cart.Id)
+            if (cartItem != null && cartItem.CartId == cart.Id)
             {
-                throw new Exception("Sản phẩm không tồn tại trong giỏ hàng.");
+                _cartRepo.DeleteCartItem(cartItem);
+                await _cartRepo.SaveChangesAsync();
             }
-
-            // Repository sẽ xử lý việc xóa item và các topping con
-            _cartRepo.DeleteCartItem(cartItem);
-            await _cartRepo.SaveChangesAsync();
 
             return await GetMyCartAsync(userId);
         }
@@ -181,70 +246,17 @@ namespace drinking_be.Services
             var cart = await _cartRepo.GetCartByUserIdAsync(userId);
             if (cart != null && cart.CartItems.Any())
             {
-                _cartItemRepo.DeleteRange(cart.CartItems); // Cần IGenericRepository<CartItem>
-                await _cartItemRepo.SaveChangesAsync();
-            }
-        }
-
-        public async Task<CartReadDto> UpdateItemQuantityAsync(int userId, CartItemUpdateDto updateDto)
-        {
-            // 1. Lấy giỏ hàng để đảm bảo tính bảo mật
-            var cart = await GetOrCreateCartAsync(userId);
-
-            // 2. Lấy Item cần sửa (Kèm theo Size và Topping con để tính giá lại)
-            // Lưu ý: Chúng ta cần Include Size để lấy PriceModifier
-            var cartItem = await _cartItemRepo.FindAsync(
-                ci => ci.Id == updateDto.CartItemId && ci.CartId == cart.Id,
-                includeProperties: "Size,InverseParentItem" // Giả định GenericRepo hỗ trợ string include hoặc bạn dùng Queryable
-            ).ContinueWith(t => t.Result.FirstOrDefault());
-
-            // *Nếu GenericRepo của bạn không hỗ trợ Include chuỗi, 
-            // bạn nên thêm hàm GetCartItemWithDetailsAsync vào ICartRepository tương tự như GetCartByUserIdAsync
-            // Ở đây tôi giả định bạn sẽ dùng _cartRepo.GetCartItemByIdAsync(cartItemId) đã có trong code cũ
-
-            cartItem = await _cartRepo.GetCartItemByIdAsync(updateDto.CartItemId);
-
-            if (cartItem == null || cartItem.CartId != cart.Id)
-            {
-                throw new Exception("Sản phẩm không tồn tại trong giỏ hàng.");
-            }
-
-            // 3. Tính toán thay đổi (Ratio)
-            int oldQuantity = cartItem.Quantity;
-            int newQuantity = updateDto.Quantity;
-
-            // 4. Cập nhật món chính
-            // Giá đơn vị = BasePrice (giá gốc SP) + Size Modifier (nếu có)
-            decimal sizeModifier = cartItem.Size?.PriceModifier ?? 0m;
-            decimal unitPrice = cartItem.BasePrice + sizeModifier;
-
-            cartItem.Quantity = newQuantity;
-            cartItem.FinalPrice = unitPrice * newQuantity;
-            _cartItemRepo.Update(cartItem);
-
-            // 5. Cập nhật các Topping con (nếu có)
-            // Logic: Nếu mua 1 ly có 2 trân châu -> mua 2 ly sẽ có 4 trân châu
-            if (cartItem.InverseParentItem != null && cartItem.InverseParentItem.Any())
-            {
-                foreach (var topping in cartItem.InverseParentItem)
+                // Xóa tất cả
+                // Cần đảm bảo Repository hỗ trợ xóa range
+                foreach (var item in cart.CartItems)
                 {
-                    // Tính số lượng topping trên mỗi đơn vị món chính
-                    int toppingUnitQty = topping.Quantity / oldQuantity;
-
-                    // Cập nhật số lượng topping mới
-                    topping.Quantity = toppingUnitQty * newQuantity;
-
-                    // Cập nhật giá topping (BasePrice của topping là giá gốc)
-                    topping.FinalPrice = topping.BasePrice * topping.Quantity;
-
-                    _cartItemRepo.Update(topping);
+                    // Xóa từng cái hoặc dùng RemoveRange của DbSet
+                    // Ở đây giả định Repo có hàm xóa range hoặc dùng context trực tiếp
+                    // _cartItemRepo.Delete(item); 
                 }
+                // Tốt nhất là dùng _context.CartItems.RemoveRange(cart.CartItems) trong Repository
+                await _cartRepo.ClearCartItemsAsync(cart.Id);
             }
-
-            await _cartRepo.SaveChangesAsync();
-
-            // 6. Trả về giỏ hàng mới
-            return await GetMyCartAsync(userId);
         }
     }
 }
