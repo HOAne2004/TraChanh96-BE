@@ -6,7 +6,7 @@ namespace drinking_be.Repositories
 {
     public class SugarLevelRepository : GenericRepository<SugarLevel>, ISugarLevelRepository
     {
-        private DBDrinkContext _context;
+        private new DBDrinkContext _context;
 
         public SugarLevelRepository(DBDrinkContext context) :base(context)
         {
@@ -18,6 +18,11 @@ namespace drinking_be.Repositories
             return await _context.SugarLevels
                                       .Where(s => sugarLevelIds.Contains(s.Id))
                                       .ToListAsync();
+        }
+
+        public async Task<bool> ExistsByNameAsync(string label)
+        {
+            return await _context.SugarLevels.AnyAsync(s => s.Label.ToLower() == label.ToLower());
         }
     }
 }

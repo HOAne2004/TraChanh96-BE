@@ -1,12 +1,12 @@
-﻿// Controllers/IceLevelsController.cs
-using drinking_be.Dtos.OptionDtos;
-using drinking_be.Interfaces;
+﻿using drinking_be.Dtos.OptionDtos;
+using drinking_be.Interfaces; 
+using drinking_be.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] // Đường dẫn: api/IceLevels
+    [Route("api/[controller]")]
     public class IceLevelsController : ControllerBase
     {
         private readonly IIceLevelService _iceService;
@@ -22,13 +22,24 @@ namespace drinking_be.Controllers
             return Ok(await _iceService.GetAllIceLevelsAsync());
         }
 
+        // ⭐️ API CHECK USAGE
+        [HttpGet("{id}/usage")]
+        public async Task<IActionResult> GetUsage(short id)
+        {
+            // Giả định bạn đã thêm hàm CountProductsUsingIceAsync vào Service
+            // Nếu chưa, hãy thêm vào hoặc tạm return 0
+            var count = await _iceService.CountProductsUsingIceLevelAsync(id);
+            return Ok(new { count  });
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateIceLevel([FromBody] IceLevelCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                return Ok(await _iceService.CreateIceLevelAsync(dto));
+                var newLevel = await _iceService.CreateIceLevelAsync(dto);
+                return CreatedAtAction(nameof(GetAllIceLevels), newLevel);
             }
             catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
         }
@@ -36,24 +47,18 @@ namespace drinking_be.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateIceLevel(short id, [FromBody] IceLevelCreateDto dto)
         {
-            var result = await _iceService.UpdateIceLevelAsync(id, dto);
-            if (result == null) return NotFound();
-            return Ok(result);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var updated = await _iceService.UpdateIceLevelAsync(id, dto);
+            if (updated == null) return NotFound();
+            return Ok(updated);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteIceLevel(short id)
         {
-            if (!await _iceService.DeleteIceLevelAsync(id)) return NotFound();
+            var result = await _iceService.DeleteIceLevelAsync(id);
+            if (!result) return NotFound();
             return NoContent();
-        }
-
-        // GET: api/Sizes/5/usage
-        [HttpGet("{id}/usage")]
-        public async Task<IActionResult> GetSizeUsage(short id)
-        {
-            var count = await _iceService.CountProductsUsingIceLevelAsync(id);
-            return Ok(new { count }); // Trả về JSON: { "count": 5 }
         }
     }
 }

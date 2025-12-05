@@ -28,6 +28,10 @@ namespace drinking_be.Services
 
         public async Task<IceLevelDto> CreateIceLevelAsync(IceLevelCreateDto iceLevelDto)
         {
+            if(await _iceRepo.ExistsByNameAsync(iceLevelDto.Label))
+            {
+                throw new ArgumentException($"Mức đá {iceLevelDto.Label} đã tồn tại.");
+            }
             var iceLevel = _mapper.Map<IceLevel>(iceLevelDto);
             await _iceRepo.AddAsync(iceLevel);
             // After adding, you may want to save changes and/or retrieve the entity with its generated Id.

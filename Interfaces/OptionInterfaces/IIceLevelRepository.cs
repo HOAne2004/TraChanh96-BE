@@ -5,6 +5,9 @@ namespace drinking_be.Interfaces.OptionInterfaces
     public interface IIceLevelRepository : IGenericRepository<IceLevel>
     {
         // Phương thức để lấy nhiều ice level theo ID
-        Task<IEnumerable<IceLevel>> GetIceLevelsByIdsAsync(List<short> iceLevelIds);    
+        Task<IEnumerable<IceLevel>> GetIceLevelsByIdsAsync(List<short> iceLevelIds);
+
+        // Thêm hàm kiểm tra tồn tại
+        Task<bool> ExistsByNameAsync(string label);
     }
 }

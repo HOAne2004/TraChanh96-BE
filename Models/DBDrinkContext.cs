@@ -149,11 +149,11 @@ public partial class DBDrinkContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BasePrice)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("base_price");
             entity.Property(e => e.CartId).HasColumnName("cart_id");
             entity.Property(e => e.FinalPrice)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("final_price");
             entity.Property(e => e.IceLevelId).HasColumnName("ice_level_id");
             entity.Property(e => e.Note)
@@ -344,7 +344,7 @@ public partial class DBDrinkContext : DbContext
                 .HasColumnName("created_at");
             entity.Property(e => e.DurationDays).HasColumnName("duration_days");
             entity.Property(e => e.MinSpendRequired)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("min_spend_required");
             entity.Property(e => e.Name)
                 .HasMaxLength(35)
@@ -437,10 +437,10 @@ public partial class DBDrinkContext : DbContext
                 .HasColumnName("delivery_date");
             entity.Property(e => e.DiscountAmount)
                 .HasDefaultValue(0m)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("discount_amount");
             entity.Property(e => e.GrandTotal)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("grand_total");
             entity.Property(e => e.OrderCode)
                 .HasMaxLength(50)
@@ -463,7 +463,7 @@ public partial class DBDrinkContext : DbContext
                 .HasMaxLength(200)
                 .HasColumnName("store_name");
             entity.Property(e => e.TotalAmount)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("total_amount");
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.UserNotes)
@@ -496,10 +496,10 @@ public partial class DBDrinkContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BasePrice)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("base_price");
             entity.Property(e => e.FinalPrice)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("final_price");
             entity.Property(e => e.IceLevelId).HasColumnName("ice_level_id");
             entity.Property(e => e.Note)
@@ -558,7 +558,7 @@ public partial class DBDrinkContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.ProcessingFee)
                 .HasDefaultValue(0m)
-                .HasColumnType("decimal(5, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("processing_fee");
             entity.Property(e => e.SortOrder)
                 .HasDefaultValue((byte)0)
@@ -612,7 +612,7 @@ public partial class DBDrinkContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BasePrice)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("base_price");
             entity.Property(e => e.CategoryId).HasColumnName("category_id");
             entity.Property(e => e.CreatedAt)
@@ -814,7 +814,7 @@ public partial class DBDrinkContext : DbContext
                 .HasColumnName("label");
             entity.Property(e => e.PriceModifier)
                 .HasDefaultValue(0m)
-                .HasColumnType("decimal(5, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("price_modifier");
         });
 
@@ -1037,7 +1037,7 @@ public partial class DBDrinkContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("discount_type");
             entity.Property(e => e.DiscountValue)
-                .HasColumnType("decimal(5, 2)")
+                .HasColumnType("decimal(, 2)")
                 .HasColumnName("discount_value");
             entity.Property(e => e.EndDate)
                 .HasColumnType("datetime")
@@ -1047,11 +1047,11 @@ public partial class DBDrinkContext : DbContext
                 .HasColumnName("is_active");
             entity.Property(e => e.LevelId).HasColumnName("level_id");
             entity.Property(e => e.MaxDiscountAmount)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("max_discount_amount");
             entity.Property(e => e.MinOrderValue)
                 .HasDefaultValue(0m)
-                .HasColumnType("decimal(10, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("min_order_value");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)

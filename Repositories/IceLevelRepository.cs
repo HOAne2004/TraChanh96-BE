@@ -6,7 +6,7 @@ namespace drinking_be.Repositories
 {
     public class IceLevelRepository :GenericRepository<IceLevel>, IIceLevelRepository
     {
-        private DBDrinkContext _context;
+        private new DBDrinkContext _context;
         public IceLevelRepository(DBDrinkContext context) : base(context)
         {
             _context = context;
@@ -16,6 +16,11 @@ namespace drinking_be.Repositories
             return await _context.IceLevels
                                       .Where(i => iceLevelIds.Contains(i.Id))
                                       .ToListAsync();
+        }
+
+        public async Task<bool> ExistsByNameAsync(string label)
+        {
+            return await _context.SugarLevels.AnyAsync(s => s.Label.ToLower() == label.ToLower());
         }
     }
 }

@@ -6,5 +6,8 @@ namespace drinking_be.Interfaces.OptionInterfaces
     {
         // Phương thức để lấy nhiều sugar level theo ID
         Task<IEnumerable<SugarLevel>> GetSugarLevelsByIdsAsync(List<short> sugarLevelIds);
+
+        // Thêm hàm kiểm tra tồn tại
+        Task<bool> ExistsByNameAsync(string label);
     }
 }

@@ -29,6 +29,10 @@ namespace drinking_be.Services
 
         public async Task<SugarLevelReadDto> CreateSugarLevelAsync(SugarLevelCreateDto sugarLevelDto)
         {
+            if(await _sugarRepo.ExistsByNameAsync(sugarLevelDto.Label))
+            {
+                throw new ArgumentException($"Mức đường {sugarLevelDto.Label} đã tồn tại.");
+            }
             var sugarLevel = _mapper.Map<SugarLevel>(sugarLevelDto);
             await _sugarRepo.AddAsync(sugarLevel);
             // After adding, you may want to save changes and/or retrieve the entity with its generated Id.

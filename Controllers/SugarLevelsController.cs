@@ -1,12 +1,11 @@
-﻿// Controllers/SugarLevelsController.cs
-using drinking_be.Dtos.OptionDtos;
-using drinking_be.Interfaces;
+﻿using drinking_be.Dtos.OptionDtos;
+using drinking_be.Interfaces; // Namespace chứa ISugarLevelService
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] // Đường dẫn: api/SugarLevels
+    [Route("api/[controller]")]
     public class SugarLevelsController : ControllerBase
     {
         private readonly ISugarLevelService _sugarService;
@@ -22,13 +21,24 @@ namespace drinking_be.Controllers
             return Ok(await _sugarService.GetAllSugarLevelsAsync());
         }
 
+        // ⭐️ API CHECK USAGE
+        [HttpGet("{id}/usage")]
+        public async Task<IActionResult> GetUsage(short id)
+        {
+            // Giả định bạn đã thêm hàm CountProductsUsingSugarAsync vào Service
+            // Nếu chưa, hãy thêm vào hoặc tạm return 0
+             var count = await _sugarService.CountProductsUsingSugarLevelAsync(id);
+            return Ok(new { count }); // Tạm thời trả về 0 để không lỗi 404
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateSugarLevel([FromBody] SugarLevelCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                return Ok(await _sugarService.CreateSugarLevelAsync(dto));
+                var newLevel = await _sugarService.CreateSugarLevelAsync(dto);
+                return CreatedAtAction(nameof(GetAllSugarLevels), newLevel);
             }
             catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
         }
@@ -36,25 +46,18 @@ namespace drinking_be.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSugarLevel(short id, [FromBody] SugarLevelCreateDto dto)
         {
-            var result = await _sugarService.UpdateSugarLevelAsync(id, dto);
-            if (result == null) return NotFound();
-            return Ok(result);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var updated = await _sugarService.UpdateSugarLevelAsync(id, dto);
+            if (updated == null) return NotFound();
+            return Ok(updated);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSugarLevel(short id)
         {
-            if (!await _sugarService.DeleteSugarLevelAsync(id)) return NotFound();
+            var result = await _sugarService.DeleteSugarLevelAsync(id);
+            if (!result) return NotFound();
             return NoContent();
-        }
-
-
-        // GET: api/Sizes/5/usage
-        [HttpGet("{id}/usage")]
-        public async Task<IActionResult> GetSizeUsage(short id)
-        {
-            var count = await _sugarService.CountProductsUsingSugarLevelAsync(id);
-            return Ok(new { count }); // Trả về JSON: { "count": 5 }
         }
     }
 }
