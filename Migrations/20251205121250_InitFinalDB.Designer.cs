@@ -12,7 +12,7 @@ using drinking_be.Models;
 namespace drinking_be.Migrations
 {
     [DbContext(typeof(DBDrinkContext))]
-    [Migration("20251205113137_InitFinalDB")]
+    [Migration("20251205121250_InitFinalDB")]
     partial class InitFinalDB
     {
         /// <inheritdoc />
