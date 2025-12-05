@@ -381,7 +381,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("date")
                         .HasColumnName("level_start_date")
-                        .HasDefaultValueSql("(CONVERT([date],NOW()))");
+                        .HasDefaultValueSql("CURRENT_DATE");
 
                     b.Property<byte?>("Status")
                         .ValueGeneratedOnAdd()
@@ -485,7 +485,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasDefaultValueSql("(newsequentialid())");
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateTime?>("PublishedDate")
                         .HasColumnType("timestamp without time zone")
@@ -1355,7 +1355,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasDefaultValueSql("(newsequentialid())");
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("Slug")
                         .HasMaxLength(200)
@@ -1468,7 +1468,7 @@ namespace drinking_be.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
-                        .HasDefaultValueSql("(newsequentialid())");
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<byte>("RoleId")
                         .ValueGeneratedOnAdd()
