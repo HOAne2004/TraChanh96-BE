@@ -74,7 +74,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Brand__3213E83F3D8FA9ED");
 
-            entity.ToTable("Brand");
+            entity.ToTable("brand");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Address)
@@ -144,7 +144,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Cart_ite__3213E83F486E79A8");
 
-            entity.ToTable("Cart_item");
+            entity.ToTable("cart_item");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BasePrice)
@@ -195,7 +195,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Category__3213E83F5A39BDEA");
 
-            entity.ToTable("Category");
+            entity.ToTable("category");
 
             entity.HasIndex(e => e.Slug, "UQ__Category__32DD1E4C00F59B8C").IsUnique();
 
@@ -232,7 +232,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Comment__3213E83FE8B13CD2");
 
-            entity.ToTable("Comment");
+            entity.ToTable("comment");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Content)
@@ -269,7 +269,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Ice_Leve__3213E83FD11018A5");
 
-            entity.ToTable("Ice_Level");
+            entity.ToTable("ice_Level");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.IsActive)
@@ -285,7 +285,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Membersh__3213E83FF483D767");
 
-            entity.ToTable("Membership");
+            entity.ToTable("membership");
 
             entity.HasIndex(e => e.CardCode, "UQ__Membersh__81703D727EAE3828").IsUnique();
 
@@ -329,7 +329,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Membersh__3213E83F3901FC68");
 
-            entity.ToTable("Membership_Level");
+            entity.ToTable("membership_Level");
 
             entity.HasIndex(e => e.Name, "UQ__Membersh__72E12F1BBCF20D34").IsUnique();
 
@@ -405,7 +405,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Order__3213E83FDE5887F1");
 
-            entity.ToTable("Order");
+            entity.ToTable("order");
 
             entity.HasIndex(e => e.OrderCode, "UQ__Order__99D12D3FD8ECB07F").IsUnique();
 
@@ -484,7 +484,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Order_it__3213E83F36FD5A45");
 
-            entity.ToTable("Order_item");
+            entity.ToTable("order_item");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.BasePrice)
@@ -535,7 +535,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Payment___3213E83F7896F946");
 
-            entity.ToTable("Payment_Method");
+            entity.ToTable("payment_Method");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ImageUrl)
@@ -561,7 +561,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Policy__3213E83FB49E512D");
 
-            entity.ToTable("Policy");
+            entity.ToTable("policy");
 
             entity.HasIndex(e => e.Slug, "UQ__Policy__32DD1E4C980885E3").IsUnique();
 
@@ -594,7 +594,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Product__3213E83F0F2383EA");
 
-            entity.ToTable("Product");
+            entity.ToTable("product");
 
             entity.HasIndex(e => e.Slug, "UQ__Product__32DD1E4CAB867B39").IsUnique();
 
@@ -664,7 +664,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Reservat__3213E83F5F2BFAAF");
 
-            entity.ToTable("Reservation");
+            entity.ToTable("reservation");
 
             entity.HasIndex(e => e.ReservationCode, "UQ__Reservat__FA8FADE431DEB25F").IsUnique();
 
@@ -717,7 +717,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Review__3213E83F5E4BD5F0");
 
-            entity.ToTable("Review");
+            entity.ToTable("review");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AdminResponse).HasColumnName("admin_response");
@@ -752,7 +752,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Table__3213E83FCBCE513F");
 
-            entity.ToTable("Shop_Table");
+            entity.ToTable("shop_Table");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CanBeMerged)
@@ -785,7 +785,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Size__3213E83F985D1A04");
 
-            entity.ToTable("Size");
+            entity.ToTable("size");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.IsActive)
@@ -805,7 +805,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Store__3213E83FCF8EAB0E");
 
-            entity.ToTable("Store");
+            entity.ToTable("store");
 
             entity.HasIndex(e => e.Slug, "UQ__Store__32DD1E4C92725A74").IsUnique();
 
@@ -856,7 +856,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Sugar_Le__3213E83F86537186");
 
-            entity.ToTable("Sugar_Level");
+            entity.ToTable("sugar_Level");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.IsActive)
@@ -872,7 +872,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__User__3213E83F0D985B4B");
 
-            entity.ToTable("User");
+            entity.ToTable("user");
 
             entity.HasIndex(e => e.PublicId, "UQ__User__5699A530AE2F5693").IsUnique();
 
@@ -928,7 +928,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__User_Add__3213E83FE51862F8");
 
-            entity.ToTable("User_Address");
+            entity.ToTable("user_Address");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
@@ -954,7 +954,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__User_Vou__3213E83F950C18C0");
 
-            entity.ToTable("User_Voucher");
+            entity.ToTable("user_Voucher");
 
             entity.HasIndex(e => e.VoucherCode, "UQ__User_Vou__21731069F90ADEF0").IsUnique();
 
@@ -992,7 +992,7 @@ public partial class DBDrinkContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Voucher___3213E83F0298D293");
 
-            entity.ToTable("Voucher_Template");
+            entity.ToTable("voucher_Template");
 
             entity.HasIndex(e => e.CouponCode, "UQ__Voucher___ADE5CBB794CB76DB").IsUnique();
 
