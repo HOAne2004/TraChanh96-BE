@@ -115,7 +115,7 @@ namespace drinking_be.Migrations
                     id = table.Column<short>(type: "smallint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     label = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    price_modifier = table.Column<decimal>(type: "numeric(5,2)", nullable: true, defaultValue: 0m),
+                    price_modifier = table.Column<decimal>(type: "numeric(10,2)", nullable: true, defaultValue: 0m),
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true)
                 },
                 constraints: table =>

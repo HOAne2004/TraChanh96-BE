@@ -63,6 +63,7 @@ namespace drinking_be.Services
 
             // Thêm Product vào DB để lấy Product.Id (cần thiết cho các bảng liên kết)
             await _productRepository.AddAsync(product);
+            await _productRepository.SaveChangesAsync();
 
             // Cập nhật các bảng liên kết M:N
             _productRepository.UpdateProductOptions(

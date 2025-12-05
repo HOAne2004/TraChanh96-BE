@@ -58,7 +58,7 @@ namespace drinking_be.Repositories
                     product.ProductSizes.Add(new ProductSize
                     {
                         ProductId = product.Id,
-                        SizeId = (short)sizeId // Ép kiểu về short nếu DB dùng smallint
+                        SizeId = (short)sizeId 
                     });
                 }
             }
