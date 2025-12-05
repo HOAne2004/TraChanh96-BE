@@ -12,8 +12,8 @@ using drinking_be.Models;
 namespace drinking_be.Migrations
 {
     [DbContext(typeof(DBDrinkContext))]
-    [Migration("20251205103248_InitPostgresDB")]
-    partial class InitPostgresDB
+    [Migration("20251205113137_InitFinalDB")]
+    partial class InitFinalDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

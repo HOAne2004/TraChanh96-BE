@@ -181,11 +181,16 @@ namespace drinking_be.Data
             // --- 7. Stores ---
              if (!await context.Stores.AnyAsync())
             {
-                 var brand = new Brand { Name = "Trà Chanh 96" }; 
-                 if (!await context.Brands.AnyAsync()) { context.Brands.Add(brand); await context.SaveChangesAsync(); }
-                 else { brand = await context.Brands.FirstOrDefaultAsync(); }
+                // 1. Logic tạo/tìm Brand chính
+                if (!await context.Brands.AnyAsync())
+                {
+                    context.Brands.Add(new Brand { Name = "Trà Chanh 96" });
+                    await context.SaveChangesAsync();
+                }
 
-                 if (brand != null) {
+                // 2. ⭐️ CHỈ CẦN LẤY LẠI THÔNG TIN: KHÔNG DÙNG "VAR" LẦN NỮA
+                var brand = await context.Brands.FirstOrDefaultAsync(b => b.Name == "Trà Chanh 96");
+                if (brand != null) {
                      context.Stores.AddRange(
                         new Store { Name = "Trà Chanh 96 - Cầu Giấy", Slug="tc-cau-giay", Address = "123 Cầu Giấy, Hà Nội", BrandId = brand.Id, OpenTime = new TimeSpan(8,0,0), CloseTime = new TimeSpan(22,0,0), ImageUrl="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=60" },
                         new Store { Name = "Trà Chanh 96 - Đống Đa", Slug="tc-dong-da", Address = "456 Xã Đàn, Hà Nội", BrandId = brand.Id, OpenTime = new TimeSpan(8,0,0), CloseTime = new TimeSpan(23,0,0), ImageUrl="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=500&q=60" }
@@ -193,6 +198,8 @@ namespace drinking_be.Data
                      await context.SaveChangesAsync();
                  }
             }
+
+
         }
     }
 }
