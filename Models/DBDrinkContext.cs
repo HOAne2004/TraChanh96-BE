@@ -1007,7 +1007,7 @@ public partial class DBDrinkContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("discount_type");
             entity.Property(e => e.DiscountValue)
-                .HasColumnType("decimal(, 2)")
+                .HasColumnType("decimal(18, 2)")
                 .HasColumnName("discount_value");
             entity.Property(e => e.EndDate)
                 .HasColumnName("end_date");

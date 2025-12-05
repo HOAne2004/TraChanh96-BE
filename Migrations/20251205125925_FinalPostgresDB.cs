@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace drinking_be.Migrations
 {
     /// <inheritdoc />
-    public partial class InitFinalDB : Migration
+    public partial class FinalPostgresDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -283,7 +283,7 @@ namespace drinking_be.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     level_id = table.Column<byte>(type: "smallint", nullable: true),
-                    discount_value = table.Column<decimal>(type: "decimal(, 2)", nullable: false),
+                    discount_value = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     discount_type = table.Column<string>(type: "character varying(10)", unicode: false, maxLength: 10, nullable: false),
                     min_order_value = table.Column<decimal>(type: "numeric(18,2)", nullable: true, defaultValue: 0m),
                     max_discount_amount = table.Column<decimal>(type: "numeric(18,2)", nullable: true),

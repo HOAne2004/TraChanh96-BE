@@ -12,8 +12,8 @@ using drinking_be.Models;
 namespace drinking_be.Migrations
 {
     [DbContext(typeof(DBDrinkContext))]
-    [Migration("20251205124530_InitFinalDB")]
-    partial class InitFinalDB
+    [Migration("20251205125925_FinalPostgresDB")]
+    partial class FinalPostgresDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1651,7 +1651,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("discount_type");
 
                     b.Property<decimal>("DiscountValue")
-                        .HasColumnType("decimal(, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("discount_value");
 
                     b.Property<DateTime>("EndDate")
