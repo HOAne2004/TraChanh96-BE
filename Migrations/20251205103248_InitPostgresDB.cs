@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace drinking_be.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialPostgres : Migration
+    public partial class InitPostgresDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -81,7 +81,7 @@ namespace drinking_be.Migrations
                     id = table.Column<byte>(type: "smallint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(35)", maxLength: 35, nullable: false),
-                    min_spend_required = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    min_spend_required = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     duration_days = table.Column<short>(type: "smallint", nullable: false),
                     benefits = table.Column<string>(type: "text", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(NOW())")
@@ -101,7 +101,7 @@ namespace drinking_be.Migrations
                     image_url = table.Column<string>(type: "character varying(500)", unicode: false, maxLength: 500, nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
                     sort_order = table.Column<byte>(type: "smallint", nullable: true, defaultValue: (byte)0),
-                    processing_fee = table.Column<decimal>(type: "numeric(5,2)", nullable: true, defaultValue: 0m)
+                    processing_fee = table.Column<decimal>(type: "numeric(18,2)", nullable: true, defaultValue: 0m)
                 },
                 constraints: table =>
                 {
@@ -115,7 +115,7 @@ namespace drinking_be.Migrations
                     id = table.Column<short>(type: "smallint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     label = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    price_modifier = table.Column<decimal>(type: "numeric(5,2)", nullable: true, defaultValue: 0m),
+                    price_modifier = table.Column<decimal>(type: "numeric(18,2)", nullable: true, defaultValue: 0m),
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true)
                 },
                 constraints: table =>
@@ -144,7 +144,7 @@ namespace drinking_be.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "gen_random_uuid()"),
+                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "(newsequentialid())"),
                     role_id = table.Column<byte>(type: "smallint", nullable: false, defaultValue: (byte)1),
                     username = table.Column<string>(type: "character varying(50)", unicode: false, maxLength: 50, nullable: false),
                     thumbnail_url = table.Column<string>(type: "character varying(200)", unicode: false, maxLength: 200, nullable: true),
@@ -217,7 +217,7 @@ namespace drinking_be.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "gen_random_uuid()"),
+                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "(newsequentialid())"),
                     slug = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     brand_id = table.Column<int>(type: "integer", nullable: false),
                     name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
@@ -225,8 +225,8 @@ namespace drinking_be.Migrations
                     address = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     latitude = table.Column<double>(type: "double precision", nullable: true),
                     longitude = table.Column<double>(type: "double precision", nullable: true),
-                    open_time = table.Column<TimeSpan>(type: "time without time zone", nullable: true),
-                    close_time = table.Column<TimeSpan>(type: "time without time zone", nullable: true),
+                    open_time = table.Column<TimeSpan>(type: "interval", nullable: true),
+                    close_time = table.Column<TimeSpan>(type: "interval", nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
                     sort_order = table.Column<byte>(type: "smallint", nullable: true, defaultValue: (byte)0),
                     map_verified = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),
@@ -253,7 +253,7 @@ namespace drinking_be.Migrations
                     slug = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     product_type = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    base_price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    base_price = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     image_url = table.Column<string>(type: "character varying(500)", unicode: false, maxLength: 500, nullable: true),
                     description = table.Column<string>(type: "text", nullable: true),
                     ingredient = table.Column<string>(type: "text", nullable: true),
@@ -283,10 +283,10 @@ namespace drinking_be.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     level_id = table.Column<byte>(type: "smallint", nullable: true),
-                    discount_value = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
+                    discount_value = table.Column<decimal>(type: "decimal(, 2)", nullable: false),
                     discount_type = table.Column<string>(type: "character varying(10)", unicode: false, maxLength: 10, nullable: false),
-                    min_order_value = table.Column<decimal>(type: "numeric(10,2)", nullable: true, defaultValue: 0m),
-                    max_discount_amount = table.Column<decimal>(type: "numeric(10,2)", nullable: true),
+                    min_order_value = table.Column<decimal>(type: "numeric(18,2)", nullable: true, defaultValue: 0m),
+                    max_discount_amount = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     quantity_per_level = table.Column<byte>(type: "smallint", nullable: true),
                     usage_limit = table.Column<int>(type: "integer", nullable: true),
                     used_count = table.Column<int>(type: "integer", nullable: true, defaultValue: 0),
@@ -338,7 +338,7 @@ namespace drinking_be.Migrations
                     card_code = table.Column<string>(type: "character varying(50)", unicode: false, maxLength: 50, nullable: false),
                     level_id = table.Column<byte>(type: "smallint", nullable: false),
                     total_spent = table.Column<decimal>(type: "numeric(12,2)", nullable: true, defaultValue: 0m),
-                    level_start_date = table.Column<DateOnly>(type: "date", nullable: true, defaultValueSql: "DATE(NOW())"),
+                    level_start_date = table.Column<DateOnly>(type: "date", nullable: true, defaultValueSql: "(CONVERT([date],NOW()))"),
                     level_end_date = table.Column<DateOnly>(type: "date", nullable: false),
                     last_level_spent_reset = table.Column<DateOnly>(type: "date", nullable: true),
                     status = table.Column<byte>(type: "smallint", nullable: true, defaultValue: (byte)1),
@@ -366,7 +366,7 @@ namespace drinking_be.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "gen_random_uuid()"),
+                    public_id = table.Column<Guid>(type: "uuid", nullable: true, defaultValueSql: "(newsequentialid())"),
                     slug = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     user_id = table.Column<int>(type: "integer", nullable: false),
@@ -425,10 +425,10 @@ namespace drinking_be.Migrations
                     payment_method_id = table.Column<int>(type: "integer", nullable: true),
                     order_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true, defaultValueSql: "(NOW())"),
                     delivery_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    total_amount = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    discount_amount = table.Column<decimal>(type: "numeric(10,2)", nullable: true, defaultValue: 0m),
+                    total_amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    discount_amount = table.Column<decimal>(type: "numeric(18,2)", nullable: true, defaultValue: 0m),
                     shipping_fee = table.Column<decimal>(type: "numeric(8,2)", nullable: true, defaultValue: 0m),
-                    grand_total = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    grand_total = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     coins_earned = table.Column<int>(type: "integer", nullable: true, defaultValue: 0),
                     status = table.Column<byte>(type: "smallint", nullable: true, defaultValue: (byte)1),
                     delivery_address = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
@@ -629,8 +629,8 @@ namespace drinking_be.Migrations
                     cart_id = table.Column<long>(type: "bigint", nullable: false),
                     product_id = table.Column<int>(type: "integer", nullable: false),
                     quantity = table.Column<int>(type: "integer", nullable: false),
-                    base_price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    final_price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    base_price = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    final_price = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     note = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     parent_item_id = table.Column<long>(type: "bigint", nullable: true),
                     size_id = table.Column<short>(type: "smallint", nullable: true),
@@ -714,8 +714,8 @@ namespace drinking_be.Migrations
                     order_id = table.Column<long>(type: "bigint", nullable: false),
                     product_id = table.Column<int>(type: "integer", nullable: false),
                     quantity = table.Column<int>(type: "integer", nullable: false),
-                    base_price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    final_price = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    base_price = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    final_price = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     note = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     parent_item_id = table.Column<long>(type: "bigint", nullable: true),
                     size_id = table.Column<short>(type: "smallint", nullable: true),

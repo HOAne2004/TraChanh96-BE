@@ -141,7 +141,7 @@ namespace drinking_be.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("BasePrice")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("base_price");
 
                     b.Property<long>("CartId")
@@ -149,7 +149,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("cart_id");
 
                     b.Property<decimal>("FinalPrice")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("final_price");
 
                     b.Property<short?>("IceLevelId")
@@ -437,7 +437,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("duration_days");
 
                     b.Property<decimal>("MinSpendRequired")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("min_spend_required");
 
                     b.Property<string>("Name")
@@ -596,12 +596,12 @@ namespace drinking_be.Migrations
 
                     b.Property<decimal?>("DiscountAmount")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasDefaultValue(0m)
                         .HasColumnName("discount_amount");
 
                     b.Property<decimal>("GrandTotal")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("grand_total");
 
                     b.Property<string>("OrderCode")
@@ -643,7 +643,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("store_name");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("total_amount");
 
                     b.Property<int?>("UserId")
@@ -686,11 +686,11 @@ namespace drinking_be.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("BasePrice")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("base_price");
 
                     b.Property<decimal>("FinalPrice")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("final_price");
 
                     b.Property<short?>("IceLevelId")
@@ -773,7 +773,7 @@ namespace drinking_be.Migrations
 
                     b.Property<decimal?>("ProcessingFee")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(5, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasDefaultValue(0m)
                         .HasColumnName("processing_fee");
 
@@ -858,7 +858,7 @@ namespace drinking_be.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("BasePrice")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("base_price");
 
                     b.Property<int>("CategoryId")
@@ -1228,7 +1228,7 @@ namespace drinking_be.Migrations
 
                     b.Property<decimal?>("PriceModifier")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(5, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasDefaultValue(0m)
                         .HasColumnName("price_modifier");
 
@@ -1648,7 +1648,7 @@ namespace drinking_be.Migrations
                         .HasColumnName("discount_type");
 
                     b.Property<decimal>("DiscountValue")
-                        .HasColumnType("decimal(5, 2)")
+                        .HasColumnType("decimal(, 2)")
                         .HasColumnName("discount_value");
 
                     b.Property<DateTime>("EndDate")
@@ -1666,12 +1666,12 @@ namespace drinking_be.Migrations
                         .HasColumnName("level_id");
 
                     b.Property<decimal?>("MaxDiscountAmount")
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasColumnName("max_discount_amount");
 
                     b.Property<decimal?>("MinOrderValue")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(10, 2)")
+                        .HasColumnType("decimal(18, 2)")
                         .HasDefaultValue(0m)
                         .HasColumnName("min_order_value");
 
