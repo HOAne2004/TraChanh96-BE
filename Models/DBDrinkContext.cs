@@ -87,7 +87,7 @@ public partial class DBDrinkContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("copyright_text");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(NOW())").HasColumnType("timestamp without time zone")
+                .HasDefaultValueSql("(NOW())")
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
             entity.Property(e => e.EmailSupport)
@@ -128,11 +128,9 @@ public partial class DBDrinkContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(NOW())")
                 .HasColumnType("timestamp without time zone")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(NOW())")
-                .HasColumnType("timestamp without time zone")
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("updated_at");
             entity.Property(e => e.UserId).HasColumnName("user_id");
@@ -203,7 +201,8 @@ public partial class DBDrinkContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(NOW())").HasColumnType("timestamp without time zone")
+                .HasDefaultValueSql("(NOW())")
+                .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
             entity.Property(e => e.IsActive)
                 .HasDefaultValue(true)
@@ -220,7 +219,8 @@ public partial class DBDrinkContext : DbContext
                 .HasDefaultValue((byte)0)
                 .HasColumnName("sort_order");
             entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(NOW())").HasColumnType("timestamp without time zone")
+                .HasDefaultValueSql("(NOW())")
+                .HasColumnType("timestamp without time zone")
                 .HasColumnName("updated_at");
 
             entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
@@ -239,7 +239,8 @@ public partial class DBDrinkContext : DbContext
                 .HasMaxLength(500)
                 .HasColumnName("content");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(NOW())").HasColumnType("timestamp without time zone")
+                .HasDefaultValueSql("(NOW())")
+                .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
             entity.Property(e => e.NewsId).HasColumnName("news_id");
             entity.Property(e => e.ParentId).HasColumnName("parent_id");
@@ -296,7 +297,8 @@ public partial class DBDrinkContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("card_code");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(NOW())").HasColumnType("timestamp without time zone")
+                .HasDefaultValueSql("(NOW())")
+                .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
             entity.Property(e => e.LastLevelSpentReset).HasColumnName("last_level_spent_reset");
             entity.Property(e => e.LevelEndDate).HasColumnName("level_end_date");

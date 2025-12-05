@@ -12,7 +12,7 @@ using drinking_be.Models;
 namespace drinking_be.Migrations
 {
     [DbContext(typeof(DBDrinkContext))]
-    [Migration("20251205125925_FinalPostgresDB")]
+    [Migration("20251205180811_FinalPostgresDB")]
     partial class FinalPostgresDB
     {
         /// <inheritdoc />
