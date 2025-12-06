@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace drinking_be.Migrations
 {
     /// <inheritdoc />
-    public partial class FinalSchemaFix : Migration
+    public partial class FinalDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
