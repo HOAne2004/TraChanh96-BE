@@ -845,7 +845,9 @@ public partial class DBDrinkContext : DbContext
             entity.Property(e => e.SortOrder)
                 .HasDefaultValue((byte)0)
                 .HasColumnName("sort_order");
-
+            entity.Property(e => e.OpenDate)
+                .HasColumnType("timestamp without time zone") // Hoặc "date" nếu chỉ cần ngày
+                .HasColumnName("open_date");
             entity.HasOne(d => d.Brand).WithMany(p => p.Stores)
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

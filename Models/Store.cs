@@ -23,6 +23,8 @@ public partial class Store
 
     public double? Longitude { get; set; }
 
+    public DateTime? OpenDate { get; set; }
+
     public TimeSpan? OpenTime { get; set; }
 
     public TimeSpan? CloseTime { get; set; }

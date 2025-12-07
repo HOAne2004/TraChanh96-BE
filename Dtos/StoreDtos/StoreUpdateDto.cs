@@ -25,6 +25,8 @@ namespace drinking_be.Dtos.StoreDtos
         // Tọa độ bản đồ
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        // Ngày khai trương (Nhận format chuỗi "yyyy-MM-dd" từ JSON)
+        public DateTime? OpenDate { get; set; }
 
         // Giờ mở cửa (Nhận format chuỗi "HH:mm:ss" từ JSON)
         // Ví dụ: "08:00:00"

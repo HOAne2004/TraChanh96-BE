@@ -21,6 +21,7 @@ namespace drinking_be.Dtos.StoreDtos
 
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public DateTime? OpenDate { get; set; } // ⭐️ Ngày khai trương (Mới)
 
         [Required]
         public TimeSpan OpenTime { get; set; } // Sử dụng TimeSpan cho giờ mở cửa

@@ -13,6 +13,7 @@ namespace drinking_be.Dtos.StoreDtos
         public string? ImageUrl { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public DateTime? OpenDate { get; set; } // ⭐️ Ngày khai trương (Mới)
         public TimeSpan? OpenTime { get; set; }
         public TimeSpan? CloseTime { get; set; }
         public bool IsActive { get; set; }
