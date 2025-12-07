@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace drinking_be.Migrations
 {
     /// <inheritdoc />
-    public partial class FinalDB : Migration
+    public partial class AddOpenDateToStoreFinal : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -225,6 +225,7 @@ namespace drinking_be.Migrations
                     address = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     latitude = table.Column<double>(type: "double precision", nullable: true),
                     longitude = table.Column<double>(type: "double precision", nullable: true),
+                    open_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     open_time = table.Column<TimeSpan>(type: "interval", nullable: true),
                     close_time = table.Column<TimeSpan>(type: "interval", nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),

@@ -12,8 +12,8 @@ using drinking_be.Models;
 namespace drinking_be.Migrations
 {
     [DbContext(typeof(DBDrinkContext))]
-    [Migration("20251207180136_AddOpenDateToStore")]
-    partial class AddOpenDateToStore
+    [Migration("20251207191406_AddOpenDateToStoreFinal")]
+    partial class AddOpenDateToStoreFinal
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
