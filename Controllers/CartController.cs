@@ -22,12 +22,34 @@ namespace drinking_be.Controllers
         // --- Helper Function ---
         private int GetUserIdFromToken()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (int.TryParse(userIdString, out int userId))
+            try
             {
+                var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
+                // Kiểm tra null hoặc empty
+                if (string.IsNullOrWhiteSpace(userIdString))
+                {
+                    throw new UnauthorizedAccessException("Token không chứa User ID.");
+                }
+                
+                // Thử parse sang int
+                if (!int.TryParse(userIdString, out int userId))
+                {
+                    throw new UnauthorizedAccessException("User ID không hợp lệ trong token.");
+                }
+                
                 return userId;
             }
-            throw new UnauthorizedAccessException("User ID không hợp lệ trong token.");
+            catch (UnauthorizedAccessException)
+            {
+                // Re-throw để controller có thể bắt và trả về 401
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Xử lý các lỗi khác (ví dụ: User claims không tồn tại)
+                throw new UnauthorizedAccessException("Không thể xác thực người dùng từ token.", ex);
+            }
         }
 
         /// <summary>
@@ -55,6 +77,7 @@ namespace drinking_be.Controllers
         [HttpPost("add-item")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> AddItemToCart([FromBody] CartItemCreateDto itemDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -64,6 +87,10 @@ namespace drinking_be.Controllers
                 var userId = GetUserIdFromToken();
                 var cart = await _cartService.AddItemToCartAsync(userId, itemDto);
                 return Ok(cart);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
@@ -77,6 +104,7 @@ namespace drinking_be.Controllers
         /// <param name="cartItemId">ID của CartItem (món chính)</param>
         [HttpDelete("remove-item/{cartItemId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> RemoveItemFromCart(long cartItemId)
         {
@@ -85,6 +113,10 @@ namespace drinking_be.Controllers
                 var userId = GetUserIdFromToken();
                 var cart = await _cartService.RemoveItemFromCartAsync(userId, cartItemId);
                 return Ok(cart);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
@@ -127,6 +159,7 @@ namespace drinking_be.Controllers
         [HttpPut("update-item")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateItemQuantity([FromBody] CartItemUpdateDto updateDto)
         {
@@ -137,6 +170,10 @@ namespace drinking_be.Controllers
                 var userId = GetUserIdFromToken();
                 var cart = await _cartService.UpdateItemQuantityAsync(userId, updateDto);
                 return Ok(cart);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
             }
             catch (Exception ex)
             {
