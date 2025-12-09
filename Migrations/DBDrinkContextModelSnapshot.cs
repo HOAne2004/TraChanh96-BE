@@ -1361,6 +1361,10 @@ namespace drinking_be.Migrations
                         .HasColumnName("public_id")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<decimal?>("ShippingFee")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("shipping_fee");
+
                     b.Property<string>("Slug")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")

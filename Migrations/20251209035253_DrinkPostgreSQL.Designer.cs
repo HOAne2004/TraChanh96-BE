@@ -12,8 +12,8 @@ using drinking_be.Models;
 namespace drinking_be.Migrations
 {
     [DbContext(typeof(DBDrinkContext))]
-    [Migration("20251207191406_AddOpenDateToStoreFinal")]
-    partial class AddOpenDateToStoreFinal
+    [Migration("20251209035253_DrinkPostgreSQL")]
+    partial class DrinkPostgreSQL
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1363,6 +1363,10 @@ namespace drinking_be.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("public_id")
                         .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<decimal?>("ShippingFee")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("shipping_fee");
 
                     b.Property<string>("Slug")
                         .HasMaxLength(200)

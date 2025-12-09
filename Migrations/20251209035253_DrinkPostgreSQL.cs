@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace drinking_be.Migrations
 {
     /// <inheritdoc />
-    public partial class AddOpenDateToStoreFinal : Migration
+    public partial class DrinkPostgreSQL : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -228,6 +228,7 @@ namespace drinking_be.Migrations
                     open_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     open_time = table.Column<TimeSpan>(type: "interval", nullable: true),
                     close_time = table.Column<TimeSpan>(type: "interval", nullable: true),
+                    shipping_fee = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: true, defaultValue: true),
                     sort_order = table.Column<byte>(type: "smallint", nullable: true, defaultValue: (byte)0),
                     map_verified = table.Column<bool>(type: "boolean", nullable: true, defaultValue: false),

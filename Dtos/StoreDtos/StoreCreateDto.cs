@@ -29,6 +29,8 @@ namespace drinking_be.Dtos.StoreDtos
         [Required]
         public TimeSpan CloseTime { get; set; } // Sử dụng TimeSpan cho giờ đóng cửa
 
+        public decimal? ShippingFee { get; set; }
+
         public bool IsActive { get; set; } = true; // Mặc định là Active
     }
 }

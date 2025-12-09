@@ -848,6 +848,9 @@ public partial class DBDrinkContext : DbContext
             entity.Property(e => e.OpenDate)
                 .HasColumnType("timestamp without time zone") // Hoặc "date" nếu chỉ cần ngày
                 .HasColumnName("open_date");
+            entity.Property(e => e.ShippingFee)
+                .HasColumnType("decimal(18, 2)") // Kiểu decimal với độ chính xác 18, 2
+                .HasColumnName("shipping_fee");
             entity.HasOne(d => d.Brand).WithMany(p => p.Stores)
                 .HasForeignKey(d => d.BrandId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

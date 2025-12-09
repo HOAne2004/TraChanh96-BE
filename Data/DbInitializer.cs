@@ -192,8 +192,8 @@ namespace drinking_be.Data
                 var brand = await context.Brands.FirstOrDefaultAsync(b => b.Name == "Trà Chanh 96");
                 if (brand != null) {
                      context.Stores.AddRange(
-                        new Store { Name = "Trà Chanh 96 - Cầu Giấy", Slug="tc-cau-giay", Address = "123 Cầu Giấy, Hà Nội", BrandId = brand.Id, OpenDate = new DateTime(2019, 11, 19), OpenTime = new TimeSpan(8,0,0), CloseTime = new TimeSpan(22,0,0), ImageUrl="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=60" },
-                        new Store { Name = "Trà Chanh 96 - Đống Đa", Slug="tc-dong-da", Address = "456 Xã Đàn, Hà Nội", BrandId = brand.Id, OpenDate = new DateTime(2021, 06,07), OpenTime = new TimeSpan(8,0,0), CloseTime = new TimeSpan(23,0,0), ImageUrl="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=500&q=60" }
+                        new Store { Name = "Trà Chanh 96 - Cầu Giấy", Slug="tc-cau-giay", Address = "123 Cầu Giấy, Hà Nội", BrandId = brand.Id, OpenDate = new DateTime(2019, 11, 19), OpenTime = new TimeSpan(8,0,0), CloseTime = new TimeSpan(22,0,0), ImageUrl="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=60", ShippingFee=10000 },
+                        new Store { Name = "Trà Chanh 96 - Đống Đa", Slug="tc-dong-da", Address = "456 Xã Đàn, Hà Nội", BrandId = brand.Id, OpenDate = new DateTime(2021, 06,07), OpenTime = new TimeSpan(8,0,0), CloseTime = new TimeSpan(23,0,0), ImageUrl="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?auto=format&fit=crop&w=500&q=60", ShippingFee = 15000 }
                      );
                      await context.SaveChangesAsync();
                  }

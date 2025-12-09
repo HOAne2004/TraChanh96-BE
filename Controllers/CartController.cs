@@ -1,184 +1,184 @@
-﻿// Controllers/CartController.cs
-using drinking_be.Dtos.CartDtos;
-using drinking_be.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+﻿    // Controllers/CartController.cs
+    using drinking_be.Dtos.CartDtos;
+    using drinking_be.Interfaces;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using System.Security.Claims;
 
-namespace drinking_be.Controllers
-{
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize] // ⭐️ Yêu cầu đăng nhập cho toàn bộ giỏ hàng
-    public class CartController : ControllerBase
+    namespace drinking_be.Controllers
     {
-        private readonly ICartService _cartService;
-
-        public CartController(ICartService cartService)
+        [Route("api/[controller]")]
+        [ApiController]
+        [Authorize] // ⭐️ Yêu cầu đăng nhập cho toàn bộ giỏ hàng
+        public class CartController : ControllerBase
         {
-            _cartService = cartService;
-        }
+            private readonly ICartService _cartService;
 
-        // --- Helper Function ---
-        private int GetUserIdFromToken()
-        {
-            try
+            public CartController(ICartService cartService)
             {
-                var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                
-                // Kiểm tra null hoặc empty
-                if (string.IsNullOrWhiteSpace(userIdString))
+                _cartService = cartService;
+            }
+
+            // --- Helper Function ---
+            private int GetUserIdFromToken()
+            {
+                try
                 {
-                    throw new UnauthorizedAccessException("Token không chứa User ID.");
+                    var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    
+                    // Kiểm tra null hoặc empty
+                    if (string.IsNullOrWhiteSpace(userIdString))
+                    {
+                        throw new UnauthorizedAccessException("Token không chứa User ID.");
+                    }
+                    
+                    // Thử parse sang int
+                    if (!int.TryParse(userIdString, out int userId))
+                    {
+                        throw new UnauthorizedAccessException("User ID không hợp lệ trong token.");
+                    }
+                    
+                    return userId;
                 }
-                
-                // Thử parse sang int
-                if (!int.TryParse(userIdString, out int userId))
+                catch (UnauthorizedAccessException)
                 {
-                    throw new UnauthorizedAccessException("User ID không hợp lệ trong token.");
+                    // Re-throw để controller có thể bắt và trả về 401
+                    throw;
                 }
-                
-                return userId;
+                catch (Exception ex)
+                {
+                    // Xử lý các lỗi khác (ví dụ: User claims không tồn tại)
+                    throw new UnauthorizedAccessException("Không thể xác thực người dùng từ token.", ex);
+                }
             }
-            catch (UnauthorizedAccessException)
-            {
-                // Re-throw để controller có thể bắt và trả về 401
-                throw;
-            }
-            catch (Exception ex)
-            {
-                // Xử lý các lỗi khác (ví dụ: User claims không tồn tại)
-                throw new UnauthorizedAccessException("Không thể xác thực người dùng từ token.", ex);
-            }
-        }
 
-        /// <summary>
-        /// Lấy giỏ hàng hiện tại của người dùng.
-        /// </summary>
-        [HttpGet("me")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
-        public async Task<IActionResult> GetMyCart()
-        {
-            try
+            /// <summary>
+            /// Lấy giỏ hàng hiện tại của người dùng.
+            /// </summary>
+            [HttpGet("me")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
+            public async Task<IActionResult> GetMyCart()
             {
-                var userId = GetUserIdFromToken();
-                var cart = await _cartService.GetMyCartAsync(userId);
-                return Ok(cart);
+                try
+                {
+                    var userId = GetUserIdFromToken();
+                    var cart = await _cartService.GetMyCartAsync(userId);
+                    return Ok(cart);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    return Unauthorized(ex.Message);
+                }
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-        }
 
-        /// <summary>
-        /// Thêm một món hàng (và topping) vào giỏ.
-        /// </summary>
-        [HttpPost("add-item")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> AddItemToCart([FromBody] CartItemCreateDto itemDto)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            /// <summary>
+            /// Thêm một món hàng (và topping) vào giỏ.
+            /// </summary>
+            [HttpPost("add-item")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
+            [ProducesResponseType(StatusCodes.Status400BadRequest)]
+            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+            public async Task<IActionResult> AddItemToCart([FromBody] CartItemCreateDto itemDto)
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            try
-            {
-                var userId = GetUserIdFromToken();
-                var cart = await _cartService.AddItemToCartAsync(userId, itemDto);
-                return Ok(cart);
+                try
+                {
+                    var userId = GetUserIdFromToken();
+                    var cart = await _cartService.AddItemToCartAsync(userId, itemDto);
+                    return Ok(cart);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    return Unauthorized(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message); // Ví dụ: Product/Size không hợp lệ
+                }
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message); // Ví dụ: Product/Size không hợp lệ
-            }
-        }
 
-        /// <summary>
-        /// Xóa một món hàng (và các topping kèm theo) khỏi giỏ.
-        /// </summary>
-        /// <param name="cartItemId">ID của CartItem (món chính)</param>
-        [HttpDelete("remove-item/{cartItemId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> RemoveItemFromCart(long cartItemId)
-        {
-            try
+            /// <summary>
+            /// Xóa một món hàng (và các topping kèm theo) khỏi giỏ.
+            /// </summary>
+            /// <param name="cartItemId">ID của CartItem (món chính)</param>
+            [HttpDelete("remove-item/{cartItemId}")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
+            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+            [ProducesResponseType(StatusCodes.Status404NotFound)]
+            public async Task<IActionResult> RemoveItemFromCart(long cartItemId)
             {
-                var userId = GetUserIdFromToken();
-                var cart = await _cartService.RemoveItemFromCartAsync(userId, cartItemId);
-                return Ok(cart);
+                try
+                {
+                    var userId = GetUserIdFromToken();
+                    var cart = await _cartService.RemoveItemFromCartAsync(userId, cartItemId);
+                    return Ok(cart);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    return Unauthorized(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    return NotFound(ex.Message); // Ví dụ: Item không tìm thấy
+                }
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message); // Ví dụ: Item không tìm thấy
-            }
-        }
 
-        /// <summary>
-        /// Xóa sạch tất cả các mục khỏi giỏ hàng của người dùng hiện tại.
-        /// </summary>
-        [HttpDelete("clear")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> ClearCart()
-        {
-            try
+            /// <summary>
+            /// Xóa sạch tất cả các mục khỏi giỏ hàng của người dùng hiện tại.
+            /// </summary>
+            [HttpDelete("clear")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
+            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+            public async Task<IActionResult> ClearCart()
             {
-                var userId = GetUserIdFromToken(); // Lấy User ID từ Token
+                try
+                {
+                    var userId = GetUserIdFromToken(); // Lấy User ID từ Token
 
-                // Gọi Service (Service này đã có logic ClearCartAsync)
-                await _cartService.ClearCartAsync(userId);
+                    // Gọi Service (Service này đã có logic ClearCartAsync)
+                    await _cartService.ClearCartAsync(userId);
 
-                // Trả về giỏ hàng mới (đã rỗng)
-                var newCart = await _cartService.GetMyCartAsync(userId);
-                return Ok(newCart);
+                    // Trả về giỏ hàng mới (đã rỗng)
+                    var newCart = await _cartService.GetMyCartAsync(userId);
+                    return Ok(newCart);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    return Unauthorized(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
             }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
 
-        /// <summary>
-        /// Cập nhật số lượng món hàng.
-        /// </summary>
-        [HttpPut("update-item")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateItemQuantity([FromBody] CartItemUpdateDto updateDto)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            /// <summary>
+            /// Cập nhật số lượng món hàng.
+            /// </summary>
+            [HttpPut("update-item")]
+            [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CartReadDto))]
+            [ProducesResponseType(StatusCodes.Status400BadRequest)]
+            [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+            [ProducesResponseType(StatusCodes.Status404NotFound)]
+            public async Task<IActionResult> UpdateItemQuantity([FromBody] CartItemUpdateDto updateDto)
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            try
-            {
-                var userId = GetUserIdFromToken();
-                var cart = await _cartService.UpdateItemQuantityAsync(userId, updateDto);
-                return Ok(cart);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
+                try
+                {
+                    var userId = GetUserIdFromToken();
+                    var cart = await _cartService.UpdateItemQuantityAsync(userId, updateDto);
+                    return Ok(cart);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    return Unauthorized(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
             }
         }
     }
-}

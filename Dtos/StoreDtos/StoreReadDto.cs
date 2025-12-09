@@ -17,6 +17,7 @@ namespace drinking_be.Dtos.StoreDtos
         public TimeSpan? OpenTime { get; set; }
         public TimeSpan? CloseTime { get; set; }
         public bool IsActive { get; set; }
+        public decimal? ShippingFee { get; set; }
 
         // Thêm thông tin Brand (nếu cần Eager Loading)
         public int BrandId { get; set; }

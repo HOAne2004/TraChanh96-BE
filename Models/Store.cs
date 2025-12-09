@@ -28,6 +28,8 @@ public partial class Store
     public TimeSpan? OpenTime { get; set; }
 
     public TimeSpan? CloseTime { get; set; }
+    
+    public decimal? ShippingFee { get; set; } 
 
     public bool? IsActive { get; set; }
 
