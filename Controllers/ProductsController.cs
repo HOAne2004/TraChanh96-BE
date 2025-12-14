@@ -1,11 +1,12 @@
 ﻿using drinking_be.Dtos.ProductDtos;
 using drinking_be.Interfaces.ProductInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -15,91 +16,58 @@ namespace drinking_be.Controllers
             _productService = productService;
         }
 
-        // GET: api/Product
+        // GET: api/products?search=tea&categorySlug=tra-sua&sort=price_asc
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<ProductReadDto>>> GetAllProducts(
-            // ⭐️ SỬA LẠI: Map tên tham số từ URL vào biến C#
-            [FromQuery(Name = "product_type")] string? productType
-        )
+        public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] string? categorySlug, [FromQuery] string? sort)
         {
-            try
-            {
-                var products = await _productService.GetAllProductsAsync(productType);
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                // ⭐️ QUAN TRỌNG: Trả về lỗi chi tiết để bạn xem trên trình duyệt
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
-            }
+            var products = await _productService.GetAllAsync(search, categorySlug, sort);
+            return Ok(products);
         }
 
-        // GET: api/Product/5
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ProductReadDto>> GetProductById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var product = await _productService.GetProductById(id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            var product = await _productService.GetByIdAsync(id);
+            if (product == null) return NotFound();
             return Ok(product);
         }
 
-        // POST: api/Product
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ProductReadDto>> CreateProduct([FromBody] ProductCreateDto productDto)
+        [HttpGet("slug/{slug}")]
+        public async Task<IActionResult> GetBySlug(string slug)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var createdProduct = await _productService.CreateProduct(productDto);
-
-            return CreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
+            var product = await _productService.GetBySlugAsync(slug);
+            if (product == null) return NotFound();
+            return Ok(product);
         }
 
-        // PUT: api/Product/5
-        [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ProductReadDto>> UpdateProduct(int id, [FromBody] ProductUpdateDto productDto)
+        // POST: api/products (Chỉ Admin/Manager)
+        [HttpPost]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Create([FromBody] ProductCreateDto createDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            try
-            {
-                var updatedProduct = await _productService.UpdateProduct(id, productDto);
-                if (updatedProduct == null) return NotFound();
-                return Ok(updatedProduct);
-            }
-            catch (Exception ex)
-            {
-                // Bắt lỗi logic (ví dụ ID option không tồn tại)
-                return BadRequest(new { message = ex.Message });
-            }
+            var newProduct = await _productService.CreateAsync(createDto);
+            return CreatedAtAction(nameof(GetById), new { id = newProduct.Id }, newProduct);
         }
 
-        // DELETE: api/Product/5
-        [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteProduct(int id)
+        // PUT: api/products/{id}
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Update(int id, [FromBody] ProductUpdateDto updateDto)
         {
-            var isDeleted = await _productService.DeleteProduct(id);
+            var updatedProduct = await _productService.UpdateAsync(id, updateDto);
+            if (updatedProduct == null) return NotFound();
+            return Ok(updatedProduct);
+        }
 
-            if (!isDeleted)
-            {
-                return NotFound();
-            }
-
+        // DELETE: api/products/{id}
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _productService.DeleteAsync(id);
+            if (!result) return NotFound();
             return NoContent();
         }
     }

@@ -1,14 +1,26 @@
-﻿namespace drinking_be.Dtos.CategoryDtos
+﻿// File: Dtos/CategoryDtos/CategoryReadDto.cs
+
+using drinking_be.Enums;
+using System.Collections.Generic;
+
+namespace drinking_be.Dtos.CategoryDtos
 {
     public class CategoryReadDto
     {
         public int Id { get; set; }
         public int? ParentId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Slug { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
+        public string Name { get; set; } = null!;
+        public string Slug { get; set; } = null!; // Luôn có Slug
 
-        // ⭐️ Cho phép hiển thị cấu trúc cây (Nested Categories)
-        public List<CategoryReadDto> Children { get; set; } = new List<CategoryReadDto>();
+        public byte? SortOrder { get; set; }
+
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+
+        // Trạng thái dưới dạng string/label
+        public string Status { get; set; } = null!;
+
+        // ⭐ Quan hệ Đệ quy: Cho phép hiển thị danh sách danh mục con
+        public ICollection<CategoryReadDto>? Children { get; set; }
     }
 }

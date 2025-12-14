@@ -1,9 +1,11 @@
-﻿using System;
+﻿using drinking_be.Enums;
+using drinking_be.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace drinking_be.Models;
 
-public partial class VoucherTemplate
+public partial class VoucherTemplate : ISoftDelete
 {
     public int Id { get; set; }
 
@@ -25,7 +27,7 @@ public partial class VoucherTemplate
 
     public int? UsedCount { get; set; }
 
-    public bool? IsActive { get; set; }
+    public PublicStatusEnum Status { get; set; } = PublicStatusEnum.Active;
 
     public byte? UsageLimitPerUser { get; set; }
 
@@ -36,6 +38,8 @@ public partial class VoucherTemplate
     public DateTime EndDate { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 
     public virtual MembershipLevel? Level { get; set; }
 

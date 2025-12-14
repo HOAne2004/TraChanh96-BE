@@ -1,9 +1,11 @@
-﻿using System;
+﻿using drinking_be.Enums;
+using drinking_be.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace drinking_be.Models;
 
-public partial class Reservation
+public partial class Reservation : ISoftDelete
 {
     public long Id { get; set; }
 
@@ -23,7 +25,7 @@ public partial class Reservation
 
     public string? Note { get; set; }
 
-    public byte? Status { get; set; }
+    public ReservationStatusEnum Status { get; set; } = ReservationStatusEnum.Pending;
 
     public int? AssignedTableId { get; set; }
     public decimal DepositAmount { get; set; }
@@ -32,6 +34,7 @@ public partial class Reservation
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 
     public virtual ShopTable? AssignedTable { get; set; }
 

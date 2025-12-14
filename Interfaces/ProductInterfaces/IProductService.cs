@@ -1,16 +1,17 @@
 ﻿using drinking_be.Dtos.ProductDtos;
-using drinking_be.Models;
 
 namespace drinking_be.Interfaces.ProductInterfaces
 {
     public interface IProductService
     {
-        // CRUD cơ bản
-        Task<IEnumerable<ProductReadDto>> GetAllProducts();
-        Task<IEnumerable<ProductReadDto>> GetAllProductsAsync(string? productType);
-        Task<ProductReadDto?> GetProductById(int id);
-        Task<ProductReadDto> CreateProduct(ProductCreateDto productDto);
-        Task<ProductReadDto?> UpdateProduct(int id, ProductUpdateDto productDto);
-        Task<bool> DeleteProduct(int id);
+        // Lấy danh sách có phân trang, lọc, tìm kiếm
+        Task<IEnumerable<ProductReadDto>> GetAllAsync(string? search, string? categorySlug, string? sort);
+
+        Task<ProductReadDto?> GetByIdAsync(int id);
+        Task<ProductReadDto?> GetBySlugAsync(string slug);
+
+        Task<ProductReadDto> CreateAsync(ProductCreateDto createDto);
+        Task<ProductReadDto?> UpdateAsync(int id, ProductUpdateDto updateDto);
+        Task<bool> DeleteAsync(int id);
     }
 }

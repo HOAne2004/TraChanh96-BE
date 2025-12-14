@@ -1,22 +1,26 @@
-﻿// Dtos/MembershipLevelDtos/MembershipLevelCreateDto.cs
+﻿// File: Dtos/MembershipLevelDtos/MembershipLevelCreateDto.cs
+
 using System.ComponentModel.DataAnnotations;
+using drinking_be.Enums;
 
 namespace drinking_be.Dtos.MembershipLevelDtos
 {
     public class MembershipLevelCreateDto
     {
-        [Required]
+        [Required(ErrorMessage = "Tên cấp độ không được để trống.")]
         [MaxLength(35)]
-        public string Name { get; set; } = string.Empty; // Đồng, Bạc, Vàng...
+        public string Name { get; set; } = string.Empty;
 
-        [Required]
-        [Range(0, (double)decimal.MaxValue)]
-        public decimal MinSpendRequired { get; set; } // Mức chi tiêu tối thiểu
+        [Required(ErrorMessage = "Chi tiêu tối thiểu không được để trống.")]
+        [Range(0, 1000000000, ErrorMessage = "Giá trị chi tiêu tối thiểu không hợp lệ.")]
+        public decimal MinSpendRequired { get; set; }
 
-        [Required]
-        [Range(1, 3650)] // 1 ngày đến 10 năm
-        public short DurationDays { get; set; } // Thời hạn duy trì cấp độ
+        [Required(ErrorMessage = "Thời hạn duy trì cấp độ (ngày) không được để trống.")]
+        [Range(1, 1000, ErrorMessage = "Thời hạn phải lớn hơn 0.")]
+        public short DurationDays { get; set; }
 
-        public string? Benefits { get; set; } // Mô tả quyền lợi (có thể là JSON)
+        public string? Benefits { get; set; }
+
+        public PublicStatusEnum Status { get; set; } = PublicStatusEnum.Active;
     }
 }

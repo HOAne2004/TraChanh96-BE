@@ -1,6 +1,6 @@
-﻿// Controllers/MembershipLevelController.cs
-using drinking_be.Dtos.MembershipLevelDtos;
-using drinking_be.Interfaces;
+﻿using drinking_be.Dtos.MembershipLevelDtos;
+using drinking_be.Interfaces.MarketingInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
@@ -16,13 +16,12 @@ namespace drinking_be.Controllers
             _levelService = levelService;
         }
 
-        // --- PUBLIC ENDPOINT (Khách hàng) ---
+        // --- PUBLIC ENDPOINT (Khách hàng xem để biết quyền lợi) ---
 
         /// <summary>
         /// Lấy danh sách tất cả các cấp độ thành viên.
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MembershipLevelReadDto>))]
         public async Task<IActionResult> GetAllLevels()
         {
             var levels = await _levelService.GetAllLevelsAsync();
@@ -30,39 +29,21 @@ namespace drinking_be.Controllers
         }
 
         // --- ADMIN ENDPOINTS ---
-        // (Giả định cần [Authorize(Roles = "Admin")])
 
-        /// <summary>
-        /// [ADMIN] Lấy chi tiết cấp độ theo ID.
-        /// </summary>
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MembershipLevelReadDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetLevelById(byte id)
         {
-            try
-            {
-                var level = await _levelService.GetLevelByIdAsync(id);
-                return Ok(level);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var level = await _levelService.GetByIdAsync(id);
+            if (level == null) return NotFound();
+            return Ok(level);
         }
 
-        /// <summary>
-        /// [ADMIN] Tạo cấp độ thành viên mới.
-        /// </summary>
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MembershipLevelReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateLevel([FromBody] MembershipLevelCreateDto levelDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
@@ -71,37 +52,29 @@ namespace drinking_be.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message); // Ví dụ: Tên trùng lặp
+                return BadRequest(new { message = ex.Message });
             }
         }
 
-        /// <summary>
-        /// [ADMIN] Cập nhật cấp độ thành viên.
-        /// </summary>
         [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MembershipLevelReadDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateLevel(byte id, [FromBody] MembershipLevelCreateDto levelDto)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateLevel(byte id, [FromBody] MembershipLevelUpdateDto levelDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            try
-            {
-                var updatedLevel = await _levelService.UpdateLevelAsync(id, levelDto);
-                return Ok(updatedLevel);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var updatedLevel = await _levelService.UpdateLevelAsync(id, levelDto);
+            if (updatedLevel == null) return NotFound();
+
+            return Ok(updatedLevel);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteLevel(byte id)
+        {
+            var result = await _levelService.DeleteLevelAsync(id);
+            if (!result) return NotFound();
+            return NoContent();
         }
     }
 }

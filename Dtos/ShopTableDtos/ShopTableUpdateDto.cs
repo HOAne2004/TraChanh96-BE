@@ -1,21 +1,24 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// File: Dtos/ShopTableDtos/ShopTableUpdateDto.cs
+
+using System.ComponentModel.DataAnnotations;
+using drinking_be.Enums;
 
 namespace drinking_be.Dtos.ShopTableDtos
 {
     public class ShopTableUpdateDto
     {
-        [Required(ErrorMessage = "Tên bàn không được để trống")]
         [MaxLength(50)]
-        public string Name { get; set; } = string.Empty;
-        
-        [Required]
-        [Range(1, 50, ErrorMessage = "Sức chứa phải từ 1 đến 50 người")]
-        public byte Capacity { get; set; }
+        public string? Name { get; set; }
+        public int? RoomId { get; set; }
 
-        public bool CanBeMerged { get; set; }
+        [Range(1, 20)]
+        public byte? Capacity { get; set; }
 
-        public int? MergedWithTableId { get; set; } // Cho phép cập nhật ghép bàn ở đây nếu cần
+        public bool? CanBeMerged { get; set; }
 
-        public bool IsActive { get; set; }
+        // Cập nhật bàn mẹ (chỉ dùng khi thay đổi cấu hình gộp bàn)
+        public int? MergedWithTableId { get; set; }
+
+        public PublicStatusEnum? Status { get; set; }
     }
 }

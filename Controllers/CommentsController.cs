@@ -1,6 +1,5 @@
-﻿// Controllers/CommentController.cs
-using drinking_be.Dtos.CommentDtos;
-using drinking_be.Interfaces;
+﻿using drinking_be.Dtos.CommentDtos;
+using drinking_be.Interfaces.FeedbackInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -18,68 +17,77 @@ namespace drinking_be.Controllers
             _commentService = commentService;
         }
 
-        // --- Helper Function ---
-        private int GetUserIdFromToken()
+        // --- Helper: GetUserId (Phiên bản chuẩn) ---
+        private int GetUserId()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (int.TryParse(userIdString, out int userId))
+            // 1. Tìm theo nameid (chuẩn JWT)
+            var claim = User.FindFirst("nameid") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+
+            // 2. Fallback sang sub
+            if (claim == null) claim = User.FindFirst("sub");
+
+            if (claim != null && int.TryParse(claim.Value, out int userId))
             {
                 return userId;
             }
-            throw new UnauthorizedAccessException("User ID không hợp lệ trong token.");
+
+            throw new UnauthorizedAccessException("Token không hợp lệ.");
         }
 
-        // --- PUBLIC ENDPOINT ---
+        // --- PUBLIC ENDPOINTS ---
 
         /// <summary>
-        /// Lấy tất cả bình luận cho một bài viết (theo News ID).
+        /// Lấy danh sách bình luận của một bài viết (Chỉ hiện Approved).
         /// </summary>
         [HttpGet("news/{newsId}")]
-        [AllowAnonymous] // Cho phép tất cả mọi người xem
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<CommentReadDto>))]
-        public async Task<IActionResult> GetCommentsForNews(int newsId)
+        [AllowAnonymous]
+        public async Task<IActionResult> GetCommentsByNews(int newsId)
         {
             var comments = await _commentService.GetCommentsByNewsIdAsync(newsId);
             return Ok(comments);
         }
 
-        // --- SECURE ENDPOINT (USER) ---
+        // --- USER ENDPOINTS ---
 
         /// <summary>
-        /// [USER] Gửi bình luận cho một bài viết.
+        /// [USER] Gửi bình luận mới.
         /// </summary>
         [HttpPost]
-        [Authorize] // ⭐️ Yêu cầu người dùng phải đăng nhập
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(CommentReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)] // News không tồn tại
-        public async Task<IActionResult> CreateComment([FromBody] CommentCreateDto commentDto)
+        [Authorize]
+        public async Task<IActionResult> Create([FromBody] CommentCreateDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                var userId = GetUserIdFromToken();
-                var createdComment = await _commentService.CreateCommentAsync(commentDto, userId);
+                var userId = GetUserId();
+                var result = await _commentService.CreateCommentAsync(userId, dto);
 
-                return StatusCode(StatusCodes.Status201Created, createdComment);
+                // Trả về 201 Created kèm thông báo hoặc object
+                return CreatedAtAction(nameof(GetCommentsByNews), new { newsId = dto.NewsId }, result);
             }
-            catch (UnauthorizedAccessException ex)
+            catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+            catch (UnauthorizedAccessException ex) { return Unauthorized(ex.Message); }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
+        /// <summary>
+        /// [USER] Xóa bình luận của chính mình.
+        /// </summary>
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
             {
-                return Unauthorized(ex.Message);
+                var userId = GetUserId();
+                var success = await _commentService.DeleteCommentAsync(id, userId);
+
+                if (!success) return NotFound("Bình luận không tồn tại hoặc bạn không có quyền xóa.");
+
+                return NoContent();
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message); // Bài viết không tồn tại
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message); // Lỗi nghiệp vụ (ví dụ: ParentId không hợp lệ)
-            }
+            catch (UnauthorizedAccessException ex) { return Unauthorized(ex.Message); }
         }
     }
 }

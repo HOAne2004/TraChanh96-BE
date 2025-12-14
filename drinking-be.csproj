@@ -25,4 +25,8 @@
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Interfaces\MarketingInterfaces\IPolicyService.cs" />
+  </ItemGroup>
+
 </Project>

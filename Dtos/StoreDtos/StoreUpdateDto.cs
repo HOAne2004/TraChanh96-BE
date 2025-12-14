@@ -1,44 +1,33 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// File: Dtos/StoreDtos/StoreUpdateDto.cs
+
+using System.ComponentModel.DataAnnotations;
+using drinking_be.Enums;
 
 namespace drinking_be.Dtos.StoreDtos
 {
     public class StoreUpdateDto
     {
-        [Required(ErrorMessage = "Tên cửa hàng không được để trống")]
         [MaxLength(200)]
-        public string Name { get; set; } = string.Empty;
+        public string? Name { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn thương hiệu")]
-        public int BrandId { get; set; }
-
-        [MaxLength(200)]
-        // Cho phép sửa Slug (URL), nếu null thì giữ nguyên
+        // Có thể thay đổi Slug
         public string? Slug { get; set; }
 
-        [MaxLength(255)]
+        // Nếu thay đổi, địa chỉ mới phải tồn tại
+        public long? AddressId { get; set; }
+
         public string? ImageUrl { get; set; }
 
-        [Required(ErrorMessage = "Địa chỉ không được để trống")]
-        [MaxLength(200)]
-        public string Address { get; set; } = string.Empty;
-
-        // Tọa độ bản đồ
-        public double? Latitude { get; set; }
-        public double? Longitude { get; set; }
-        // Ngày khai trương (Nhận format chuỗi "yyyy-MM-dd" từ JSON)
-        public DateTime? OpenDate { get; set; }
-
-        // Giờ mở cửa (Nhận format chuỗi "HH:mm:ss" từ JSON)
-        // Ví dụ: "08:00:00"
         public TimeSpan? OpenTime { get; set; }
         public TimeSpan? CloseTime { get; set; }
+        public DateTime? OpenDate { get; set; }
 
-        public decimal? ShippingFee { get; set; }
+        public decimal? ShippingFeeFixed { get; set; }
+        public decimal? ShippingFeePerKm { get; set; }
 
-        public bool IsActive { get; set; } = true;
+        public StoreStatusEnum? Status { get; set; }
 
-        public byte SortOrder { get; set; } = 0;
-
-        public bool MapVerified { get; set; } = false;
+        public byte? SortOrder { get; set; }
+        public bool? MapVerified { get; set; }
     }
 }

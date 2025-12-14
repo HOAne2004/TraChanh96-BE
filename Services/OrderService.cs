@@ -1,255 +1,272 @@
-﻿// Services/OrderService.cs
+﻿using AutoMapper;
 using drinking_be.Dtos.OrderDtos;
-using drinking_be.Models;
-using drinking_be.Enums; // Giả định có OrderStatusEnum
-using AutoMapper;
-using System.Collections.Generic;
-using drinking_be.Interfaces.ProductInterfaces;
-using drinking_be.Interfaces.OptionInterfaces;
+using drinking_be.Dtos.OrderItemDtos; // Import DTOs con
+using drinking_be.Enums;
+using drinking_be.Interfaces;
 using drinking_be.Interfaces.OrderInterfaces;
+using drinking_be.Models;
+using drinking_be.Utils; // Để dùng GetDescription()
+using Microsoft.EntityFrameworkCore;
 
 namespace drinking_be.Services
 {
     public class OrderService : IOrderService
     {
-        // Inject các Repository cần thiết
-        private readonly IOrderRepository _orderRepo;
-        private readonly IProductRepository _productRepo;
-        private readonly ISizeRepository _sizeRepo; // Cần để tra cứu giá size
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly ISugarLevelRepository _sugarRepo;
-        private readonly IIceLevelRepository _iceRepo;
 
-        public OrderService(IOrderRepository orderRepo,
-                            IProductRepository productRepo,
-                            ISizeRepository sizeRepo,
-                            ISugarLevelRepository sugarRepo, // Thêm
-                    IIceLevelRepository iceRepo,
-                            IMapper mapper)
+        public OrderService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _orderRepo = orderRepo;
-            _productRepo = productRepo;
-            _sizeRepo = sizeRepo;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _sugarRepo = sugarRepo;
-            _iceRepo = iceRepo;
         }
 
-        public async Task<OrderReadDto> CreateOrderAsync(OrderCreateDto orderDto)
+        public async Task<OrderReadDto> CreateOrderAsync(int userId, OrderCreateDto dto)
         {
-            // --- 1. Lấy dữ liệu Sản phẩm & Tùy chọn ---
+            var productRepo = _unitOfWork.Repository<Product>();
+            var sizeRepo = _unitOfWork.Repository<Size>();
+            var addressRepo = _unitOfWork.Repository<Address>();
+            var orderRepo = _unitOfWork.Repository<Order>();
 
-            // 1.1. Lấy tất cả ID Sản phẩm (Món chính & Topping)
-            var productIds = orderDto.Items.Select(i => i.ProductId)
-                                           .Union(orderDto.Items.SelectMany(i => i.Toppings).Select(t => t.ToppingId))
-                                           .Distinct()
-                                           .ToList();
+            // 1. Validate Địa chỉ
+            var address = await addressRepo.GetFirstOrDefaultAsync(a => a.Id == dto.DeliveryAddressId && a.UserId == userId);
+            if (address == null) throw new Exception("Địa chỉ giao hàng không hợp lệ.");
 
-            // 1.2. Lấy tất cả ID Size, sugar, ice 
-            var sizeIds = orderDto.Items.Select(i => i.SizeId).Distinct().ToList();
+            // 2. Lấy dữ liệu Sản phẩm & Size
+            var allProductIds = dto.Items.Select(i => i.ProductId)
+                .Concat(dto.Items.SelectMany(i => i.Toppings).Select(t => t.ProductId))
+                .Distinct().ToList();
 
-            var sugarIds = orderDto.Items.Select(i => i.SugarLevelId).Distinct().ToList();
-            var iceIds = orderDto.Items.Select(i => i.IceLevelId).Distinct().ToList();
-            var allSugars = (await _sugarRepo.GetSugarLevelsByIdsAsync(sugarIds)).ToDictionary(s => s.Id);
-            var allIces = (await _iceRepo.GetIceLevelsByIdsAsync(iceIds)).ToDictionary(i => i.Id);
+            var products = await productRepo.GetAllAsync(p => allProductIds.Contains(p.Id));
+            var productMap = products.ToDictionary(p => p.Id);
 
-            // 1.3. Tra cứu dữ liệu gốc từ DB
-            var allProducts = (await _productRepo.GetProductsByIdsAsync(productIds)).ToDictionary(p => p.Id);
-            var allSizes = (await _sizeRepo.GetSizesByIdsAsync(sizeIds)).ToDictionary(s => s.Id);
+            var sizeIds = dto.Items.Where(i => i.SizeId.HasValue).Select(i => i.SizeId!.Value).Distinct().ToList();
+            var sizes = await sizeRepo.GetAllAsync(s => sizeIds.Contains(s.Id));
+            var sizeMap = sizes.ToDictionary(s => s.Id);
 
-            // TODO: Bổ sung logic kiểm tra tồn kho (nếu có)
-            if (allProducts.Count != productIds.Count || allSizes.Count != sizeIds.Count)
-            {
-                throw new Exception("Thông tin một hoặc nhiều sản phẩm/size không hợp lệ hoặc không tồn tại.");
-            }
-
-            // --- 2. Ánh xạ và Tính toán Giá (Logic nghiệp vụ cốt lõi) ---
-
-            // Khởi tạo Order Entity
+            // 3. Khởi tạo Order
             var order = new Order
             {
-                UserId = orderDto.UserId,
-                StoreId = orderDto.StoreId,
-                PaymentMethodId = orderDto.PaymentMethodId,
-                DeliveryAddress = orderDto.DeliveryAddress,
-                CustomerName = orderDto.CustomerName,
-                CustomerPhone = orderDto.CustomerPhone,
+                UserId = userId,
+                StoreId = dto.StoreId,
+                PaymentMethodId = dto.PaymentMethodId,
+                DeliveryAddressId = dto.DeliveryAddressId,
+                UserNotes = dto.UserNotes,
+                VoucherCodeUsed = dto.VoucherCodeUsed,
+
+                OrderCode = $"ORD-{DateTime.UtcNow.Ticks}",
                 OrderDate = DateTime.UtcNow,
-                Status = (byte)OrderStatusEnum.New, // Mặc định là đơn hàng mới
-                VoucherCodeUsed = orderDto.VoucherCodeUsed
-                // Các trường tổng tiền sẽ được tính sau
+                Status = OrderStatusEnum.New,
+                CreatedAt = DateTime.UtcNow, // Thêm CreatedAt nếu model có
+
+                ShippingFee = 0,
+                DiscountAmount = 0
             };
 
-            var allOrderItems = new List<OrderItem>();
-            decimal subTotalAmount = 0; // Tổng tiền trước khi áp dụng phí/chiết khấu
+            decimal subTotal = 0;
 
-            // Xử lý từng Món chính trong đơn hàng
-            foreach (var itemDto in orderDto.Items)
+            // 4. Tạo Order Items & Tính tiền
+            foreach (var itemDto in dto.Items)
             {
-                var product = allProducts[itemDto.ProductId];
-                var size = allSizes[itemDto.SizeId];
+                if (!productMap.ContainsKey(itemDto.ProductId)) throw new Exception($"Sản phẩm ID {itemDto.ProductId} không tồn tại.");
 
-                // 2.1. Tính toán giá cho Món chính (Beverage)
+                var product = productMap[itemDto.ProductId];
+
                 decimal basePrice = product.BasePrice;
-                decimal sizeModifier = size.PriceModifier ?? 0m; // Sử dụng 0m để chỉ định Decimal
+                decimal sizeModifier = 0;
 
-                // Final Price 1 đơn vị = Giá cơ bản + Giá phụ thu Size
+                if (itemDto.SizeId.HasValue)
+                {
+                    if (!sizeMap.ContainsKey(itemDto.SizeId.Value)) throw new Exception($"Size ID {itemDto.SizeId} không hợp lệ.");
+                    sizeModifier = sizeMap[itemDto.SizeId.Value].PriceModifier ?? 0;
+                }
+
                 decimal itemUnitPrice = basePrice + sizeModifier;
-                decimal itemTotalPrice = itemUnitPrice * itemDto.Quantity;
+                decimal itemFinalPrice = itemUnitPrice * itemDto.Quantity;
 
-                // 2.2. Tạo OrderItem Entity cho Món chính
-                var mainOrderItem = new OrderItem
+                var orderItem = new OrderItem
                 {
                     ProductId = itemDto.ProductId,
                     Quantity = itemDto.Quantity,
                     BasePrice = basePrice,
-                    FinalPrice = itemTotalPrice,
-
+                    FinalPrice = itemFinalPrice,
                     SizeId = itemDto.SizeId,
-                    SugarLevelId = itemDto.SugarLevelId,
-                    IceLevelId = itemDto.IceLevelId,
-                    ParentItemId = null // Món chính
+                    Note = itemDto.Note,
+
+                    // ✅ FIX LỖI 1: Xử lý Enum không nullable
+                    // Nếu DTO có giá trị -> Ép kiểu về Enum
+                    // Nếu DTO null -> Lấy giá trị mặc định của Enum (S100/I100) hoặc giá trị đầu tiên
+                    SugarLevel = itemDto.SugarLevel.HasValue ? (SugarLevelEnum)itemDto.SugarLevel.Value : SugarLevelEnum.S100,
+                    IceLevel = itemDto.IceLevel.HasValue ? (IceLevelEnum)itemDto.IceLevel.Value : IceLevelEnum.I100,
                 };
 
-                allOrderItems.Add(mainOrderItem);
-                subTotalAmount += mainOrderItem.FinalPrice;
+                subTotal += itemFinalPrice;
 
-                // 2.3. Xử lý Topping (Order Items con)
-                foreach (var toppingDto in itemDto.Toppings)
+                // 5. Xử lý Topping
+                if (itemDto.Toppings != null && itemDto.Toppings.Any())
                 {
-                    var toppingProduct = allProducts[toppingDto.ToppingId];
-
-                    decimal toppingUnitPrice = toppingProduct.BasePrice;
-                    decimal toppingTotalPrice = toppingUnitPrice * toppingDto.Quantity;
-
-                    var toppingItem = new OrderItem
+                    foreach (var toppingDto in itemDto.Toppings)
                     {
-                        ProductId = toppingDto.ToppingId,
-                        Quantity = toppingDto.Quantity,
-                        BasePrice = toppingProduct.BasePrice,
-                        FinalPrice = toppingTotalPrice,
+                        if (!productMap.ContainsKey(toppingDto.ProductId)) continue;
+                        var toppingProduct = productMap[toppingDto.ProductId];
 
-                        // Liên kết với Món chính: EF Core sẽ tự gán ParentItemId
-                        ParentItem = mainOrderItem
-                    };
+                        int totalToppingQty = itemDto.Quantity * toppingDto.Quantity;
+                        decimal toppingFinalPrice = toppingProduct.BasePrice * totalToppingQty;
 
-                    allOrderItems.Add(toppingItem);
-                    subTotalAmount += toppingItem.FinalPrice;
+                        // ✅ FIX LỖI 2: Đổi tên InverseParent -> InverseParentItem (Theo Model của bạn)
+                        orderItem.InverseParentItem.Add(new OrderItem
+                        {
+                            ProductId = toppingDto.ProductId,
+                            Quantity = totalToppingQty,
+                            BasePrice = toppingProduct.BasePrice,
+                            FinalPrice = toppingFinalPrice,
+                            // Topping mặc định Sugar/Ice chuẩn
+                            SugarLevel = SugarLevelEnum.S100,
+                            IceLevel = IceLevelEnum.I100
+                        });
+
+                        subTotal += toppingFinalPrice;
+                    }
                 }
+
+                order.OrderItems.Add(orderItem);
             }
 
-            // --- 3. Tính toán Tổng tiền cuối cùng ---
+            order.TotalAmount = subTotal;
+            order.GrandTotal = subTotal + (order.ShippingFee ?? 0) - (order.DiscountAmount ?? 0);
 
-            order.TotalAmount = subTotalAmount; // Tổng tiền hàng
+            // 7. Lưu vào DB
+            await orderRepo.AddAsync(order);
+            await _unitOfWork.SaveChangesAsync();
 
-            // TODO: Triển khai các hàm sau
-            // order.ShippingFee = await CalculateShippingFee(order.DeliveryAddress, order.StoreId);
-            // order.DiscountAmount = await ApplyVoucher(order.VoucherCodeUsed, subTotalAmount, order.UserId);
-
-            // Giả định: Discount và Shipping Fee là 0 cho ví dụ này
-            order.ShippingFee = 0m;
-            order.DiscountAmount = 0m;
-
-            order.GrandTotal = order.TotalAmount + (order.ShippingFee ?? 0m) - (order.DiscountAmount ?? 0m);
-
-            // --- 4. Lưu Order (Sử dụng Repository với Transaction) ---
-            var createdOrder = await _orderRepo.CreateOrderWithDetails(order, allOrderItems);
-
-            // --- 5. Ánh xạ sang OrderReadDto và trả về ---
-
-            // Cần ánh xạ thủ công các tên (Name/Label) cho DTO trả về (vì không có Navigation Properties)
-            var readDto = _mapper.Map<OrderReadDto>(createdOrder);
-            readDto.Items = new List<OrderItemReadDto>();
-
-            // Lấy lại các OrderItem đã được lưu (bao gồm cả ID chính xác)
-            var mainItemsFromRepo = allOrderItems.Where(i => i.ParentItemId == null).ToList();
-
-
-            foreach (var mainItem in mainItemsFromRepo)
-            {
-                var mainItemDto = _mapper.Map<OrderItemReadDto>(mainItem);
-
-                // Gán tên/label thủ công
-                var product = allProducts[mainItem.ProductId];
-
-                mainItemDto.ProductName = product.Name;
-
-                // Gán Label cho Options (LƯU Ý: Phải kiểm tra Nullable)
-                if (mainItem.SizeId.HasValue && allSizes.TryGetValue(mainItem.SizeId.Value, out var size))
-                {
-                    mainItemDto.SizeLabel = size.Label;
-                }
-                if (mainItem.SugarLevelId.HasValue && allSugars.TryGetValue(mainItem.SugarLevelId.Value, out var sugar))
-                {
-                    mainItemDto.SugarLabel = sugar.Label; // TODO: Cần IProductRepository
-                }
-                if (mainItem.IceLevelId.HasValue && allIces.TryGetValue(mainItem.IceLevelId.Value, out var ice))
-                {
-                    mainItemDto.IceLabel = ice.Label; // TODO: Cần IProductRepository
-                }
-
-                // Ánh xạ Topping (Lấy các item con có ParentItemId trỏ về ID của món chính này)
-                // LƯU Ý: Do EF chưa gán ID chính xác, ta dùng ParentItem Navigation Property
-                var toppings = allOrderItems.Where(i => i.ParentItem == mainItem).ToList();
-
-                mainItemDto.Toppings = toppings.Select(t =>
-                {
-                    var toppingDto = _mapper.Map<OrderToppingReadDto>(t);
-                    toppingDto.ProductName = allProducts[t.ProductId].Name;
-                    return toppingDto;
-                }).ToList();
-
-                readDto.Items.Add(mainItemDto);
-            }
-
-            return readDto; ;
+            return (await GetOrderByIdAsync(order.Id))!;
         }
 
-        public async Task<IEnumerable<OrderReadDto>> GetOrdersAsync(int? userId)
+        public async Task<OrderReadDto?> GetOrderByIdAsync(long orderId)
         {
-            // 1. Lấy dữ liệu thô từ DB (đã Include đầy đủ)
-            var orders = await _orderRepo.GetOrdersAsync(userId);
-            var orderDtos = new List<OrderReadDto>();
+            var repo = _unitOfWork.Repository<Order>();
 
-            // 2. Duyệt và ánh xạ thủ công
-            foreach (var order in orders)
+            // ✅ FIX LỖI 2: Đổi InverseParent -> InverseParentItem trong chuỗi Include
+            var order = await repo.GetFirstOrDefaultAsync(
+                filter: o => o.Id == orderId,
+                includeProperties: "OrderItems,OrderItems.Product,OrderItems.Size,OrderItems.InverseParentItem,OrderItems.InverseParentItem.Product,DeliveryAddress,PaymentMethod,Store"
+            );
+
+            if (order == null) return null;
+
+            return MapOrderToDto(order);
+        }
+
+        public async Task<IEnumerable<OrderReadDto>> GetMyOrdersAsync(int userId, OrderStatusEnum? status)
+        {
+            var repo = _unitOfWork.Repository<Order>();
+
+            // ✅ FIX LỖI 2: Đổi tên trong Include
+            var query = await repo.GetAllAsync(
+                filter: o => o.UserId == userId && (!status.HasValue || o.Status == status.Value),
+                orderBy: q => q.OrderByDescending(o => o.OrderDate),
+                includeProperties: "OrderItems,OrderItems.Product,OrderItems.Size,OrderItems.InverseParentItem,OrderItems.InverseParentItem.Product,DeliveryAddress,PaymentMethod,Store"
+            );
+
+            return query.Select(MapOrderToDto);
+        }
+
+        public async Task<IEnumerable<OrderReadDto>> GetAllOrdersAsync(OrderStatusEnum? status, string? searchCode)
+        {
+            var repo = _unitOfWork.Repository<Order>();
+
+            var query = await repo.GetAllAsync(
+                orderBy: q => q.OrderByDescending(o => o.OrderDate),
+                includeProperties: "OrderItems,OrderItems.Product,OrderItems.Size,DeliveryAddress,PaymentMethod,Store"
+            );
+
+            if (status.HasValue) query = query.Where(o => o.Status == status.Value);
+            if (!string.IsNullOrEmpty(searchCode)) query = query.Where(o => o.OrderCode.Contains(searchCode));
+
+            return query.Select(MapOrderToDto);
+        }
+
+        public async Task<OrderReadDto?> UpdateOrderStatusAsync(long orderId, OrderStatusEnum newStatus)
+        {
+            var repo = _unitOfWork.Repository<Order>();
+            var order = await repo.GetByIdAsync(orderId);
+
+            if (order == null) return null;
+
+            order.Status = newStatus;
+
+            // ✅ FIX LỖI 3: Model Order chưa có UpdatedAt, tạm thời bỏ qua hoặc thêm vào Model
+            // order.UpdatedAt = DateTime.UtcNow; 
+
+            repo.Update(order);
+            await _unitOfWork.SaveChangesAsync();
+
+            return MapOrderToDto(order);
+        }
+
+        public async Task<bool> CancelOrderAsync(long orderId, int userId, string reason)
+        {
+            var repo = _unitOfWork.Repository<Order>();
+            var order = await repo.GetFirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+
+            if (order == null) return false;
+
+            if (order.Status != OrderStatusEnum.New)
             {
-                // Map các thông tin cơ bản của Order (Status, TotalAmount...)
-                var orderDto = _mapper.Map<OrderReadDto>(order);
-                orderDto.Items = new List<OrderItemReadDto>();
+                throw new Exception("Không thể hủy đơn hàng đã được xác nhận hoặc đang giao.");
+            }
 
-                // Tách Món chính và Topping
-                // Món chính là món có ParentItemId == null
+            order.Status = OrderStatusEnum.Cancelled;
+            order.UserNotes = string.IsNullOrEmpty(order.UserNotes) ? $"[Lý do hủy: {reason}]" : $"{order.UserNotes} | [Lý do hủy: {reason}]";
+
+            // ✅ FIX LỖI 3: Bỏ cập nhật UpdatedAt nếu không có
+            // order.UpdatedAt = DateTime.UtcNow;
+
+            repo.Update(order);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
+        private OrderReadDto MapOrderToDto(Order order)
+        {
+            var dto = _mapper.Map<OrderReadDto>(order);
+            dto.Items = new List<OrderItemReadDto>();
+
+            // ✅ FIX LỖI 2: Lọc mainItems và map Topping từ InverseParentItem
+            if (order.OrderItems != null)
+            {
                 var mainItems = order.OrderItems.Where(i => i.ParentItemId == null).ToList();
 
-                foreach (var mainItem in mainItems)
+                foreach (var item in mainItems)
                 {
-                    var itemDto = _mapper.Map<OrderItemReadDto>(mainItem);
+                    var itemDto = _mapper.Map<OrderItemReadDto>(item);
 
-                    // Gán tên và Label từ các bảng liên kết (đã được Include ở Repo)
-                    itemDto.ProductName = mainItem.Product?.Name;
-                    itemDto.SizeLabel = mainItem.Size?.Label;
-                    itemDto.SugarLabel = mainItem.SugarLevel?.Label;
-                    itemDto.IceLabel = mainItem.IceLevel?.Label;
+                    if (item.Product != null) itemDto.ProductName = item.Product.Name;
+                    if (item.Size != null) itemDto.SizeLabel = item.Size.Label;
 
-                    // Tìm các Topping thuộc về món chính này
-                    var childToppings = order.OrderItems.Where(i => i.ParentItemId == mainItem.Id).ToList();
+                    // Enum không null -> gọi GetDescription() trực tiếp
+                    itemDto.SugarLabel = item.SugarLevel.GetDescription();
+                    itemDto.IceLabel = item.IceLevel.GetDescription();
 
-                    itemDto.Toppings = childToppings.Select(t =>
+                    // Map Topping từ InverseParentItem
+                    if (item.InverseParentItem != null && item.InverseParentItem.Any())
                     {
-                        var toppingDto = _mapper.Map<OrderToppingReadDto>(t);
-                        toppingDto.ProductName = t.Product?.Name;
-                        return toppingDto;
-                    }).ToList();
+                        itemDto.Toppings = item.InverseParentItem.Select(t => new OrderToppingReadDto
+                        {
+                            Id = t.Id,
+                            ProductId = t.ProductId,
+                            ProductName = t.Product?.Name ?? "Topping",
+                            Quantity = t.Quantity,
+                            BasePrice = t.BasePrice,
+                            FinalPrice = t.FinalPrice
+                        }).ToList();
+                    }
 
-                    orderDto.Items.Add(itemDto);
+                    dto.Items.Add(itemDto);
                 }
-
-                orderDtos.Add(orderDto);
             }
 
-            return orderDtos;
+            return dto;
         }
-
     }
 }

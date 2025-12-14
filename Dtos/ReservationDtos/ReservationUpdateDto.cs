@@ -1,19 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using drinking_be.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace drinking_be.Dtos.ReservationDtos
 {
     public class ReservationUpdateDto
     {
-        // Dùng để Admin cập nhật trạng thái hoặc gán bàn
-        public string? CustomerName { get; set; }
-        public string? CustomerPhone { get; set; }
+        public ReservationStatusEnum? Status { get; set; }
 
-        [Required]
-        public byte Status { get; set; } // Sử dụng Enum value
+        public int? AssignedTableId { get; set; } // Admin gán bàn
 
-        public int? AssignedTableId { get; set; } // Có thể null nếu chưa xếp bàn hoặc hủy xếp
+        public bool? IsDepositPaid { get; set; } // Xác nhận đã đóng tiền cọc
 
-        public string? Note { get; set; } // Admin có thể ghi chú thêm
-        public decimal DepositAmount { get; set; }
+        [MaxLength(500)]
+        public string? Note { get; set; }
     }
 }

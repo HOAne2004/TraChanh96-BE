@@ -3,41 +3,24 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using drinking_be.Enums;
+using drinking_be.Interfaces;
 
 namespace drinking_be.Models;
 
-[Table("Social_media")]
-public partial class SocialMedia
+public partial class SocialMedia : ISoftDelete
 {
-    [Key]
-    [Column("id")]
     public int Id { get; set; }
-
-    [Column("brand_id")]
     public int BrandId { get; set; }
-
-    [Column("platform_name")]
-    [StringLength(30)]
-    [Unicode(false)]
+    public int StoreId { get; set; }
     public string PlatformName { get; set; } = null!;
-
-    [Column("url")]
-    [StringLength(500)]
-    [Unicode(false)]
     public string Url { get; set; } = null!;
-
-    [Column("icon_url")]
-    [StringLength(500)]
-    [Unicode(false)]
     public string? IconUrl { get; set; }
-
-    [Column("sort_order")]
     public byte? SortOrder { get; set; }
-
-    [Column("is_active")]
-    public bool? IsActive { get; set; }
-
-    [ForeignKey("BrandId")]
-    [InverseProperty("SocialMedia")]
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public PublicStatusEnum Status { get; set; } = PublicStatusEnum.Active;
     public virtual Brand Brand { get; set; } = null!;
+    public virtual Store? Store { get; set; } = null!;
 }

@@ -1,7 +1,7 @@
-﻿using drinking_be.Interfaces;
+﻿using drinking_be.Data;
+using drinking_be.Interfaces;
 using drinking_be.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace drinking_be.Repositories
@@ -9,34 +9,28 @@ namespace drinking_be.Repositories
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly DBDrinkContext _context;
-        private readonly DbSet<T> _dbSet;
+        // ⭐ Sửa thành protected để các class con (UserRepository) có thể dùng
+        protected readonly DbSet<T> dbSet;
 
         public GenericRepository(DBDrinkContext context)
         {
             _context = context;
-            _dbSet = context.Set<T>();
+            this.dbSet = _context.Set<T>();
         }
 
-        // --- Các phương thức cơ bản ---
-        public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
-
-        public async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
-
-        public async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
-
-        public void Update(T entity) => _dbSet.Update(entity);
-
-        public void Delete(T entity) => _dbSet.Remove(entity);
-
-        public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
-
-        // --- Phương thức tìm kiếm (LINQ) ---
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, string? includeProperties = null)
+        public async Task<IEnumerable<T>> GetAllAsync(
+            Expression<Func<T, bool>>? filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            string? includeProperties = null)
         {
-            IQueryable<T> query = _dbSet;
+            IQueryable<T> query = dbSet;
 
-            // Nếu có yêu cầu Include các bảng liên quan (dạng chuỗi "Table1,Table2")
-            if (!string.IsNullOrEmpty(includeProperties))
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (includeProperties != null)
             {
                 foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
@@ -44,17 +38,79 @@ namespace drinking_be.Repositories
                 }
             }
 
-            return await query.Where(predicate).ToListAsync();
+            if (orderBy != null)
+            {
+                return await orderBy(query).ToListAsync();
+            }
+            return await query.ToListAsync();
+        }
+
+        public async Task<T?> GetByIdAsync(object id)
+        {
+            return await dbSet.FindAsync(id);
+        }
+
+        public async Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> filter, string? includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+
+            if (includeProperties != null)
+            {
+                foreach (var includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+
+            return await query.FirstOrDefaultAsync(filter);
+        }
+
+        public async Task AddAsync(T entity)
+        {
+            await dbSet.AddAsync(entity);
         }
 
         public async Task AddRangeAsync(IEnumerable<T> entities)
         {
-            await _dbSet.AddRangeAsync(entities);
+            await dbSet.AddRangeAsync(entities);
+        }
+
+        public void Update(T entity)
+        {
+            dbSet.Attach(entity);
+            _context.Entry(entity).State = EntityState.Modified;
+        }
+
+        public void Delete(T entity)
+        {
+            if (_context.Entry(entity).State == EntityState.Detached)
+            {
+                dbSet.Attach(entity);
+            }
+            dbSet.Remove(entity);
         }
 
         public void DeleteRange(IEnumerable<T> entities)
         {
-            _dbSet.RemoveRange(entities);
+            dbSet.RemoveRange(entities);
+        }
+
+        // ⭐ Hàm này thiếu gây ra lỗi CS0535
+        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> filter)
+        {
+            return await dbSet.AnyAsync(filter);
+        }
+
+        public async Task<int> CountAsync(Expression<Func<T, bool>>? filter = null)
+        {
+            IQueryable<T> query = dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            return await query.CountAsync();
         }
     }
 }

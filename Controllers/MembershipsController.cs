@@ -1,15 +1,14 @@
-﻿// Controllers/MembershipController.cs
-using drinking_be.Interfaces;
-using drinking_be.Dtos.MembershipDtos;
+﻿using drinking_be.Dtos.MembershipDtos;
+using drinking_be.Interfaces.MarketingInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims; // Cần để lấy User ID từ Token
+using System.Security.Claims;
 
 namespace drinking_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // ⭐️ Yêu cầu người dùng phải đăng nhập
+    [Authorize]
     public class MembershipsController : ControllerBase
     {
         private readonly IMembershipService _membershipService;
@@ -19,34 +18,42 @@ namespace drinking_be.Controllers
             _membershipService = membershipService;
         }
 
-        // --- Helper Function ---
-        private int GetUserIdFromToken()
+        // --- Helper: GetUserId (Phiên bản "bất tử" - sửa lỗi Token) ---
+        private int GetUserId()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (int.TryParse(userIdString, out int userId))
+            var idClaim = User.Claims.FirstOrDefault(c =>
+                (c.Type == "nameid" || c.Type == ClaimTypes.NameIdentifier)
+                && int.TryParse(c.Value, out _));
+
+            if (idClaim != null && int.TryParse(idClaim.Value, out int userId))
             {
                 return userId;
             }
-            throw new UnauthorizedAccessException("User ID không hợp lệ trong token.");
+
+            // Fallback
+            var subClaim = User.FindFirst("sub");
+            if (subClaim != null && int.TryParse(subClaim.Value, out int subId))
+            {
+                return subId;
+            }
+
+            throw new UnauthorizedAccessException("Token không hợp lệ.");
         }
 
         /// <summary>
-        /// [USER] Lấy thông tin thành viên (cấp độ, điểm, v.v.) của người dùng hiện tại.
+        /// [USER] Lấy thông tin thành viên (cấp độ, điểm, v.v.) của tôi.
         /// </summary>
         [HttpGet("me")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MembershipReadDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetMyMembership()
         {
             try
             {
-                var userId = GetUserIdFromToken();
+                var userId = GetUserId();
                 var membershipInfo = await _membershipService.GetMyMembershipAsync(userId);
 
                 if (membershipInfo == null)
                 {
-                    return NotFound("Không tìm thấy thông tin thành viên cho người dùng này.");
+                    return NotFound("Bạn chưa kích hoạt thành viên.");
                 }
 
                 return Ok(membershipInfo);
@@ -56,5 +63,7 @@ namespace drinking_be.Controllers
                 return Unauthorized(ex.Message);
             }
         }
+
+        // Có thể thêm API Admin tạo thẻ cho User nếu cần (POST)
     }
 }

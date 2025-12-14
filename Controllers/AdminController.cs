@@ -1,14 +1,14 @@
 ﻿// Controllers/AdminController.cs
 using drinking_be.Dtos.UserDtos;
-using drinking_be.Interfaces;
+using drinking_be.Interfaces.AuthInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
 {
-    [Route("api/[controller]")] // Route gốc: /api/Admin
+    [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")] // Yêu cầu quyền Admin cho mọi hành động
+    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;

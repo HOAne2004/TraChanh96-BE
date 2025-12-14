@@ -1,11 +1,12 @@
-﻿// Dtos/VoucherDtos/VoucherApplyResultDto.cs
-
-namespace drinking_be.Dtos.VoucherDtos
+﻿namespace drinking_be.Dtos.VoucherDtos
 {
     public class VoucherApplyResultDto
     {
-        public decimal DiscountAmount { get; set; } // Số tiền được giảm
-        public decimal FinalAmount { get; set; } // Số tiền cuối cùng
+        public bool IsValid { get; set; }
+        public string Message { get; set; } = string.Empty;
         public string VoucherCode { get; set; } = string.Empty;
+
+        public decimal DiscountAmount { get; set; }
+        public decimal FinalAmount { get; set; } // Sau khi giảm
     }
 }

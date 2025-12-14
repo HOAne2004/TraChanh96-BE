@@ -8,6 +8,6 @@ namespace drinking_be.Interfaces.OptionInterfaces
     public interface ISizeRepository : IGenericRepository<Size>
     {
         // Phương thức để lấy nhiều size theo ID
-        Task<IEnumerable<Size>> GetSizesByIdsAsync(List<short> sizeIds);
+        //Task<IEnumerable<Size>> GetSizesByIdsAsync(List<short> sizeIds);
     }
 }

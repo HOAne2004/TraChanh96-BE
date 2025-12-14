@@ -1,9 +1,9 @@
-﻿// Controllers/ReviewController.cs
-using drinking_be.Dtos.ReviewDtos;
-using drinking_be.Interfaces;
+﻿using drinking_be.Dtos.ReviewDtos;
+using drinking_be.Enums;
+using drinking_be.Interfaces.FeedbackInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims; // Cần để lấy User ID
+using System.Security.Claims;
 
 namespace drinking_be.Controllers
 {
@@ -18,70 +18,80 @@ namespace drinking_be.Controllers
             _reviewService = reviewService;
         }
 
-        // --- Helper Function ---
-        private int GetUserIdFromToken()
+        // --- Helper GetUserId ---
+        private int GetUserId()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (int.TryParse(userIdString, out int userId))
-            {
-                return userId;
-            }
-            throw new UnauthorizedAccessException("User ID không hợp lệ trong token.");
+            var claim = User.FindFirst("nameid") ?? User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim != null && int.TryParse(claim.Value, out int userId)) return userId;
+            return 0;
         }
 
-        // --- PUBLIC ENDPOINT ---
+        // --- PUBLIC ---
 
-        /// <summary>
-        /// Lấy tất cả các đánh giá đã được duyệt cho một sản phẩm.
-        /// </summary>
-        /// <param name="productId">ID của sản phẩm.</param>
         [HttpGet("product/{productId}")]
-        [AllowAnonymous] // Cho phép tất cả mọi người xem
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ReviewReadDto>))]
+        [AllowAnonymous]
         public async Task<IActionResult> GetReviewsForProduct(int productId)
         {
             var reviews = await _reviewService.GetApprovedReviewsAsync(productId);
             return Ok(reviews);
         }
 
-        // --- SECURE ENDPOINT (USER) ---
+        // --- USER ---
 
-        /// <summary>
-        /// [USER] Gửi đánh giá cho một sản phẩm.
-        /// </summary>
         [HttpPost]
-        [Authorize] // ⭐️ Yêu cầu người dùng phải đăng nhập
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ReviewReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)] // Lỗi nghiệp vụ (đã review)
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)] // Product không tồn tại
+        [Authorize]
         public async Task<IActionResult> CreateReview([FromBody] ReviewCreateDto reviewDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                var userId = GetUserIdFromToken();
-                var createdReview = await _reviewService.CreateReviewAsync(reviewDto, userId);
+                var userId = GetUserId();
+                if (userId == 0) return Unauthorized();
 
-                // Trả về 201 Created (có thể dùng GetById nếu có)
-                return StatusCode(StatusCodes.Status201Created, createdReview);
+                var createdReview = await _reviewService.CreateReviewAsync(userId, reviewDto);
+                return CreatedAtAction(nameof(GetReviewsForProduct), new { productId = reviewDto.ProductId }, createdReview);
+            }
+            catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = GetUserId();
+            var isAdmin = User.IsInRole("Admin");
+
+            try
+            {
+                var result = await _reviewService.DeleteReviewAsync(id, userId, isAdmin);
+                if (!result) return NotFound();
+                return NoContent();
             }
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(ex.Message);
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message); // Sản phẩm không tồn tại
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message); // Lỗi nghiệp vụ (ví dụ: đã review)
-            }
+        }
+
+        // --- ADMIN ---
+
+        [HttpGet("admin")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> GetAll([FromQuery] int? productId, [FromQuery] ReviewStatusEnum? status)
+        {
+            var result = await _reviewService.GetAllReviewsAsync(productId, status);
+            return Ok(result);
+        }
+
+        [HttpPut("{id}/admin")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> AdminUpdate(int id, [FromBody] ReviewUpdateDto dto)
+        {
+            var result = await _reviewService.UpdateReviewAsync(id, dto);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
     }
 }

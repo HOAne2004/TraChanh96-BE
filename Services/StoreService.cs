@@ -1,94 +1,151 @@
-﻿// Services/StoreService.cs
+﻿using AutoMapper;
 using drinking_be.Dtos.StoreDtos;
-using drinking_be.Models;
-using AutoMapper;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using drinking_be.Enums;
+using drinking_be.Interfaces;
 using drinking_be.Interfaces.StoreInterfaces;
+using drinking_be.Models;
+using drinking_be.Utils; // Cần SlugGenerator
 
 namespace drinking_be.Services
 {
     public class StoreService : IStoreService
     {
-        private readonly IStoreRepository _storeRepo;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public StoreService(IStoreRepository storeRepo, IMapper mapper)
+        public StoreService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _storeRepo = storeRepo;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        // --- PUBLIC API ---
-
         public async Task<IEnumerable<StoreReadDto>> GetActiveStoresAsync()
         {
-            var stores = await _storeRepo.GetActiveStoresAsync();
+            var repo = _unitOfWork.Repository<Store>();
 
-            // Ánh xạ Store Entity (đã có Brand) sang StoreReadDto
+            // Lấy Store Active, include Brand và Address để hiển thị Card
+            var stores = await repo.GetAllAsync(
+                filter: s => s.Status == StoreStatusEnum.Active,
+                orderBy: q => q.OrderBy(s => s.SortOrder).ThenBy(s => s.Name),
+                includeProperties: "Brand,Address"
+            );
+
             return _mapper.Map<IEnumerable<StoreReadDto>>(stores);
         }
 
         public async Task<StoreReadDto?> GetStoreBySlugAsync(string slug)
         {
-            var store = await _storeRepo.GetBySlugAsync(slug);
-            if (store == null || !store.IsActive == true)
+            var repo = _unitOfWork.Repository<Store>();
+
+            // Lấy chi tiết, Include nhiều thông tin hơn (Social, Policy nếu cần)
+            var store = await repo.GetFirstOrDefaultAsync(
+                filter: s => s.Slug == slug && s.Status == StoreStatusEnum.Active,
+                includeProperties: "Brand,Address,SocialMedias"
+            );
+
+            return store == null ? null : _mapper.Map<StoreReadDto>(store);
+        }
+
+        public async Task<IEnumerable<StoreReadDto>> GetAllStoresAsync(string? search, StoreStatusEnum? status)
+        {
+            var repo = _unitOfWork.Repository<Store>();
+
+            var query = await repo.GetAllAsync(
+                includeProperties: "Brand,Address",
+                orderBy: q => q.OrderByDescending(s => s.CreatedAt)
+            );
+
+            if (status.HasValue)
             {
-                return null;
+                query = query.Where(s => s.Status == status.Value);
             }
 
-            // Ánh xạ Store Entity (đã có Brand) sang StoreReadDto
-            return _mapper.Map<StoreReadDto>(store);
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
+                query = query.Where(s => s.Name.ToLower().Contains(search));
+            }
+
+            return _mapper.Map<IEnumerable<StoreReadDto>>(query);
         }
 
-        // TODO: Triển khai các phương thức Admin (Create, Update)
-
-        public async Task<StoreReadDto> CreateStoreAsync(StoreCreateDto storeDto)
+        public async Task<StoreReadDto?> GetByIdAsync(int id)
         {
-            var store = _mapper.Map<Store>(storeDto);
-
-            // Thêm logic xác thực BrandId có tồn tại hay không
-
-            await _storeRepo.AddAsync(store);
-            await _storeRepo.SaveChangesAsync();
-
-            // NOTE: Để trả về BrandName chính xác, ta cần viết GetByIdWithBrand() trong Repo
-            // Giả định: Ta chỉ trả về DTO cơ bản sau khi tạo
-            return _mapper.Map<StoreReadDto>(store);
+            var store = await _unitOfWork.Repository<Store>().GetFirstOrDefaultAsync(
+                filter: s => s.Id == id,
+                includeProperties: "Brand,Address,SocialMedias"
+            );
+            return store == null ? null : _mapper.Map<StoreReadDto>(store);
         }
 
-        // ⭐️ THÊM MỚI: Logic Cập nhật
-        public async Task<StoreReadDto?> UpdateStoreAsync(long id, StoreUpdateDto storeDto)
+        public async Task<StoreReadDto> CreateStoreAsync(StoreCreateDto dto)
         {
-            // 1. Tìm Store cũ
-            var existingStore = await _storeRepo.GetByIdAsync((int)id); // Ép kiểu nếu Repo dùng int
-            if (existingStore == null) return null;
+            var repo = _unitOfWork.Repository<Store>();
+            var brandRepo = _unitOfWork.Repository<Brand>();
+            var addressRepo = _unitOfWork.Repository<Address>();
 
-            // 2. Cập nhật dữ liệu (Map từ DTO đè lên Entity cũ)
-            _mapper.Map(storeDto, existingStore);
+            // 1. Validate Brand & Address
+            if (!await brandRepo.ExistsAsync(b => b.Id == dto.BrandId))
+                throw new Exception("Thương hiệu không tồn tại.");
 
-            // 3. Lưu thay đổi
-            _storeRepo.Update(existingStore);
-            await _storeRepo.SaveChangesAsync();
+            if (!await addressRepo.ExistsAsync(a => a.Id == dto.AddressId))
+                throw new Exception("Địa chỉ không tồn tại.");
 
-            return _mapper.Map<StoreReadDto>(existingStore);
+            // 2. Map & Create
+            var store = _mapper.Map<Store>(dto);
+            store.PublicId = Guid.NewGuid();
+            store.CreatedAt = DateTime.UtcNow;
+
+            // 3. Tạo Slug
+            string baseSlug = SlugGenerator.GenerateSlug(store.Name);
+            store.Slug = baseSlug;
+
+            // Check trùng slug đơn giản (nếu trùng thì thêm random string)
+            if (await repo.ExistsAsync(s => s.Slug == baseSlug))
+            {
+                store.Slug = $"{baseSlug}-{Guid.NewGuid().ToString().Substring(0, 4)}";
+            }
+
+            await repo.AddAsync(store);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Load lại để lấy thông tin Address/Brand hiển thị
+            return (await GetByIdAsync(store.Id))!;
         }
 
-        // ⭐️ THÊM MỚI: Logic Xóa
-        public async Task<bool> DeleteStoreAsync(long id)
+        public async Task<StoreReadDto?> UpdateStoreAsync(int id, StoreUpdateDto dto)
         {
-            var existingStore = await _storeRepo.GetByIdAsync((int)id);
-            if (existingStore == null) return false;
+            var repo = _unitOfWork.Repository<Store>();
+            var store = await repo.GetByIdAsync(id);
 
-            // Cách 1: Xóa cứng (Hard Delete)
-            _storeRepo.Delete(existingStore);
+            if (store == null) return null;
 
-            // Cách 2: Xóa mềm (Soft Delete - Khuyên dùng)
-            // existingStore.IsActive = false;
-            // _storeRepo.Update(existingStore);
+            // Map update
+            _mapper.Map(dto, store);
+            store.UpdatedAt = DateTime.UtcNow;
 
-            await _storeRepo.SaveChangesAsync();
+            // Nếu muốn cập nhật Slug khi đổi tên, thêm logic ở đây (thường thì hạn chế đổi slug)
+
+            repo.Update(store);
+            await _unitOfWork.SaveChangesAsync();
+
+            return (await GetByIdAsync(id));
+        }
+
+        public async Task<bool> DeleteStoreAsync(int id)
+        {
+            var repo = _unitOfWork.Repository<Store>();
+            var store = await repo.GetByIdAsync(id);
+
+            if (store == null) return false;
+
+            // Soft Delete
+            store.Status = StoreStatusEnum.Deleted;
+            store.DeletedAt = DateTime.UtcNow;
+
+            repo.Update(store);
+            await _unitOfWork.SaveChangesAsync();
+
             return true;
         }
     }

@@ -1,47 +1,98 @@
-﻿// Services/PaymentMethodService.cs
+﻿using AutoMapper;
 using drinking_be.Dtos.PaymentMethodDtos;
+using drinking_be.Enums;
 using drinking_be.Interfaces;
+using drinking_be.Interfaces.OrderInterfaces;
 using drinking_be.Models;
-using AutoMapper;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace drinking_be.Services
 {
     public class PaymentMethodService : IPaymentMethodService
     {
-        private readonly IPaymentMethodRepository _methodRepo;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public PaymentMethodService(IPaymentMethodRepository methodRepo, IMapper mapper)
+        public PaymentMethodService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _methodRepo = methodRepo;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        // --- PUBLIC API ---
-
         public async Task<IEnumerable<PaymentMethodReadDto>> GetActiveMethodsAsync()
         {
-            var methods = await _methodRepo.GetActiveMethodsAsync();
+            var repo = _unitOfWork.Repository<PaymentMethod>();
 
-            // Ánh xạ Entity sang DTO
+            // Lấy Active và sắp xếp theo SortOrder (nhỏ lên trước)
+            var methods = await repo.GetAllAsync(
+                filter: p => p.Status == PublicStatusEnum.Active,
+                orderBy: q => q.OrderBy(p => p.SortOrder).ThenBy(p => p.Id)
+            );
+
             return _mapper.Map<IEnumerable<PaymentMethodReadDto>>(methods);
         }
 
-        // --- ADMIN API ---
-
-        public async Task<PaymentMethodReadDto> CreatePaymentMethodAsync(PaymentMethodCreateDto methodDto)
+        public async Task<IEnumerable<PaymentMethodReadDto>> GetAllMethodsAsync()
         {
-            // 1. Ánh xạ DTO sang Entity
-            var method = _mapper.Map<PaymentMethod>(methodDto);
+            var repo = _unitOfWork.Repository<PaymentMethod>();
 
-            // 2. Lưu vào DB
-            await _methodRepo.AddAsync(method);
-            await _methodRepo.SaveChangesAsync();
+            // Admin thấy hết (cả Active, Inactive, Hidden)
+            var methods = await repo.GetAllAsync(
+                orderBy: q => q.OrderBy(p => p.SortOrder)
+            );
+
+            return _mapper.Map<IEnumerable<PaymentMethodReadDto>>(methods);
+        }
+
+        public async Task<PaymentMethodReadDto?> GetByIdAsync(int id)
+        {
+            var method = await _unitOfWork.Repository<PaymentMethod>().GetByIdAsync(id);
+            return method == null ? null : _mapper.Map<PaymentMethodReadDto>(method);
+        }
+
+        public async Task<PaymentMethodReadDto> CreateAsync(PaymentMethodCreateDto dto)
+        {
+            var repo = _unitOfWork.Repository<PaymentMethod>();
+
+            var method = _mapper.Map<PaymentMethod>(dto);
+            method.CreatedAt = DateTime.UtcNow;
+
+            await repo.AddAsync(method);
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<PaymentMethodReadDto>(method);
+        }
+
+        public async Task<PaymentMethodReadDto?> UpdateAsync(int id, PaymentMethodUpdateDto dto)
+        {
+            var repo = _unitOfWork.Repository<PaymentMethod>();
+            var method = await repo.GetByIdAsync(id);
+
+            if (method == null) return null;
+
+            _mapper.Map(dto, method);
+            method.UpdatedAt = DateTime.UtcNow;
+
+            repo.Update(method);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<PaymentMethodReadDto>(method);
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var repo = _unitOfWork.Repository<PaymentMethod>();
+            var method = await repo.GetByIdAsync(id);
+
+            if (method == null) return false;
+
+            // Soft Delete
+            method.Status = PublicStatusEnum.Inactive;
+            method.DeletedAt = DateTime.UtcNow;
+
+            repo.Update(method);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
         }
     }
 }
