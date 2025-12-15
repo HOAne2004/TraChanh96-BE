@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using drinking_be.Enums;
+using drinking_be.Interfaces;
 
 namespace drinking_be.Models;
 
-public partial class News
+public partial class News : ISoftDelete
 {
     public int Id { get; set; }
 
@@ -21,7 +23,7 @@ public partial class News
 
     public string? ThumbnailUrl { get; set; }
 
-    public string? Status { get; set; }
+    public ContentStatusEnum Status { get; set; } = ContentStatusEnum.Draft;
 
     public bool? IsFeatured { get; set; }
 
@@ -32,6 +34,8 @@ public partial class News
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 

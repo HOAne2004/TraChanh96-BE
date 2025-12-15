@@ -7,32 +7,76 @@
       "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\profiles\\mappingprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\profiles\\mappingprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\dbdrinkcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\dbdrinkcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\railway.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\railway.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\controllers\\bannerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\controllers\\bannerscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\interfaces\\optioninterfaces\\isizeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\interfaces\\optioninterfaces\\isizeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\uservoucher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\uservoucher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\controllers\\categoriescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\controllers\\categoriescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\controllers\\sugarlevelscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\controllers\\sugarlevelscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\supplyorderitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\supplyorderitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\controllers\\sizescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\controllers\\sizescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\supplyorder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\supplyorder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\store.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\store.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\staff.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\staff.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\socialmedia.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\socialmedia.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\size.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\size.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\shoptable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\shoptable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\room.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\room.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\review.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\review.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\reservation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\reservation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|c:\\users\\lehuy\\onedrive\\documents\\drinking\\drinking-be\\drinking-be\\models\\productsize.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B42026A-589A-4C80-B3F9-5ED14B1CFF8F}|drinking-be\\drinking-be.csproj|solutionrelative:drinking-be\\models\\productsize.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -52,103 +96,227 @@
               "RelativeDocumentMoniker": "drinking-be\\Program.cs",
               "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Program.cs",
               "RelativeToolTip": "drinking-be\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACMAAABXAAAAAAAAAA==",
+              "ViewState": "AgIAAKUAAAAAAAAAAAAYwMwAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-13T12:00:11.86Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "MappingProfile.cs",
-              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Profiles\\MappingProfile.cs",
-              "RelativeDocumentMoniker": "drinking-be\\Profiles\\MappingProfile.cs",
-              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Profiles\\MappingProfile.cs",
-              "RelativeToolTip": "drinking-be\\Profiles\\MappingProfile.cs",
-              "ViewState": "AgIAAAYBAAAAAAAAAAAjwAkBAABgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-13T12:46:05.964Z",
-              "IsPinned": true,
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": ".gitignore",
-              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\.gitignore",
-              "RelativeDocumentMoniker": "drinking-be\\.gitignore",
-              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\.gitignore",
-              "RelativeToolTip": "drinking-be\\.gitignore",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-11-26T15:22:58.592Z",
-              "EditorCaption": ""
+              "Title": "MappingProfile.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Profiles\\MappingProfile.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Profiles\\MappingProfile.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Profiles\\MappingProfile.cs",
+              "RelativeToolTip": "drinking-be\\Profiles\\MappingProfile.cs",
+              "ViewState": "AgIAACUAAAAAAAAAAAAAADwAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-13T12:46:05.964Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "railway.json",
-              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\railway.json",
-              "RelativeDocumentMoniker": "drinking-be\\railway.json",
-              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\railway.json",
-              "RelativeToolTip": "drinking-be\\railway.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Title": "DBDrinkContext.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\DBDrinkContext.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\DBDrinkContext.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\DBDrinkContext.cs",
+              "RelativeToolTip": "drinking-be\\Models\\DBDrinkContext.cs",
+              "ViewState": "AgIAAC8AAAAAAAAAAAAAACcAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-05T12:26:50.465Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\appsettings.json",
+              "RelativeDocumentMoniker": "drinking-be\\appsettings.json",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\appsettings.json",
+              "RelativeToolTip": "drinking-be\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-11-26T15:00:43.018Z",
+              "WhenOpened": "2025-12-14T18:04:24.122Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "ISizeService.cs",
-              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Interfaces\\OptionInterfaces\\ISizeService.cs",
-              "RelativeDocumentMoniker": "drinking-be\\Interfaces\\OptionInterfaces\\ISizeService.cs",
-              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Interfaces\\OptionInterfaces\\ISizeService.cs",
-              "RelativeToolTip": "drinking-be\\Interfaces\\OptionInterfaces\\ISizeService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAA4AAAAAAAAAA==",
+              "Title": "BannersController.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\BannersController.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Controllers\\BannersController.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\BannersController.cs",
+              "RelativeToolTip": "drinking-be\\Controllers\\BannersController.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAwA8AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-26T09:43:07.27Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-14T18:01:55.215Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "CategoriesController.cs",
-              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\CategoriesController.cs",
-              "RelativeDocumentMoniker": "drinking-be\\Controllers\\CategoriesController.cs",
-              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\CategoriesController.cs",
-              "RelativeToolTip": "drinking-be\\Controllers\\CategoriesController.cs",
-              "ViewState": "AgIAAFAAAAAAAAAAAAAswG0AAAAJAAAAAAAAAA==",
+              "Title": "UserVoucher.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\UserVoucher.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\UserVoucher.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\UserVoucher.cs",
+              "RelativeToolTip": "drinking-be\\Models\\UserVoucher.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-26T09:33:43.838Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-14T16:00:30.584Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "SugarLevelsController.cs",
-              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\SugarLevelsController.cs",
-              "RelativeDocumentMoniker": "drinking-be\\Controllers\\SugarLevelsController.cs",
-              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\SugarLevelsController.cs",
-              "RelativeToolTip": "drinking-be\\Controllers\\SugarLevelsController.cs",
-              "ViewState": "AgIAAB0AAAAAAAAAAAAgwCgAAAAeAAAAAAAAAA==",
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\User.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\User.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\User.cs",
+              "RelativeToolTip": "drinking-be\\Models\\User.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAUwAcAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-26T09:33:13.855Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-14T16:00:18.105Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
-              "Title": "SizesController.cs",
-              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\SizesController.cs",
-              "RelativeDocumentMoniker": "drinking-be\\Controllers\\SizesController.cs",
-              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Controllers\\SizesController.cs",
-              "RelativeToolTip": "drinking-be\\Controllers\\SizesController.cs",
-              "ViewState": "AgIAACsAAAAAAAAAAAAkwD8AAAAJAAAAAAAAAA==",
+              "Title": "SupplyOrderItem.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\SupplyOrderItem.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\SupplyOrderItem.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\SupplyOrderItem.cs",
+              "RelativeToolTip": "drinking-be\\Models\\SupplyOrderItem.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-26T09:33:00.397Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-14T16:00:01.806Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "SupplyOrder.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\SupplyOrder.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\SupplyOrder.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\SupplyOrder.cs",
+              "RelativeToolTip": "drinking-be\\Models\\SupplyOrder.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAAAAcAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:59:45.905Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Store.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Store.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\Store.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Store.cs",
+              "RelativeToolTip": "drinking-be\\Models\\Store.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:59:35.635Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Staff.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Staff.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\Staff.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Staff.cs",
+              "RelativeToolTip": "drinking-be\\Models\\Staff.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:59:13.852Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "SocialMedia.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\SocialMedia.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\SocialMedia.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\SocialMedia.cs",
+              "RelativeToolTip": "drinking-be\\Models\\SocialMedia.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:58:59.076Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Size.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Size.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\Size.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Size.cs",
+              "RelativeToolTip": "drinking-be\\Models\\Size.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:58:44.17Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "ShopTable.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\ShopTable.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\ShopTable.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\ShopTable.cs",
+              "RelativeToolTip": "drinking-be\\Models\\ShopTable.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAwAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:57:23.485Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Room.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Room.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\Room.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Room.cs",
+              "RelativeToolTip": "drinking-be\\Models\\Room.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:51:02.54Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Review.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Review.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\Review.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Review.cs",
+              "RelativeToolTip": "drinking-be\\Models\\Review.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAQwAMAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:50:40.763Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Reservation.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Reservation.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\Reservation.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Reservation.cs",
+              "RelativeToolTip": "drinking-be\\Models\\Reservation.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAYwAcAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:48:45.481Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "ProductSize.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\ProductSize.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\ProductSize.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\ProductSize.cs",
+              "RelativeToolTip": "drinking-be\\Models\\ProductSize.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:47:51.063Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Product.cs",
+              "DocumentMoniker": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Product.cs",
+              "RelativeDocumentMoniker": "drinking-be\\Models\\Product.cs",
+              "ToolTip": "C:\\Users\\lehuy\\OneDrive\\Documents\\Drinking\\drinking-be\\drinking-be\\Models\\Product.cs",
+              "RelativeToolTip": "drinking-be\\Models\\Product.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAIwAgAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-14T15:37:04.711Z"
             }
           ]
         }

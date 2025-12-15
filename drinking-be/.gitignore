@@ -56,7 +56,7 @@ appsettings.Development.json
 secrets.json
 
 # EF Migrations (optional)
-[Mm]igrations/
+#[Mm]igrations/
 
 # OS files
 .DS_Store
@@ -72,3 +72,4 @@ npm-debug.log
 # Others
 *.swp
 *.tmp
+*.user

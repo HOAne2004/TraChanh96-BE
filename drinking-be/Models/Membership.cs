@@ -1,9 +1,11 @@
-﻿using System;
+﻿using drinking_be.Enums;
+using System;
 using System.Collections.Generic;
+using drinking_be.Interfaces;
 
 namespace drinking_be.Models;
 
-public partial class Membership
+public partial class Membership: ISoftDelete
 {
     public long Id { get; set; }
 
@@ -21,9 +23,10 @@ public partial class Membership
 
     public DateOnly? LastLevelSpentReset { get; set; }
 
-    public byte? Status { get; set; }
+    public MembershipStatusEnum Status { get; set; } = MembershipStatusEnum.Active;
 
     public DateTime? CreatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 
     public virtual MembershipLevel Level { get; set; } = null!;
 

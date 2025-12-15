@@ -1,5 +1,6 @@
 ﻿using drinking_be.Dtos.ShopTableDtos;
-using drinking_be.Interfaces.ShopTableInterfaces;
+using drinking_be.Interfaces.StoreInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
@@ -15,34 +16,27 @@ namespace drinking_be.Controllers
             _shopTableService = shopTableService;
         }
 
-        // GET: api/ShopTable/store/{storeId}
+        // GET: api/shoptable/store/{storeId}?roomId=1
         [HttpGet("store/{storeId}")]
-        public async Task<IActionResult> GetTablesByStore(int storeId)
+        public async Task<IActionResult> GetTablesByStore(int storeId, [FromQuery] int? roomId)
         {
-            var tables = await _shopTableService.GetTablesByStoreAsync(storeId);
+            var tables = await _shopTableService.GetTablesByStoreAsync(storeId, roomId);
             return Ok(tables);
         }
 
-        // GET: api/ShopTable/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTableById(int id)
         {
             var table = await _shopTableService.GetTableByIdAsync(id);
-            if (table == null)
-            {
-                return NotFound(new { message = "Không tìm thấy bàn." });
-            }
+            if (table == null) return NotFound(new { message = "Không tìm thấy bàn." });
             return Ok(table);
         }
 
-        // POST: api/ShopTable
         [HttpPost]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> CreateTable([FromBody] ShopTableCreateDto createDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
@@ -55,35 +49,31 @@ namespace drinking_be.Controllers
             }
         }
 
-        // PUT: api/ShopTable/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateTable(int id, [FromBody] ShopTableUpdateDto updateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var result = await _shopTableService.UpdateTableAsync(id, updateDto);
-            if (!result)
+            try
             {
-                return NotFound(new { message = "Không tìm thấy bàn để cập nhật." });
+                var result = await _shopTableService.UpdateTableAsync(id, updateDto);
+                if (result == null) return NotFound();
+                return Ok(result);
             }
-
-            return Ok(new { message = "Cập nhật bàn thành công." });
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        // DELETE: api/ShopTable/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteTable(int id)
         {
             var result = await _shopTableService.DeleteTableAsync(id);
-            if (!result)
-            {
-                return NotFound(new { message = "Không tìm thấy bàn để xóa." });
-            }
-
-            return Ok(new { message = "Xóa bàn thành công." });
+            if (!result) return NotFound();
+            return NoContent();
         }
     }
 }

@@ -1,7 +1,9 @@
-﻿// Controllers/NewsController.cs
-using drinking_be.Dtos.NewsDtos;
-using drinking_be.Interfaces.NewsInterfaces;
+﻿using drinking_be.Dtos.NewsDtos;
+using drinking_be.Enums;
+using drinking_be.Interfaces.MarketingInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace drinking_be.Controllers
 {
@@ -16,95 +18,90 @@ namespace drinking_be.Controllers
             _newsService = newsService;
         }
 
-        /// <summary>
-        /// API phục vụ Carousel/Slider (Frontend gọi: GET /api/carousel)
-        /// </summary>
-        [HttpGet("/api/carousel")] // ⭐️ Route tuyệt đối
+        // --- Helper: GetUserId ---
+        private int GetUserId()
+        {
+            var claim = User.FindFirst("nameid") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim == null) claim = User.FindFirst("sub");
+
+            if (claim != null && int.TryParse(claim.Value, out int userId)) return userId;
+            throw new UnauthorizedAccessException("Token không hợp lệ.");
+        }
+
+        // --- PUBLIC ENDPOINTS ---
+
+        [HttpGet("/api/carousel")]
+        [AllowAnonymous]
         public IActionResult GetCarousel()
         {
-            // Vì chưa có bảng Carousel riêng, ta trả về dữ liệu giả lập (Mock)
-            // hoặc bạn có thể Query từ bảng News/Products nếu muốn.
             var slides = new List<object>
             {
-                new {
-                    id = 1,
-                    imageUrl = "https://img.freepik.com/free-vector/flat-design-bubble-tea-banner-template_23-2149463197.jpg",
-                    title = "Chào hè rực rỡ",
-                    link = "/menu"
-                },
-                new {
-                    id = 2,
-                    imageUrl = "https://img.freepik.com/free-vector/flat-bubble-tea-banner-template_23-2149463198.jpg",
-                    title = "Món mới: Trà sữa nướng",
-                    link = "/products/tra-sua-nuong"
-                }
+                new { id = 1, imageUrl = "https://img.freepik.com/free-vector/flat-design-bubble-tea-banner-template_23-2149463197.jpg", title = "Chào hè rực rỡ", link = "/menu" },
+                new { id = 2, imageUrl = "https://img.freepik.com/free-vector/flat-bubble-tea-banner-template_23-2149463198.jpg", title = "Món mới: Trà sữa nướng", link = "/products/tra-sua-nuong" }
             };
             return Ok(slides);
         }
 
-        // --- PUBLIC ENDPOINTS (Khách hàng) ---
-
-        /// <summary>
-        /// Lấy danh sách tất cả các bài viết đã xuất bản.
-        /// </summary>
-        /// <returns>Danh sách NewsReadDto.</returns>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<NewsReadDto>))]
+        [AllowAnonymous]
         public async Task<IActionResult> GetPublishedNews()
         {
-            var newsList = await _newsService.GetPublishedNewsAsync();
-            return Ok(newsList);
+            var result = await _newsService.GetPublishedNewsAsync();
+            return Ok(result);
         }
 
-        /// <summary>
-        /// Lấy chi tiết một bài viết đã xuất bản dựa trên Slug.
-        /// </summary>
-        /// <param name="slug">Slug của bài viết.</param>
-        /// <returns>NewsReadDto chi tiết.</returns>
         [HttpGet("{slug}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(NewsReadDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetNewsBySlug(string slug)
+        [AllowAnonymous]
+        public async Task<IActionResult> GetBySlug(string slug)
         {
-            var news = await _newsService.GetNewsBySlugAsync(slug);
-            if (news == null)
-            {
-                return NotFound("Không tìm thấy bài viết hoặc bài viết chưa được xuất bản.");
-            }
-            return Ok(news);
+            var result = await _newsService.GetNewsBySlugAsync(slug);
+            if (result == null) return NotFound("Bài viết không tồn tại.");
+            return Ok(result);
         }
 
-        // --- ADMIN ENDPOINT ---
+        // --- ADMIN ENDPOINTS ---
 
-        /// <summary>
-        /// [ADMIN] Tạo bài viết tin tức mới.
-        /// </summary>
-        /// <param name="newsDto">Dữ liệu tạo bài viết.</param>
-        /// <returns>NewsReadDto của bài viết đã tạo.</returns>
-        // Cần thêm [Authorize(Roles = "Admin")] nếu triển khai xác thực
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(NewsReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateNews([FromBody] NewsCreateDto newsDto)
+        [HttpGet("admin")] // Route: /api/news/admin
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> GetAllNews([FromQuery] string? search, [FromQuery] ContentStatusEnum? status)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var result = await _newsService.GetAllNewsAsync(search, status);
+            return Ok(result);
+        }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Create([FromBody] NewsCreateDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                var createdNews = await _newsService.CreateNewsAsync(newsDto);
-
-                return CreatedAtAction(nameof(GetNewsBySlug),
-                                       new { slug = createdNews.Slug },
-                                       createdNews);
+                var userId = GetUserId();
+                var result = await _newsService.CreateNewsAsync(userId, dto);
+                return CreatedAtAction(nameof(GetBySlug), new { slug = result.Slug }, result);
             }
             catch (Exception ex)
             {
-                // Xử lý lỗi nghiệp vụ (ví dụ: UserID không hợp lệ)
-                return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Update(int id, [FromBody] NewsUpdateDto dto)
+        {
+            var result = await _newsService.UpdateNewsAsync(id, dto);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _newsService.DeleteNewsAsync(id);
+            if (!result) return NotFound();
+            return NoContent();
         }
     }
 }

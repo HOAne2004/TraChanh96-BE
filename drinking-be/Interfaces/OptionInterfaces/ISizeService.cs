@@ -1,17 +1,22 @@
-﻿// Interfaces/ISizeService.cs (TẠO MỚI)
-using drinking_be.Dtos.ProductDtos; // Tái sử dụng DTO nếu có, hoặc tạo DTO riêng
-using drinking_be.Models;
-using drinking_be.Dtos.OptionDtos;
+﻿using drinking_be.Dtos.SizeDtos;
 
 namespace drinking_be.Interfaces.OptionInterfaces
 {
-
     public interface ISizeService
     {
-        Task<IEnumerable<SizeDto>> GetAllSizesAsync();
-        Task<SizeDto> CreateSizeAsync(SizeCreateDto sizeDto);
-        Task<SizeDto?> UpdateSizeAsync(short id, SizeCreateDto sizeDto);
-        Task<bool> DeleteSizeAsync(short id);
+        // Lấy tất cả (Admin xem hết, Client lọc Active)
+        Task<IEnumerable<SizeReadDto>> GetAllAsync(bool activeOnly = true);
+
+        Task<SizeReadDto?> GetByIdAsync(short id);
+
+        Task<SizeReadDto> CreateAsync(SizeCreateDto dto);
+
+        Task<SizeReadDto?> UpdateAsync(short id, SizeUpdateDto dto);
+
+        // Xóa mềm
+        Task<bool> DeleteAsync(short id);
+
+        // Đếm số sản phẩm đang áp dụng size này (Để cảnh báo trước khi xóa)
         Task<int> CountProductsUsingSizeAsync(short id);
     }
 }

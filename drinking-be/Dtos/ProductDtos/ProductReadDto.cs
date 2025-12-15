@@ -1,27 +1,37 @@
-﻿using drinking_be.Dtos.CategoryDtos;
+﻿// File: Dtos/ProductDtos/ProductReadDto.cs
+
+using drinking_be.Dtos.SizeDtos; // Cho các tùy chọn Size
+using drinking_be.Enums;
 
 namespace drinking_be.Dtos.ProductDtos
 {
     public class ProductReadDto
     {
-        public long Id { get; set; }
-        public string Name { get; set; } = string.Empty;
+        public int Id { get; set; }
+        public string PublicId { get; set; } = null!;
+        public string Name { get; set; } = null!;
+        public string Slug { get; set; } = null!;
+
+        // --- Giá và Phân loại ---
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; } = null!; // Cần Include Category
+        public string ProductType { get; set; } = null!;
         public decimal BasePrice { get; set; }
-        public string? ImageUrl { get; set; } = string.Empty;
-        public string? Desciption { get; set; }       
+
+        // --- Mô tả & Ảnh ---
+        public string? ImageUrl { get; set; }
+        public string? Description { get; set; }
         public string? Ingredient { get; set; }
-        public string Status { get; set; } = string.Empty;
-        public string ProductType { get; set; } = string.Empty;
-        public DateTime LaunchDateTime { get; set; }
+
+        // --- Thống kê & Trạng thái ---
+        public string Status { get; set; } = null!; // String/Label
         public double? TotalRating { get; set; }
         public int? TotalSold { get; set; }
+        public DateTime? LaunchDateTime { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
-        // Thêm các danh sách ID tùy chọn HỢP LỆ (cho frontend hiển thị)
-        public List<int> AllowedSizeIds { get; set; } = new List<int>();
-        public List<int> AllowedIceLevelIds { get; set; } = new List<int>();
-        public List<int> AllowedSugarLevelIds { get; set; } = new List<int>();
-
-        // Thông tin Danh mục (có thể dùng CategoryReadDto)
-        public int CategoryId { get; set; }
+        // ⭐ TÙY CHỌN ÁP DỤNG: Danh sách Size (Đã map từ ProductSize)
+        public ICollection<SizeReadDto> AvailableSizes { get; set; } = new List<SizeReadDto>();
     }
 }

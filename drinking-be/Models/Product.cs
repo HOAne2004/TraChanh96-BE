@@ -1,10 +1,12 @@
-﻿using System;
+﻿using drinking_be.Enums;
+using drinking_be.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace drinking_be.Models;
 
-public partial class Product
+public partial class Product : ISoftDelete
 {
     public int Id { get; set; }
 
@@ -26,7 +28,7 @@ public partial class Product
 
     public string? Ingredient { get; set; }
 
-    public string Status { get; set; } = null!;
+    public ProductStatusEnum Status { get; set; } = ProductStatusEnum.Active;
 
     public double? TotalRating { get; set; }
 
@@ -39,6 +41,7 @@ public partial class Product
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 
     public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 
@@ -48,18 +51,6 @@ public partial class Product
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
-    // Models/Size.cs
-    // Sửa .Size thành .Product (vì trong ProductSize, thuộc tính Product mới trỏ về class này)
     [InverseProperty(nameof(ProductSize.Product))]
     public virtual ICollection<ProductSize> ProductSizes { get; set; } = new List<ProductSize>();
-
-    // Models/IceLevel.cs
-    // Sửa .IceLevel thành .Product
-    [InverseProperty(nameof(ProductIceLevel.Product))]
-    public virtual ICollection<ProductIceLevel> ProductIceLevels { get; set; } = new List<ProductIceLevel>();
-
-    // Models/SugarLevel.cs
-    // Sửa .SugarLevel thành .Product
-    [InverseProperty(nameof(ProductSugarLevel.Product))]
-    public virtual ICollection<ProductSugarLevel> ProductSugarLevels { get; set; } = new List<ProductSugarLevel>();
 }

@@ -1,6 +1,6 @@
-﻿// Controllers/BrandController.cs
-using drinking_be.Dtos.BrandDtos;
-using drinking_be.Interfaces;
+﻿using drinking_be.Dtos.BrandDtos;
+using drinking_be.Interfaces.MarketingInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
@@ -16,75 +16,60 @@ namespace drinking_be.Controllers
             _brandService = brandService;
         }
 
-        // --- CÁC API MỚI KHỚP VỚI FRONTEND ---
-
-        /// <summary>
-        /// API phục vụ Footer (Frontend gọi: GET /api/footerInfo)
-        /// </summary>
-        [HttpGet("/api/footerInfo")] // ⭐️ Route tuyệt đối để ghi đè route controller
-        public async Task<IActionResult> GetFooterInfo()
+        // --- HELPER ---
+        private BrandReadDto GetDefaultBrandInfo()
         {
-            var brand = await _brandService.GetPrimaryBrandInfoAsync();
-            if (brand == null) return NotFound();
-
-            // Trả về toàn bộ BrandDto, Frontend sẽ tự lấy address, hotline, social...
-            return Ok(brand);
-        }
-
-        /// <summary>
-        /// API phục vụ cấu hình App (Logo, Tên...) (Frontend gọi: GET /api/appConfig)
-        /// </summary>
-        [HttpGet("/api/appConfig")] // ⭐️ Route tuyệt đối
-        public async Task<IActionResult> GetAppConfig()
-        {
-            var brand = await _brandService.GetPrimaryBrandInfoAsync();
-            if (brand == null) return NotFound();
-            return Ok(brand);
-        }
-
-        // --- PUBLIC ENDPOINT (Thông tin chung) ---
-
-        /// <summary>
-        /// Lấy thông tin chi tiết về Brand/Thương hiệu chính.
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BrandReadDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetPrimaryBrand()
-        {
-            var brand = await _brandService.GetPrimaryBrandInfoAsync();
-            if (brand == null)
+            return new BrandReadDto
             {
-                return NotFound("Thông tin thương hiệu chưa được thiết lập.");
-            }
-            return Ok(brand);
+                Name = "Trà Chanh 96 (Mặc định)",
+                CompanyName = "Công ty TNHH Trà Chanh 96",
+                LogoUrl = "https://placehold.co/100x100?text=Logo",
+                Address = "Vui lòng cập nhật thông tin trong trang quản trị",
+                Hotline = "1900 xxxx",
+                EmailSupport = "support@trachanh96.vn",
+                Status = "Active"
+            };
         }
 
-        // --- ADMIN ENDPOINT ---
+        // --- PUBLIC API (Dùng cho cả Footer, AppConfig, Contact...) ---
 
-        /// <summary>
-        /// [ADMIN] Tạo mới hoặc cập nhật thông tin Brand chính.
-        /// </summary>
+        [HttpGet("info")] // Đặt route là /api/brand/info
+        [AllowAnonymous]  // Khách không cần login cũng xem được
+        public async Task<IActionResult> GetPublicBrandInfo()
+        {
+            var brand = await _brandService.GetPrimaryBrandInfoAsync();
+            // Luôn trả về dữ liệu (Thật hoặc Mặc định) để FE không bị crash
+            return Ok(brand ?? GetDefaultBrandInfo());
+        }
+
+        // --- ADMIN API (Quản lý) ---
+
         [HttpPost]
-        // Thường cần [Authorize(Roles = "Admin")] ở đây
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BrandReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateOrUpdateBrand([FromBody] BrandCreateDto brandDto)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create([FromBody] BrandCreateDto brandDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                var updatedBrand = await _brandService.CreateOrUpdateBrandAsync(brandDto);
-                return Ok(updatedBrand);
+                var result = await _brandService.CreateBrandAsync(brandDto);
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Update(int id, [FromBody] BrandUpdateDto brandDto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var result = await _brandService.UpdateBrandAsync(id, brandDto);
+            if (result == null) return NotFound();
+
+            return Ok(result);
         }
     }
 }

@@ -1,107 +1,80 @@
-﻿// Controllers/VoucherTemplateController.cs (CẬP NHẬT)
-using drinking_be.Dtos.VoucherDtos;
-using drinking_be.Interfaces;
+﻿using drinking_be.Dtos.VoucherDtos;
+using drinking_be.Enums;
+using drinking_be.Interfaces.MarketingInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
 {
-    [Route("api/admin/[controller]")] // Đặt trong /admin/
+    [Route("api/[controller]")]
     [ApiController]
-    // [Authorize(Roles = "Admin")] // Cần có xác thực Admin
-    public class VoucherTemplateController : ControllerBase
+    public class VoucherTemplatesController : ControllerBase
     {
-        private readonly IVoucherService _voucherService;
+        private readonly IVoucherTemplateService _templateService;
 
-        public VoucherTemplateController(IVoucherService voucherService)
+        public VoucherTemplatesController(IVoucherTemplateService templateService)
         {
-            _voucherService = voucherService;
+            _templateService = templateService;
         }
 
-        /// <summary>
-        /// [ADMIN] Lấy tất cả các mẫu voucher đã tạo.
-        /// </summary>
+        // GET: api/vouchertemplates?status=Active
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<VoucherTemplateReadDto>))]
-        public async Task<IActionResult> GetAllTemplates()
+        public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] PublicStatusEnum? status)
         {
-            var templates = await _voucherService.GetAllTemplatesAsync();
-            return Ok(templates);
+            var result = await _templateService.GetAllAsync(search, status);
+            return Ok(result);
         }
 
-        /// <summary>
-        /// [ADMIN] Lấy chi tiết mẫu voucher theo ID.
-        /// </summary>
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VoucherTemplateReadDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetTemplateById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            try
-            {
-                var template = await _voucherService.GetTemplateByIdAsync(id);
-                return Ok(template);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var result = await _templateService.GetByIdAsync(id);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
 
-        /// <summary>
-        /// [ADMIN] Tạo một mẫu voucher mới.
-        /// </summary>
+        // --- ADMIN ONLY ---
+
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(VoucherTemplateReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateTemplate([FromBody] VoucherTemplateCreateDto templateDto)
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Create([FromBody] VoucherTemplateCreateDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                var createdTemplate = await _voucherService.CreateTemplateAsync(templateDto);
-                return CreatedAtAction(nameof(GetTemplateById), new { id = createdTemplate.Id }, createdTemplate);
+                var result = await _templateService.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message); // Ví dụ: Ngày không hợp lệ
+                return BadRequest(new { message = ex.Message });
             }
         }
 
-        // ⭐️ ENDPOINT MỚI ĐƯỢC BỔ SUNG ⭐️
-
-        /// <summary>
-        /// [ADMIN] Phát hành (Issue) một voucher từ template cho User.
-        /// </summary>
-        [HttpPost("issue")]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(UserVoucherReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> IssueVoucherToUser([FromBody] VoucherIssueDto issueDto)
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Update(int id, [FromBody] VoucherTemplateUpdateDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                var issuedVoucher = await _voucherService.IssueVoucherAsync(issueDto);
-
-                // Trả về 201 Created (không có route cụ thể để lấy UserVoucher)
-                return StatusCode(StatusCodes.Status201Created, issuedVoucher);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message); // User hoặc Template không tồn tại
+                var result = await _templateService.UpdateAsync(id, dto);
+                if (result == null) return NotFound();
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message); // Lỗi khác
+                return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _templateService.DeleteAsync(id);
+            if (!result) return NotFound();
+            return NoContent();
         }
     }
 }

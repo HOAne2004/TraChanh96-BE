@@ -1,9 +1,11 @@
-﻿using System;
+﻿using drinking_be.Enums;
+using System;
 using System.Collections.Generic;
+using drinking_be.Interfaces;
 
 namespace drinking_be.Models;
 
-public partial class Category
+public partial class Category:ISoftDelete
 {
     public int Id { get; set; }
 
@@ -13,13 +15,13 @@ public partial class Category
 
     public string Name { get; set; } = null!;
 
-    public bool? IsActive { get; set; }
-
     public byte? SortOrder { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public PublicStatusEnum Status { get; set; } = PublicStatusEnum.Active;
 
     public virtual ICollection<Category> InverseParent { get; set; } = new List<Category>();
 

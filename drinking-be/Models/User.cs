@@ -1,15 +1,17 @@
-﻿using System;
+﻿using drinking_be.Enums;
+using drinking_be.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace drinking_be.Models;
 
-public partial class User
+public partial class User : ISoftDelete
 {
     public int Id { get; set; }
 
     public Guid? PublicId { get; set; }
 
-    public byte RoleId { get; set; }
+    public UserRoleEnum RoleId { get; set; } = UserRoleEnum.Customer;
 
     public string Username { get; set; } = null!;
 
@@ -25,14 +27,21 @@ public partial class User
 
     public bool? EmailVerified { get; set; }
 
-    public byte Status { get; set; }
+    public UserStatusEnum Status { get; set; } = UserStatusEnum.Active;
 
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 
     public DateTime? LastLogin { get; set; }
 
+    // ⭐ BỔ SUNG CHO AUTH
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
+
+    public string? ResetPasswordToken { get; set; }
+    public DateTime? ResetPasswordTokenExpiryTime { get; set; }
     public virtual Cart? Cart { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
@@ -47,7 +56,10 @@ public partial class User
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
-    public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
+    public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
 
     public virtual ICollection<UserVoucher> UserVouchers { get; set; } = new List<UserVoucher>();
+    public virtual Staff? Staff { get; set; }
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }

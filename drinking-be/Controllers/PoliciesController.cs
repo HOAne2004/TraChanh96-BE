@@ -1,77 +1,84 @@
-﻿// Controllers/PolicyController.cs
-using drinking_be.Dtos.PolicyDtos;
+﻿using drinking_be.Dtos.PolicyDtos;
+using drinking_be.Enums;
 using drinking_be.Interfaces.PolicyInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PolicyController : ControllerBase
+    public class PoliciesController : ControllerBase
     {
         private readonly IPolicyService _policyService;
 
-        public PolicyController(IPolicyService policyService)
+        public PoliciesController(IPolicyService policyService)
         {
             _policyService = policyService;
         }
 
-        // --- PUBLIC ENDPOINTS (Khách hàng) ---
+        // --- PUBLIC API ---
 
-        /// <summary>
-        /// Lấy danh sách tất cả các chính sách đang hoạt động.
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PolicyReadDto>))]
-        public async Task<IActionResult> GetActivePolicies()
+        [HttpGet("active")] // Route: /api/policies/active?brandId=1
+        [AllowAnonymous]
+        public async Task<IActionResult> GetActivePolicies([FromQuery] int brandId = 1) // Mặc định Brand 1
         {
-            var policies = await _policyService.GetActivePoliciesAsync();
+            var policies = await _policyService.GetActivePoliciesAsync(brandId);
             return Ok(policies);
         }
 
-        /// <summary>
-        /// Lấy chi tiết một chính sách theo Slug.
-        /// </summary>
         [HttpGet("{slug}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PolicyReadDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetPolicyBySlug(string slug)
+        [AllowAnonymous]
+        public async Task<IActionResult> GetBySlug(string slug)
         {
             var policy = await _policyService.GetPolicyBySlugAsync(slug);
-            if (policy == null)
-            {
-                return NotFound("Không tìm thấy chính sách này.");
-            }
+            if (policy == null) return NotFound("Chính sách không tồn tại.");
             return Ok(policy);
         }
 
-        // --- ADMIN ENDPOINT ---
+        // --- ADMIN API ---
 
-        /// <summary>
-        /// [ADMIN] Tạo chính sách mới.
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(PolicyReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreatePolicy([FromBody] PolicyCreateDto policyDto)
+        [HttpGet("admin")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> GetAll([FromQuery] int? brandId, [FromQuery] int? storeId, [FromQuery] PolicyReviewStatusEnum? status)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var result = await _policyService.GetAllPoliciesAsync(brandId, storeId, status);
+            return Ok(result);
+        }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Create([FromBody] PolicyCreateDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                var createdPolicy = await _policyService.CreatePolicyAsync(policyDto);
-
-                return CreatedAtAction(nameof(GetPolicyBySlug),
-                                       new { slug = createdPolicy.Slug },
-                                       createdPolicy);
+                var result = await _policyService.CreatePolicyAsync(dto);
+                return CreatedAtAction(nameof(GetBySlug), new { slug = result.Slug }, result);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Update(int id, [FromBody] PolicyUpdateDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var result = await _policyService.UpdatePolicyAsync(id, dto);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _policyService.DeletePolicyAsync(id);
+            if (!result) return NotFound();
+            return NoContent();
         }
     }
 }

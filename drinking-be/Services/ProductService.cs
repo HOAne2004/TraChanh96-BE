@@ -1,134 +1,176 @@
 ﻿using AutoMapper;
 using drinking_be.Dtos.ProductDtos;
+using drinking_be.Interfaces;
 using drinking_be.Interfaces.ProductInterfaces;
 using drinking_be.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using drinking_be.Utils; // Để dùng SlugGenerator
+using Microsoft.EntityFrameworkCore;
 
 namespace drinking_be.Services
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public ProductService(IProductRepository productRepository, IMapper mapper)
+        public ProductService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _productRepository = productRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        // --- Hàm hỗ trợ ánh xạ phức tạp (quan trọng nhất) ---
-        private ProductReadDto MapProductToReadDto(Product product)
+        public async Task<IEnumerable<ProductReadDto>> GetAllAsync(string? search, string? categorySlug, string? sort)
         {
-            var dto = _mapper.Map<ProductReadDto>(product);
+            var productRepo = _unitOfWork.Repository<Product>();
 
-            dto.AllowedSizeIds = product.ProductSizes?
-                 .Select(ps => (int)ps.SizeId).ToList() ?? new List<int>();
-
-            dto.AllowedIceLevelIds = product.ProductIceLevels?
-                .Select(pi => (int)pi.IceLevelId).ToList() ?? new List<int>();
-
-            dto.AllowedSugarLevelIds = product.ProductSugarLevels?
-                .Select(ps => (int)ps.SugarLevelId).ToList() ?? new List<int>();
-
-            return dto;
-        }
-
-        // --- Implement các phương thức CRUD ---
-
-        public async Task<IEnumerable<ProductReadDto>> GetAllProducts()
-        {
-            // LỖI: GetAll
-            var products = await _productRepository.GetAllAsync(); // Đổi thành GetAllAsync
-            return products.Select(p => MapProductToReadDto(p)).ToList();
-        }
-
-        public async Task<ProductReadDto?> GetProductById(int id)
-        {
-            // Sử dụng GetProductWithDependencies để tải cả các tùy chọn M:N
-            var product = await _productRepository.GetProductWithDependencies(id);
-            if (product == null)
-            {
-                return null;
-            }
-
-            return MapProductToReadDto(product);
-        }
-
-        public async Task<ProductReadDto> CreateProduct(ProductCreateDto productDto)
-        {
-            var product = _mapper.Map<Product>(productDto);
-
-            // Thêm Product vào DB để lấy Product.Id (cần thiết cho các bảng liên kết)
-            await _productRepository.AddAsync(product);
-
-            // Cập nhật các bảng liên kết M:N
-            _productRepository.UpdateProductOptions(
-                product,
-                productDto.SizeIds,
-                productDto.IceLevelIds,
-                productDto.SugarLevelIds
+            // 1. Lấy dữ liệu kèm Category và Size (Eager Loading)
+            // Chuỗi include phải khớp tên Property trong Entity Product
+            var products = await productRepo.GetAllAsync(
+                includeProperties: "Category,ProductSizes,ProductSizes.Size"
             );
 
-            await _productRepository.SaveChangesAsync();
-
-            // Tải lại Product với các Dependencies để trả về DTO đầy đủ
-            var createdProduct = await _productRepository.GetProductWithDependencies(product.Id);
-            return MapProductToReadDto(createdProduct!);
-        }
-
-        public async Task<ProductReadDto?> UpdateProduct(int id, ProductCreateDto productDto)
-        {
-            // Lấy Product cũ cùng với các Dependencies (để Repository có thể xử lý việc xóa/thêm liên kết)
-            var existingProduct = await _productRepository.GetProductWithDependencies(id);
-            if (existingProduct == null)
+            // 2. Lọc theo tên (Search)
+            if (!string.IsNullOrEmpty(search))
             {
-                return null;
+                products = products.Where(p => p.Name.ToLower().Contains(search.ToLower()));
             }
 
-            // Cập nhật các trường cơ bản (tên, giá, category)
-            _mapper.Map(productDto, existingProduct);
+            // 3. Lọc theo Category Slug
+            if (!string.IsNullOrEmpty(categorySlug))
+            {
+                products = products.Where(p => p.Category != null && p.Category.Slug == categorySlug);
+            }
 
-            // Cập nhật các bảng liên kết M:N
-            _productRepository.UpdateProductOptions(
-                existingProduct,
-                productDto.SizeIds,
-                productDto.IceLevelIds,
-                productDto.SugarLevelIds
+            // 4. Sắp xếp
+            if (!string.IsNullOrEmpty(sort))
+            {
+                products = sort switch
+                {
+                    "price_asc" => products.OrderBy(p => p.BasePrice),
+                    "price_desc" => products.OrderByDescending(p => p.BasePrice),
+                    "newest" => products.OrderByDescending(p => p.CreatedAt),
+                    _ => products
+                };
+            }
+
+            return _mapper.Map<IEnumerable<ProductReadDto>>(products);
+        }
+
+        public async Task<ProductReadDto?> GetByIdAsync(int id)
+        {
+            var product = await _unitOfWork.Repository<Product>().GetFirstOrDefaultAsync(
+                filter: p => p.Id == id,
+                includeProperties: "Category,ProductSizes,ProductSizes.Size"
             );
 
-            // Lưu thay đổi
-            _productRepository.Update(existingProduct);
-            await _productRepository.SaveChangesAsync();
-
-            // Trả về DTO sau khi cập nhật
-            return MapProductToReadDto(existingProduct);
+            return product == null ? null : _mapper.Map<ProductReadDto>(product);
         }
 
-        public async Task<bool> DeleteProduct(int id)
+        public async Task<ProductReadDto?> GetBySlugAsync(string slug)
         {
-            var product = await _productRepository.GetProductWithDependencies(id);
-            if (product == null)
+            var product = await _unitOfWork.Repository<Product>().GetFirstOrDefaultAsync(
+                filter: p => p.Slug == slug,
+                includeProperties: "Category,ProductSizes,ProductSizes.Size"
+            );
+
+            return product == null ? null : _mapper.Map<ProductReadDto>(product);
+        }
+
+        public async Task<ProductReadDto> CreateAsync(ProductCreateDto createDto)
+        {
+            var productRepo = _unitOfWork.Repository<Product>();
+            var productSizeRepo = _unitOfWork.Repository<ProductSize>();
+
+            // 1. Map DTO -> Entity
+            var product = _mapper.Map<Product>(createDto);
+
+            // 2. Tạo Slug và PublicId
+            product.Slug = SlugGenerator.GenerateSlug(product.Name);
+            product.PublicId = Guid.NewGuid().ToString();
+
+            // 3. Lưu Product trước để lấy ID
+            await productRepo.AddAsync(product);
+            await _unitOfWork.SaveChangesAsync();
+
+            // 4. Xử lý thêm Size (Nếu có chọn Size)
+            if (createDto.SizeIds != null && createDto.SizeIds.Any())
             {
-                return false;
+                foreach (var sizeId in createDto.SizeIds)
+                {
+                    var productSize = new ProductSize
+                    {
+                        ProductId = product.Id,
+                        SizeId = (short)sizeId // Ép kiểu về short vì SizeId là short
+                    };
+                    await productSizeRepo.AddAsync(productSize);
+                }
+                await _unitOfWork.SaveChangesAsync();
             }
 
-            // Lưu ý: Tùy thuộc vào cấu hình Cascade Delete của CSDL, 
-            // việc xóa Product có thể tự động xóa các mục trong bảng liên kết.
-            // Nếu không, cần xóa thủ công các mục trong Product_Size, Product_Topping, v.v.
+            // 5. Load lại để trả về full thông tin
+            return (await GetByIdAsync(product.Id))!;
+        }
 
-            _productRepository.Delete(product);
-            await _productRepository.SaveChangesAsync();
+        public async Task<ProductReadDto?> UpdateAsync(int id, ProductUpdateDto updateDto)
+        {
+            var productRepo = _unitOfWork.Repository<Product>();
+            var productSizeRepo = _unitOfWork.Repository<ProductSize>();
+
+            var product = await productRepo.GetFirstOrDefaultAsync(p => p.Id == id);
+            if (product == null) return null;
+
+            // 1. Map thông tin cơ bản
+            _mapper.Map(updateDto, product);
+
+            // Nếu đổi tên thì đổi Slug (tùy logic, thường hạn chế đổi slug để SEO)
+            if (!string.IsNullOrEmpty(updateDto.Name))
+            {
+                product.Slug = SlugGenerator.GenerateSlug(updateDto.Name);
+            }
+
+            product.UpdatedAt = DateTime.UtcNow;
+            productRepo.Update(product);
+
+            // 2. Xử lý cập nhật Size (Xóa cũ -> Thêm mới) - Logic đơn giản nhất
+            if (updateDto.SizeIds != null)
+            {
+                // Lấy các size cũ của product này
+                var oldSizes = await productSizeRepo.GetAllAsync(filter: ps => ps.ProductId == id);
+
+                // Xóa hết size cũ
+                productSizeRepo.DeleteRange(oldSizes);
+
+                // Thêm size mới
+                foreach (var sizeId in updateDto.SizeIds)
+                {
+                    await productSizeRepo.AddAsync(new ProductSize
+                    {
+                        ProductId = id,
+                        SizeId = (short)sizeId
+                    });
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            return (await GetByIdAsync(id))!;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var productRepo = _unitOfWork.Repository<Product>();
+            var product = await productRepo.GetByIdAsync(id);
+
+            if (product == null) return false;
+
+            // Soft Delete (Xóa mềm)
+            // product.DeletedAt = DateTime.UtcNow;
+            // productRepo.Update(product);
+
+            // Hard Delete (Xóa cứng)
+            productRepo.Delete(product);
+            await _unitOfWork.SaveChangesAsync();
+
             return true;
-        }
-
-        public async Task<IEnumerable<ProductReadDto>> GetAllProductsAsync(string? productType)
-        {
-            // ⭐️ GỌI: Hàm repo mới (sẽ tạo ở bước sau)
-            var products = await _productRepository.GetAllAsync(productType);
-            return products.Select(p => MapProductToReadDto(p)).ToList();
         }
     }
 }

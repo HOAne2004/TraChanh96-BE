@@ -1,37 +1,30 @@
-﻿// Dtos/CartDtos/CartItemCreateDto.cs
-using System.ComponentModel.DataAnnotations;
-using drinking_be.Dtos.OrderDtos; // Tận dụng DTO của Order
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace drinking_be.Dtos.CartDtos
 {
-    // Chúng ta có thể TÁI SỬ DỤNG cấu trúc của OrderItemCreateDto
-    // Nhưng để rõ ràng, ta sẽ tạo DTO riêng (hoặc kế thừa)
-
-    public class CartToppingCreateDto
-    {
-        [Required]
-        public int ProductId { get; set; } // ToppingId
-
-        [Required]
-        [Range(1, 50)]
-        public int Quantity { get; set; }
-    }
-
     public class CartItemCreateDto
     {
         [Required]
-        public int ProductId { get; set; } // Trà sữa
+        public int ProductId { get; set; }
 
-        [Required]
-        [Range(1, 100)]
+        [Range(1, 100, ErrorMessage = "Số lượng phải ít nhất là 1.")]
         public int Quantity { get; set; }
 
-        // Tùy chọn bắt buộc
+        [Required]
         public short SizeId { get; set; }
-        public short SugarLevelId { get; set; }
-        public short IceLevelId { get; set; }
 
-        // Danh sách các topping đính kèm
-        public List<CartToppingCreateDto> Toppings { get; set; } = new List<CartToppingCreateDto>();
+        public short? SugarLevelId { get; set; }
+        public short? IceLevelId { get; set; }
+
+        public string? Note { get; set; }
+
+        // Danh sách topping (nếu có)
+        public List<CartToppingCreateDto>? Toppings { get; set; }
+    }
+
+    public class CartToppingCreateDto
+    {
+        public int ProductId { get; set; } // ID của sản phẩm Topping
+        public int Quantity { get; set; } // Số lượng topping trên 1 ly
     }
 }

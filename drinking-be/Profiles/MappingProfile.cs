@@ -1,268 +1,418 @@
 ﻿using AutoMapper;
+using drinking_be.Dtos.AddressDtos;
+using drinking_be.Dtos.AttendanceDtos;
+using drinking_be.Dtos.BannerDtos;
 using drinking_be.Dtos.BrandDtos;
 using drinking_be.Dtos.CartDtos;
 using drinking_be.Dtos.CategoryDtos;
 using drinking_be.Dtos.CommentDtos;
+using drinking_be.Dtos.FranchiseDtos;
+using drinking_be.Dtos.InventoryDtos;
+using drinking_be.Dtos.MaterialDtos;
 using drinking_be.Dtos.MembershipDtos;
 using drinking_be.Dtos.MembershipLevelDtos;
 using drinking_be.Dtos.NewsDtos;
-using drinking_be.Dtos.OptionDtos;
+using drinking_be.Dtos.NotificationDtos;
 using drinking_be.Dtos.OrderDtos;
+using drinking_be.Dtos.OrderItemDtos;
+using drinking_be.Dtos.OrderPaymentDtos;
 using drinking_be.Dtos.PaymentMethodDtos;
+using drinking_be.Dtos.PayslipDtos;
+using drinking_be.Dtos.PolicyDtos;
 using drinking_be.Dtos.ProductDtos;
 using drinking_be.Dtos.ReservationDtos;
 using drinking_be.Dtos.ReviewDtos;
+using drinking_be.Dtos.RoomDtos;
 using drinking_be.Dtos.ShopTableDtos;
+using drinking_be.Dtos.SizeDtos;
+using drinking_be.Dtos.SocialMediaDtos;
+using drinking_be.Dtos.StaffDtos;
 using drinking_be.Dtos.StoreDtos;
+using drinking_be.Dtos.SupplyOrderDtos;
 using drinking_be.Dtos.UserDtos;
 using drinking_be.Dtos.VoucherDtos;
 using drinking_be.Enums;
 using drinking_be.Models;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 
 public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        // --- Mapping từ Model (CSDL) sang DTO (Trả về) ---
-        CreateMap<Category, CategoryReadDto>();
+        // --- Address Mappings ---
+        CreateMap<AddressCreateDto, Address>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => PublicStatusEnum.Active))
+            .ReverseMap();
+        CreateMap<Address, AddressReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+        CreateMap<AddressUpdateDto, Address>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-        // --- Mapping từ DTO (Input) sang Model (CSDL) ---
-        // AutoMapper sẽ tự tạo ra Slug và các trường khác
-        CreateMap<CategoryCreateDto, Category>();
+        // --- Attendance Mappings ---
+        CreateMap<AttendanceCreateDto, Attendance>().ReverseMap();
+        CreateMap<Attendance, AttendanceReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.StaffName, opt => opt.MapFrom(src => src.Staff.FullName))
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name));
+        CreateMap<AttendanceUpdateDto, Attendance>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-        // --- Product Mapping ---
-        // Mapping Input DTO sang Model (CSDL)
-        CreateMap<ProductCreateDto, Product>()
-            .ForMember(dest => dest.Slug, opt => opt.MapFrom(src => src.Name.ToLower().Replace(" ", "-")));
+        // --- Banner Mappings ---
+        CreateMap<Banner, BannerReadDto>();
+        CreateMap<BannerCreateDto, Banner>();
 
-        // Mapping Model sang Read DTO
-        CreateMap<Product, ProductReadDto>();
+        // --- Brand Mappings ---
+        CreateMap<BrandCreateDto, Brand>().ReverseMap();
+        CreateMap<Brand, BrandReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+        CreateMap<BrandUpdateDto, Brand>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-        // Entity OrderItem (Topping) -> OrderToppingReadDto
-        CreateMap<OrderItem, OrderToppingReadDto>()
-            .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
-            .ForMember(dest => dest.ProductName, opt => opt.Ignore()) // Sẽ ánh xạ thủ công ở Service
-            .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.BasePrice));
-
-        // Entity OrderItem (Món chính) -> OrderItemReadDto
-        CreateMap<OrderItem, OrderItemReadDto>()
-            // Bỏ qua các trường cần tra cứu (Name/Label)
-            .ForMember(dest => dest.ProductName, opt => opt.Ignore())
-            .ForMember(dest => dest.SizeLabel, opt => opt.Ignore())
-            .ForMember(dest => dest.SugarLabel, opt => opt.Ignore())
-            .ForMember(dest => dest.IceLabel, opt => opt.Ignore())
-            // Bỏ qua Toppings vì chúng ta sẽ ánh xạ thủ công (hoặc sử dụng cấu trúc ProjectTo)
-            .ForMember(dest => dest.Toppings, opt => opt.Ignore());
-
-        // Entity Order -> OrderReadDto
-        CreateMap<Order, OrderReadDto>()
-            // Ánh xạ Status từ short sang chuỗi (Enum)
-            .ForMember(dest => dest.Status,
-                       opt => opt.MapFrom(src => ((OrderStatusEnum)src.Status).ToString()))
-            // Bỏ qua Items vì chúng ta sẽ tự điền Items đã được ánh xạ ở Service
+        // --- Cart Mappings ---
+        CreateMap<Cart, CartReadDto>()
+            .ForMember(dest => dest.TotalAmount, opt => opt.Ignore())
             .ForMember(dest => dest.Items, opt => opt.Ignore());
 
-        // Entity News -> NewsReadDto
-        CreateMap<News, NewsReadDto>()
-             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+        // --- CartItem Mappings ---
+        CreateMap<CartItemCreateDto, CartItem>()
+             .ForMember(dest => dest.CartId, opt => opt.Ignore())
+             .ForMember(dest => dest.SugarLevel, opt => opt.MapFrom(src => src.SugarLevelId.HasValue ? (SugarLevelEnum)src.SugarLevelId.Value : SugarLevelEnum.S100))
+             .ForMember(dest => dest.IceLevel, opt => opt.MapFrom(src => src.IceLevelId.HasValue ? (IceLevelEnum)src.IceLevelId.Value : IceLevelEnum.I100));
+        CreateMap<CartItemUpdateDto, CartItem>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+        CreateMap<CartItem, CartItemReadDto>()
+            .ForMember(dest => dest.ProductName, opt => opt.Ignore())
+            .ForMember(dest => dest.ImageUrl, opt => opt.Ignore())
+            .ForMember(dest => dest.SizeLabel, opt => opt.Ignore())
+            .ForMember(dest => dest.Toppings, opt => opt.Ignore())
+            .ForMember(dest => dest.SugarLabel, opt => opt.MapFrom(src => src.SugarLevel.ToString()))
+            .ForMember(dest => dest.IceLabel, opt => opt.MapFrom(src => src.IceLevel.ToString()));
+        CreateMap<CartItem, CartToppingReadDto>()
+            .ForMember(dest => dest.ProductName, opt => opt.Ignore());
 
-        // DTO NewsCreateDto -> Entity News
+        // --- Category Mappings ---
+        CreateMap<CategoryCreateDto, Category>()
+             .ForMember(dest => dest.Slug, opt => opt.MapFrom(src => src.Name.ToLower().Replace(" ", "-")))
+             .ReverseMap();
+        CreateMap<Category, CategoryReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.Children, opt => opt.MapFrom(src => src.InverseParent));
+        CreateMap<CategoryUpdateDto, Category>()
+            .ForMember(dest => dest.Slug, opt => opt.Condition(src => src.Slug != null || src.Name != null))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Comment Mappings ---
+        CreateMap<CommentCreateDto, Comment>()
+             .ForMember(dest => dest.UserId, opt => opt.Ignore())
+             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => ReviewStatusEnum.Pending))
+             .ReverseMap();
+        CreateMap<Comment, CommentReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Username))
+            .ForMember(dest => dest.UserThumbnailUrl, opt => opt.MapFrom(src => src.User.ThumbnailUrl))
+            .ForMember(dest => dest.Replies, opt => opt.MapFrom(src => src.InverseParent));
+
+        // --- FranchiseRequest Mappings ---
+        CreateMap<FranchiseCreateDto, FranchiseRequest>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => FranchiseStatusEnum.Pending))
+            .ReverseMap();
+        CreateMap<FranchiseRequest, FranchiseReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.ReviewerName, opt => opt.MapFrom(src => src.Reviewer != null ? src.Reviewer.Username : "Chưa phân công"));
+        CreateMap<FranchiseUpdateDto, FranchiseRequest>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Inventory Mappings ---
+        CreateMap<InventoryCreateDto, Inventory>()
+            .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ReverseMap();
+        CreateMap<Inventory, InventoryReadDto>()
+            .ForMember(dest => dest.MaterialName, opt => opt.MapFrom(src => src.Material.Name))
+            .ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.Material.BaseUnit))
+            .ForMember(dest => dest.MaterialImageUrl, opt => opt.MapFrom(src => src.Material.ImageUrl))
+            .ForMember(dest => dest.MinStockAlert, opt => opt.MapFrom(src => src.Material.MinStockAlert))
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : "Kho Tổng (HQ)"))
+            .ForMember(dest => dest.IsLowStock, opt => opt.MapFrom(src => src.Material.MinStockAlert.HasValue && src.Quantity <= src.Material.MinStockAlert.Value));
+        CreateMap<InventoryUpdateDto, Inventory>()
+            .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        // --- Material Mappings ---
+        CreateMap<MaterialCreateDto, Material>()
+            .ForMember(dest => dest.PublicId, opt => opt.Ignore())
+            .ForMember(dest => dest.Inventories, opt => opt.Ignore())
+            .ForMember(dest => dest.SupplyOrderItems, opt => opt.Ignore())
+            .ReverseMap();
+        CreateMap<Material, MaterialReadDto>()
+            .ForMember(dest => dest.CostPerBaseUnit, opt => opt.MapFrom(src => src.CostPerBaseUnit));
+        CreateMap<MaterialUpdateDto, Material>()
+            .ForMember(dest => dest.PublicId, opt => opt.Ignore())
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- MembershipLevel Mappings ---
+        CreateMap<MembershipLevelCreateDto, MembershipLevel>().ReverseMap();
+        CreateMap<MembershipLevel, MembershipLevelReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+        CreateMap<MembershipLevelUpdateDto, MembershipLevel>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Membership Mappings ---
+        CreateMap<MembershipCreateDto, Membership>()
+            .ForMember(dest => dest.CardCode, opt => opt.Ignore())
+            .ReverseMap();
+        CreateMap<Membership, MembershipReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.LevelName, opt => opt.MapFrom(src => src.Level.Name))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Username));
+
+        // --- News Mappings ---
         CreateMap<NewsCreateDto, News>()
-             .ForMember(dest => dest.Slug, opt => opt.MapFrom(src =>
-                 src.Title.ToLower().Replace(" ", "-") + "-" + DateTime.UtcNow.Ticks)) // Tạo slug đơn giản
-             .ForMember(dest => dest.PublishedDate, opt => opt.Condition(src => src.Status == "Published")); // Chỉ đặt nếu trạng thái là Published
+             .ForMember(dest => dest.Slug, opt => opt.Ignore())
+             .ForMember(dest => dest.PublishedDate, opt => opt.Condition(src => src.Status == ContentStatusEnum.Published))
+             .ReverseMap();
+        CreateMap<News, NewsReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Username));
+        CreateMap<NewsUpdateDto, News>()
+            .ForMember(dest => dest.PublishedDate, opt => opt.Condition((src, dest) => src.Status == ContentStatusEnum.Published && dest.PublishedDate == null))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-        // ----------------------------------------------------------------
+        // --- Notification Mappings ---
+        CreateMap<Notification, NotificationReadDto>();
+        CreateMap<NotificationCreateDto, Notification>()
+            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString())); // Enum -> String
+
+        // --- Order Mappings ---
+        CreateMap<OrderCreateDto, Order>()
+             .ForMember(dest => dest.OrderCode, opt => opt.Ignore())
+             .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => DateTime.UtcNow))
+             .ForMember(dest => dest.TotalAmount, opt => opt.Ignore())
+             .ForMember(dest => dest.GrandTotal, opt => opt.Ignore())
+             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => OrderStatusEnum.New))
+             .ForMember(dest => dest.OrderItems, opt => opt.Ignore());
+        CreateMap<Order, OrderReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+            .ForMember(dest => dest.Items, opt => opt.Ignore())
+            .ForMember(dest => dest.PaymentMethod, opt => opt.MapFrom(src => src.PaymentMethod));
+
+        // --- OrderItem Mappings ---
+        CreateMap<OrderItemCreateDto, OrderItem>()
+             .ForMember(dest => dest.OrderId, opt => opt.Ignore())
+             .ForMember(dest => dest.BasePrice, opt => opt.Ignore())
+             .ForMember(dest => dest.FinalPrice, opt => opt.Ignore())
+             .ForMember(dest => dest.ParentItem, opt => opt.Ignore())
+             .ForMember(dest => dest.ParentItemId, opt => opt.Ignore())
+             .ForMember(dest => dest.SugarLevel, opt => opt.MapFrom(src => src.SugarLevel.HasValue ? (SugarLevelEnum)src.SugarLevel.Value : SugarLevelEnum.S100))
+             .ForMember(dest => dest.IceLevel, opt => opt.MapFrom(src => src.IceLevel.HasValue ? (IceLevelEnum)src.IceLevel.Value : IceLevelEnum.I100));
+        CreateMap<OrderItem, OrderItemReadDto>()
+            .ForMember(dest => dest.ProductName, opt => opt.Ignore())
+            .ForMember(dest => dest.SizeLabel, opt => opt.Ignore())
+            .ForMember(dest => dest.Toppings, opt => opt.Ignore())
+            .ForMember(dest => dest.SugarLabel, opt => opt.MapFrom(src => src.SugarLevel.ToString()))
+            .ForMember(dest => dest.IceLabel, opt => opt.MapFrom(src => src.IceLevel.ToString()));
+        CreateMap<OrderItem, OrderToppingReadDto>()
+            .ForMember(dest => dest.ProductName, opt => opt.Ignore())
+            .ForMember(dest => dest.BasePrice, opt => opt.MapFrom(src => src.BasePrice));
+
+        // --- OrderPayment Mappings ---
+        CreateMap<OrderPayment, OrderPaymentReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.PaymentMethod, opt => opt.MapFrom(src => src.PaymentMethod));
+
+        // --- PaymentMethod Mappings ---
+        CreateMap<PaymentMethodCreateDto, PaymentMethod>().ReverseMap();
+        CreateMap<PaymentMethod, PaymentMethodReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.PaymentType, opt => opt.MapFrom(src => src.PaymentType.ToString()));
+        CreateMap<PaymentMethodUpdateDto, PaymentMethod>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Payslip Mappings ---
+        CreateMap<PayslipCreateDto, Payslip>().ReverseMap();
+        CreateMap<Payslip, PayslipReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.StaffName, opt => opt.MapFrom(src => src.Staff.FullName))
+            .ForMember(dest => dest.StaffPosition, opt => opt.MapFrom(src => src.Staff.Position.ToString()));
+        CreateMap<PayslipUpdateDto, Payslip>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Policy Mappings ---
+        CreateMap<PolicyCreateDto, Policy>()
+             .ForMember(dest => dest.Slug, opt => opt.MapFrom(src => src.Title.ToLower().Replace(" ", "-")))
+             .ReverseMap();
+        CreateMap<Policy, PolicyReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Brand.Name))
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : null));
+        CreateMap<PolicyUpdateDto, Policy>()
+            .ForMember(dest => dest.Slug, opt => opt.Condition((src, dest) => src.Slug != null || src.Title != null))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Product Mappings ---
+        CreateMap<ProductCreateDto, Product>()
+             .ForMember(dest => dest.Slug, opt => opt.Ignore())
+             .ForMember(dest => dest.ProductSizes, opt => opt.Ignore())
+             .ReverseMap();
+        CreateMap<Product, ProductReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+            .ForMember(dest => dest.AvailableSizes, opt => opt.MapFrom(src => src.ProductSizes.Select(ps => ps.Size)));
+        CreateMap<ProductUpdateDto, Product>()
+             .ForMember(dest => dest.Slug, opt => opt.Condition(src => src.Slug != null))
+             .ForMember(dest => dest.ProductSizes, opt => opt.Ignore())
+             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Reservation Mappings ---
+        CreateMap<ReservationCreateDto, Reservation>()
+             .ForMember(dest => dest.ReservationCode, opt => opt.Ignore())
+             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => ReservationStatusEnum.Pending))
+             .ForMember(dest => dest.AssignedTableId, opt => opt.Ignore())
+             .ReverseMap();
+        CreateMap<Reservation, ReservationReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.Username : null))
+            .ForMember(dest => dest.AssignedTableName, opt => opt.MapFrom(src => src.AssignedTable != null ? src.AssignedTable.Name : null));
+        CreateMap<ReservationUpdateDto, Reservation>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Review Mappings ---
+        CreateMap<ReviewCreateDto, Review>()
+             .ForMember(dest => dest.UserId, opt => opt.Ignore())
+             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => ReviewStatusEnum.Pending))
+             .ReverseMap();
+        CreateMap<Review, ReviewReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Username))
+            .ForMember(dest => dest.UserThumbnailUrl, opt => opt.MapFrom(src => src.User.ThumbnailUrl));
+        CreateMap<ReviewUpdateDto, Review>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Room Mappings ---
+        CreateMap<RoomCreateDto, Room>().ReverseMap();
+        CreateMap<Room, RoomReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+            .ForMember(dest => dest.TotalTables, opt => opt.MapFrom(src => src.ShopTables.Count));
+        CreateMap<RoomUpdateDto, Room>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- ShopTable Mappings ---
+        CreateMap<ShopTableCreateDto, ShopTable>().ReverseMap();
+        CreateMap<ShopTable, ShopTableReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store.Name))
+            .ForMember(dest => dest.MergedWithTableName, opt => opt.MapFrom(src => src.MergedWithTable != null ? src.MergedWithTable.Name : null))
+            .ForMember(dest => dest.MergedTables, opt => opt.MapFrom(src => src.InverseMergedWithTable))
+            .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room != null ? src.Room.Name : null));
+        CreateMap<ShopTableUpdateDto, ShopTable>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Size Mappings ---
+        CreateMap<Size, SizeReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+        CreateMap<SizeCreateDto, Size>().ReverseMap();
+        CreateMap<SizeUpdateDto, Size>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- SocialMedia Mappings ---
+        CreateMap<SocialMediaCreateDto, SocialMedia>().ReverseMap();
+        CreateMap<SocialMedia, SocialMediaReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Brand.Name))
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : null));
+        CreateMap<SocialMediaUpdateDto, SocialMedia>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // --- Staff Mappings ---
+        CreateMap<StaffCreateDto, Staff>()
+            .ForMember(dest => dest.PublicId, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => PublicStatusEnum.Active))
+            .ReverseMap();
+        CreateMap<Staff, StaffReadDto>()
+            .ForMember(dest => dest.Position, opt => opt.MapFrom(src => src.Position.ToString()))
+            .ForMember(dest => dest.SalaryType, opt => opt.MapFrom(src => src.SalaryType.ToString()))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Username))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+            .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.ThumbnailUrl))
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : "Trụ sở chính"));
+        CreateMap<StaffUpdateDto, Staff>()
+            .ForMember(dest => dest.PublicId, opt => opt.Ignore())
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
         // --- Store Mappings ---
-        // ----------------------------------------------------------------
-
-        // Entity Store -> StoreReadDto
-        CreateMap<Store, StoreReadDto>()
-            .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Brand.Name)); // Cần Include Brand
-
-        // DTO StoreCreateDto -> Entity Store
         CreateMap<StoreCreateDto, Store>()
-            .ForMember(dest => dest.Slug, opt => opt.MapFrom(src =>
-                 src.Name.ToLower().Replace(" ", "-") + "-" + DateTime.UtcNow.Ticks)); // Tạo slug đơn giản
+             .ForMember(dest => dest.Slug, opt => opt.Ignore())
+             .ReverseMap();
+        CreateMap<Store, StoreReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Brand.Name))
+            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address));
+        CreateMap<StoreUpdateDto, Store>()
+             .ForMember(dest => dest.Slug, opt => opt.Condition(src => src.Slug != null))
+             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-        // ----------------------------------------------------------------
-        // --- Brand Mappings ---
-        // ----------------------------------------------------------------
+        // --- SupplyOrder Mappings ---
+        CreateMap<SupplyOrderCreateDto, SupplyOrder>()
+            .ForMember(dest => dest.SupplyOrderItems, opt => opt.MapFrom(src => src.Items))
+            .ForMember(dest => dest.OrderCode, opt => opt.Ignore())
+            .ForMember(dest => dest.TotalAmount, opt => opt.Ignore())
+            .ForMember(dest => dest.Status, opt => opt.Ignore())
+            .ForMember(dest => dest.PublicId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedByUserId, opt => opt.Ignore())
+            .ReverseMap();
+        CreateMap<SupplyOrderItemCreateDto, SupplyOrderItem>()
+            .ForMember(dest => dest.Unit, opt => opt.Ignore())
+            .ForMember(dest => dest.CostPerUnit, opt => opt.Ignore())
+            .ForMember(dest => dest.TotalCost, opt => opt.Ignore());
+        CreateMap<SupplyOrder, SupplyOrderReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : "Kho Tổng (HQ)"))
+            .ForMember(dest => dest.CreatedByName, opt => opt.MapFrom(src => src.CreatedBy.Username))
+            .ForMember(dest => dest.ApprovedByName, opt => opt.MapFrom(src => src.ApprovedBy != null ? src.ApprovedBy.Username : null))
+            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.SupplyOrderItems));
+        CreateMap<SupplyOrderItem, SupplyOrderItemReadDto>()
+            .ForMember(dest => dest.MaterialName, opt => opt.MapFrom(src => src.Material.Name))
+            .ForMember(dest => dest.MaterialImageUrl, opt => opt.MapFrom(src => src.Material.ImageUrl));
+        CreateMap<SupplyOrderUpdateDto, SupplyOrder>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-        // Entity Brand -> BrandReadDto
-        CreateMap<Brand, BrandReadDto>();
+        // --- User Mappings ---
+        CreateMap<UserRegisterDto, User>()
+            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+            .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => UserRoleEnum.Customer))
+            .ReverseMap();
+        CreateMap<User, UserReadDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.RoleId.ToString()));
+        CreateMap<UserUpdateDto, User>()
+            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-        // DTO BrandCreateDto -> Entity Brand
-        CreateMap<BrandCreateDto, Brand>();
-
-        // Trong Constructor của MappingProfile:
-
-        CreateMap<SocialMedia, SocialMediaDto>();
-
-        CreateMap<Brand, BrandReadDto>()
-            .ForMember(dest => dest.SocialMedia, opt => opt.MapFrom(src => src.SocialMedia));
-
-        // ----------------------------------------------------------------
-        // --- Payment Method Mappings ---
-        // ----------------------------------------------------------------
-
-        // Entity PaymentMethod -> PaymentMethodReadDto
-        CreateMap<PaymentMethod, PaymentMethodReadDto>();
-
-        // DTO PaymentMethodCreateDto -> Entity PaymentMethod
-        CreateMap<PaymentMethodCreateDto, PaymentMethod>();
-
-        // ----------------------------------------------------------------
-        // --- Membership Level Mappings ---
-        // ----------------------------------------------------------------
-
-        // Entity MembershipLevel -> MembershipLevelReadDto
-        CreateMap<MembershipLevel, MembershipLevelReadDto>();
-
-        // DTO MembershipLevelCreateDto -> Entity MembershipLevel
-        CreateMap<MembershipLevelCreateDto, MembershipLevel>();
-
-        // ----------------------------------------------------------------
-        // --- Voucher Template Mappings ---
-        // ----------------------------------------------------------------
-
-        // Entity VoucherTemplate -> VoucherTemplateReadDto
+        // --- VoucherTemplate Mappings ---
+        CreateMap<VoucherTemplateCreateDto, VoucherTemplate>().ReverseMap();
         CreateMap<VoucherTemplate, VoucherTemplateReadDto>()
-            // Ánh xạ LevelName từ Navigation Property, xử lý null
-            .ForMember(dest => dest.LevelName, opt => opt.MapFrom(src =>
-                src.LevelId.HasValue ? src.Level.Name : "Tất cả"));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.LevelName, opt => opt.MapFrom(src => src.Level != null ? src.Level.Name : "Tất cả"));
+        CreateMap<VoucherTemplateUpdateDto, VoucherTemplate>()
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
 
-        // DTO VoucherTemplateCreateDto -> Entity VoucherTemplate
-        CreateMap<VoucherTemplateCreateDto, VoucherTemplate>();
-
-        // ----------------------------------------------------------------
-        // --- User Voucher Mappings ---
-        // ----------------------------------------------------------------
-
-        // Entity UserVoucher -> UserVoucherReadDto
+        // --- UserVoucher Mappings ---
+        CreateMap<UserVoucherCreateDto, UserVoucher>()
+             .ForMember(dest => dest.VoucherCode, opt => opt.Condition(src => src.VoucherCode != null))
+             .ForMember(dest => dest.IssuedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
+             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => UserVoucherStatusEnum.Unused))
+             .ForMember(dest => dest.UsedDate, opt => opt.Ignore())
+             .ForMember(dest => dest.OrderIdUsed, opt => opt.Ignore())
+             .ReverseMap();
         CreateMap<UserVoucher, UserVoucherReadDto>()
-            // Ánh xạ chi tiết từ Template lồng nhau
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
             .ForMember(dest => dest.TemplateName, opt => opt.MapFrom(src => src.VoucherTemplate.Name))
             .ForMember(dest => dest.DiscountValue, opt => opt.MapFrom(src => src.VoucherTemplate.DiscountValue))
             .ForMember(dest => dest.DiscountType, opt => opt.MapFrom(src => src.VoucherTemplate.DiscountType))
             .ForMember(dest => dest.MinOrderValue, opt => opt.MapFrom(src => src.VoucherTemplate.MinOrderValue))
             .ForMember(dest => dest.MaxDiscountAmount, opt => opt.MapFrom(src => src.VoucherTemplate.MaxDiscountAmount));
-
-        // ----------------------------------------------------------------
-        // --- Membership Mappings ---
-        // ----------------------------------------------------------------
-
-        // Entity Membership -> MembershipReadDto
-        CreateMap<Membership, MembershipReadDto>()
-            .ForMember(dest => dest.LevelName, opt => opt.MapFrom(src => src.Level.Name))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Username));
-
-        // ----------------------------------------------------------------
-        // --- Review Mappings ---
-        // ----------------------------------------------------------------
-
-        // Entity Review -> ReviewReadDto
-        CreateMap<Review, ReviewReadDto>()
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Username))
-            .ForMember(dest => dest.UserThumbnailUrl, opt => opt.MapFrom(src => src.User.ThumbnailUrl)); // Cần Include User
-
-        // DTO ReviewCreateDto -> Entity Review
-        CreateMap<ReviewCreateDto, Review>()
-            // UserId sẽ được gán thủ công trong Service
-            .ForMember(dest => dest.UserId, opt => opt.Ignore());
-
-        // ----------------------------------------------------------------
-        // --- Comment Mappings ---
-        // ----------------------------------------------------------------
-
-        // Entity Comment -> CommentReadDto
-        CreateMap<Comment, CommentReadDto>()
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.Username))
-            .ForMember(dest => dest.UserThumbnailUrl, opt => opt.MapFrom(src => src.User.ThumbnailUrl)); // Cần Include User
-
-        // DTO CommentCreateDto -> Entity Comment
-        CreateMap<CommentCreateDto, Comment>()
-            // UserId sẽ được gán thủ công trong Service
-            .ForMember(dest => dest.UserId, opt => opt.Ignore());
-
-        // ----------------------------------------------------------------
-        // --- Cart Mappings ---
-        // ----------------------------------------------------------------
-
-        // Entity CartItem (Món chính) -> CartItemReadDto
-        CreateMap<CartItem, CartItemReadDto>()
-            // Ánh xạ các trường cần Join (Giả định Repository đã Include)
-            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
-            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Product.ImageUrl))
-            .ForMember(dest => dest.SizeLabel, opt => opt.MapFrom(src => src.Size != null ? src.Size.Label : ""))
-            .ForMember(dest => dest.SugarLabel, opt => opt.MapFrom(src => src.SugarLevel != null ? src.SugarLevel.Label : ""))
-            .ForMember(dest => dest.IceLabel, opt => opt.MapFrom(src => src.IceLevel != null ? src.IceLevel.Label : ""))
-            .ForMember(dest => dest.Toppings, opt => opt.Ignore()); // Sẽ map thủ công trong Service
-
-        // Entity CartItem (Topping) -> CartToppingReadDto
-        CreateMap<CartItem, CartToppingReadDto>()
-            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));
-
-        // Entity Cart -> CartReadDto
-        CreateMap<Cart, CartReadDto>()
-            .ForMember(dest => dest.Items, opt => opt.Ignore()) // Sẽ map thủ công
-            .ForMember(dest => dest.TotalAmount, opt => opt.Ignore()); // Sẽ tính toán thủ công
-
-        // ----------------------------------------------------------------
-        // --- Option Mappings (Size, Sugar, Ice) ---
-        // ----------------------------------------------------------------
-
-        CreateMap<Size, SizeDto>();
-        CreateMap<SugarLevel, SugarLevelDto>();
-        CreateMap<IceLevel, IceLevelDto>();
-
-        // 1. Map cho Size
-        CreateMap<SizeCreateDto, Size>();
-
-        // 2. Map cho IceLevel
-        CreateMap<IceLevelCreateDto, IceLevel>();
-
-        // 3. Map cho SugarLevel
-        CreateMap<SugarLevelCreateDto, SugarLevel>();
-
-        // ----------------------------------------------------------------
-        // --- User Mappings ---
-        // ----------------------------------------------------------------
-
-        // 1. Ánh xạ DTO (Input) sang Model (CSDL)
-        CreateMap<UserRegisterDto, User>()
-            // Bỏ qua Password, vì chúng ta hash nó thủ công trong Service
-            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());
-
-        // 2. Ánh xạ Model (CSDL) sang DTO (Trả về)
-        CreateMap<User, UserReadDto>()
-            // Ánh xạ RoleId (byte/tinyint) sang Role (string)
-            .ForMember(dest => dest.Role, opt => opt.MapFrom(src =>
-                src.RoleId == 2 ? "Admin" : (src.RoleId == 3 ? "Manager" : "User")
-            ));
-
-        // ---ShopTable Mapping-- -
-        // Map từ Entity sang ReadDto
-        CreateMap<ShopTable, ShopTableReadDto>()
-            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : null));
-
-        // Map từ CreateDto sang Entity
-        CreateMap<ShopTableCreateDto, ShopTable>();
-
-        // Map từ UpdateDto sang Entity
-        CreateMap<ShopTableUpdateDto, ShopTable>();
-
-        // --- Reservation Mapping ---
-        CreateMap<Reservation, ReservationReadDto>()
-            .ForMember(dest => dest.StoreName, opt => opt.MapFrom(src => src.Store != null ? src.Store.Name : "N/A"))
-            .ForMember(dest => dest.AssignedTableName, opt => opt.MapFrom(src => src.AssignedTable != null ? src.AssignedTable.Name : null))
-            .ForMember(dest => dest.StatusLabel, opt => opt.MapFrom(src => ((ReservationStatusEnum)src.Status).ToString()));
-
-        CreateMap<ReservationCreateDto, Reservation>();
-
-        // UpdateDto map thủ công trong Service vì logic phức tạp, hoặc map fields đơn giản
-        CreateMap<ReservationUpdateDto, Reservation>()
-            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
 }

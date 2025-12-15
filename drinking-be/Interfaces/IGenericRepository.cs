@@ -4,21 +4,33 @@ namespace drinking_be.Interfaces
 {
     public interface IGenericRepository<T> where T : class
     {
-        // Đọc dữ liệu
-        Task<IEnumerable<T>> GetAllAsync();
-        Task<T?> GetByIdAsync(int id);
+        // Lấy tất cả (có thể kèm điều kiện lọc và include)
+        Task<IEnumerable<T>> GetAllAsync(
+            Expression<Func<T, bool>>? filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            string? includeProperties = null // Ví dụ: "Category,Brand"
+        );
 
-        // Thêm, Sửa, Xóa
+        // Lấy 1 bản ghi
+        Task<T?> GetByIdAsync(object id);
+
+        // Lấy 1 bản ghi kèm điều kiện và include (Quan trọng cho Detail API)
+        Task<T?> GetFirstOrDefaultAsync(
+            Expression<Func<T, bool>> filter,
+            string? includeProperties = null
+        );
+
         Task AddAsync(T entity);
+        Task AddRangeAsync(IEnumerable<T> entities);
+
         void Update(T entity);
+
         void Delete(T entity);
+        void DeleteRange(IEnumerable<T> entities);
 
-        // Lưu thay đổi vào CSDL
-        Task<int> SaveChangesAsync();
+        // Kiểm tra tồn tại (Tối ưu hơn lấy cả object)
+        Task<bool> ExistsAsync(Expression<Func<T, bool>> filter);
 
-        // Tìm kiếm nâng cao
-        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, string? includeProperties = null); 
-        Task AddRangeAsync(IEnumerable<T> entities); // Cho phép thêm nhiều
-        void DeleteRange(IEnumerable<T> entities); // Cho phép xóa nhiều
+        Task<int> CountAsync(Expression<Func<T, bool>>? filter = null);
     }
 }

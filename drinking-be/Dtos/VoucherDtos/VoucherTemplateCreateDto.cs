@@ -1,34 +1,49 @@
-﻿// Dtos/VoucherDtos/VoucherTemplateCreateDto.cs
+﻿// File: Dtos/VoucherDtos/VoucherTemplateCreateDto.cs
+
 using System.ComponentModel.DataAnnotations;
-using System;
+using drinking_be.Enums;
 
 namespace drinking_be.Dtos.VoucherDtos
 {
     public class VoucherTemplateCreateDto
     {
-        [Required]
+        [Required(ErrorMessage = "Tên mẫu voucher không được để trống.")]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        [Required]
-        [Range(0.01, (double)decimal.MaxValue)]
+        // Mã Coupon (nếu là Mã công khai)
+        [MaxLength(20)]
+        public string? CouponCode { get; set; }
+
+        // --- Quy tắc Giảm giá ---
+        [Required(ErrorMessage = "Giá trị giảm giá không được để trống.")]
+        [Range(0.01, 10000000)]
         public decimal DiscountValue { get; set; }
 
-        [Required]
-        public string DiscountType { get; set; } = "Fixed"; // "Percent" or "Fixed"
+        [Required(ErrorMessage = "Loại giảm giá (Ví dụ: Fixed, Percent) không được để trống.")]
+        [MaxLength(10)]
+        public string DiscountType { get; set; } = string.Empty;
 
-        public decimal MinOrderValue { get; set; } = 0;
+        [Range(0, 100000000)]
+        public decimal? MinOrderValue { get; set; } = 0m;
+
         public decimal? MaxDiscountAmount { get; set; }
 
-        public int? UsageLimit { get; set; }
-        public bool IsActive { get; set; } = true;
+        // --- Giới hạn Sử dụng ---
+        public int? UsageLimit { get; set; } // Tổng số lần sử dụng tối đa
+        public byte? UsageLimitPerUser { get; set; } // Giới hạn mỗi người dùng
 
-        [Required]
+        // --- Áp dụng cho Cấp độ Thành viên (Tùy chọn) ---
+        public byte? LevelId { get; set; }
+
+        // --- Thời gian hiệu lực ---
+        [Required(ErrorMessage = "Ngày bắt đầu hiệu lực không được để trống.")]
         public DateTime StartDate { get; set; }
-        [Required]
+
+        [Required(ErrorMessage = "Ngày hết hạn không được để trống.")]
         public DateTime EndDate { get; set; }
 
-        // Áp dụng cho hạng nào? (NULL = tất cả)
-        public byte? LevelId { get; set; }
+        // Mặc định là Active
+        public PublicStatusEnum Status { get; set; } = PublicStatusEnum.Active;
     }
 }

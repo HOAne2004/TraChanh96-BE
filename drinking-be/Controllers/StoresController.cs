@@ -1,6 +1,7 @@
-﻿// Controllers/StoreController.cs
-using drinking_be.Dtos.StoreDtos;
+﻿using drinking_be.Dtos.StoreDtos;
+using drinking_be.Enums;
 using drinking_be.Interfaces.StoreInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
@@ -16,98 +17,66 @@ namespace drinking_be.Controllers
             _storeService = storeService;
         }
 
-        // --- PUBLIC ENDPOINTS (Khách hàng) ---
+        // --- PUBLIC ---
 
-        /// <summary>
-        /// Lấy danh sách tất cả cửa hàng đang hoạt động.
-        /// </summary>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<StoreReadDto>))]
         public async Task<IActionResult> GetActiveStores()
         {
             var stores = await _storeService.GetActiveStoresAsync();
             return Ok(stores);
         }
 
-        /// <summary>
-        /// Lấy chi tiết một cửa hàng theo Slug.
-        /// </summary>
         [HttpGet("{slug}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StoreReadDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetStoreBySlug(string slug)
         {
             var store = await _storeService.GetStoreBySlugAsync(slug);
-            if (store == null)
-            {
-                return NotFound("Không tìm thấy cửa hàng này.");
-            }
+            if (store == null) return NotFound("Cửa hàng không tồn tại.");
             return Ok(store);
         }
 
-        // --- ADMIN ENDPOINT ---
+        // --- ADMIN ---
 
-        /// <summary>
-        /// [ADMIN] Tạo cửa hàng mới.
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(StoreReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateStore([FromBody] StoreCreateDto storeDto)
+        [HttpGet("admin")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> GetAllAdmin([FromQuery] string? search, [FromQuery] StoreStatusEnum? status)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var result = await _storeService.GetAllStoresAsync(search, status);
+            return Ok(result);
+        }
 
+        [HttpPost]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Create([FromBody] StoreCreateDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             try
             {
-                var createdStore = await _storeService.CreateStoreAsync(storeDto);
-
-                return CreatedAtAction(nameof(GetStoreBySlug),
-                                       new { slug = createdStore.Slug },
-                                       createdStore);
+                var result = await _storeService.CreateStoreAsync(dto);
+                return CreatedAtAction(nameof(GetStoreBySlug), new { slug = result.Slug }, result);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
         }
 
-        // ⭐️ THÊM MỚI: Cập nhật cửa hàng (PUT /api/stores/{id})
         [HttpPut("{id}")]
-        // [Authorize(Roles = "Admin")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StoreReadDto))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateStore(long id, [FromBody] StoreCreateDto storeDto)
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> Update(int id, [FromBody] StoreUpdateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var updatedStore = await _storeService.UpdateStoreAsync(id, storeDto);
-
-            if (updatedStore == null)
-            {
-                return NotFound($"Không tìm thấy cửa hàng với ID: {id}");
-            }
-
-            return Ok(updatedStore);
+            var result = await _storeService.UpdateStoreAsync(id, dto);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
 
-        // ⭐️ THÊM MỚI: Xóa cửa hàng (DELETE /api/stores/{id})
         [HttpDelete("{id}")]
-        // [Authorize(Roles = "Admin")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteStore(long id)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
         {
             var result = await _storeService.DeleteStoreAsync(id);
-
-            if (!result)
-            {
-                return NotFound($"Không tìm thấy cửa hàng với ID: {id}");
-            }
-
-            return NoContent(); // 204 No Content thành công
+            if (!result) return NotFound();
+            return NoContent();
         }
     }
 }

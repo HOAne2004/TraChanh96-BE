@@ -1,5 +1,4 @@
-﻿// Dtos/VoucherDtos/VoucherApplyDto.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace drinking_be.Dtos.VoucherDtos
 {
@@ -9,6 +8,7 @@ namespace drinking_be.Dtos.VoucherDtos
         public string VoucherCode { get; set; } = string.Empty;
 
         [Required]
-        public decimal OrderTotalAmount { get; set; } // Tổng tiền tạm tính của đơn hàng
+        [Range(0, double.MaxValue)]
+        public decimal OrderTotalAmount { get; set; } // Tổng tiền hàng để tính điều kiện
     }
 }

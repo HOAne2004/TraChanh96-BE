@@ -1,74 +1,108 @@
-﻿// Services/CommentService.cs
-using AutoMapper;
+﻿using AutoMapper;
 using drinking_be.Dtos.CommentDtos;
+using drinking_be.Enums;
 using drinking_be.Interfaces;
-using drinking_be.Interfaces.NewsInterfaces;
+using drinking_be.Interfaces.FeedbackInterfaces;
 using drinking_be.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace drinking_be.Services
 {
     public class CommentService : ICommentService
     {
-        private readonly ICommentRepository _commentRepo;
-        private readonly INewsRepository _newsRepo; // Cần kiểm tra News tồn tại
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public CommentService(ICommentRepository commentRepo, INewsRepository newsRepo, IMapper mapper)
+        public CommentService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _commentRepo = commentRepo;
-            _newsRepo = newsRepo;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        // --- PUBLIC API ---
-
         public async Task<IEnumerable<CommentReadDto>> GetCommentsByNewsIdAsync(int newsId)
         {
-            var comments = await _commentRepo.GetCommentsByNewsIdAsync(newsId);
-            return _mapper.Map<IEnumerable<CommentReadDto>>(comments);
-        }
+            var commentRepo = _unitOfWork.Repository<Comment>();
 
-        // --- USER API ---
+            // Lấy danh sách bình luận GỐC (ParentId == null)
+            // Kèm theo:
+            // 1. User: Để lấy tên/avatar người bình luận
+            // 2. InverseParent: Để lấy danh sách trả lời (Replies)
+            // 3. InverseParent.User: Để lấy thông tin người trả lời
+            var comments = await commentRepo.GetAllAsync(
+                filter: c => c.NewsId == newsId && c.ParentId == null && c.Status == ReviewStatusEnum.Approved,
+                orderBy: q => q.OrderByDescending(c => c.CreatedAt),
+                includeProperties: "User,InverseParent,InverseParent.User"
+            );
 
-        public async Task<CommentReadDto> CreateCommentAsync(CommentCreateDto commentDto, int userId)
-        {
-            // 1. Kiểm tra News có tồn tại không
-            var news = await _newsRepo.GetByIdAsync(commentDto.NewsId);
-            if (news == null)
+            // Mẹo: Nếu muốn lọc cả các Reply phải là Approved, ta có thể lọc lại trong bộ nhớ (Client Evaluation)
+            // hoặc cấu hình Global Query Filter. Ở đây ta map sang DTO rồi lọc nhẹ.
+            var dtos = _mapper.Map<IEnumerable<CommentReadDto>>(comments);
+
+            // Lọc thủ công các Reply chưa Approved (nếu Include lấy dư)
+            foreach (var dto in dtos)
             {
-                throw new KeyNotFoundException("Bài viết không tồn tại.");
-            }
-
-            // 2. (Tùy chọn) Kiểm tra ParentId (bình luận cha) có tồn tại không
-            if (commentDto.ParentId.HasValue)
-            {
-                var parentComment = await _commentRepo.GetByIdAsync(commentDto.ParentId.Value);
-                if (parentComment == null || parentComment.NewsId != commentDto.NewsId)
+                if (dto.Replies != null)
                 {
-                    throw new Exception("Bình luận cha không hợp lệ.");
+                    dto.Replies = dto.Replies.Where(r => r.Status == ReviewStatusEnum.Approved.ToString()).ToList();
                 }
             }
 
-            // 3. Ánh xạ DTO sang Entity
-            var comment = _mapper.Map<Comment>(commentDto);
+            return dtos;
+        }
 
-            // 4. Gán các giá trị hệ thống
+        public async Task<CommentReadDto> CreateCommentAsync(int userId, CommentCreateDto dto)
+        {
+            var commentRepo = _unitOfWork.Repository<Comment>();
+            var newsRepo = _unitOfWork.Repository<News>();
+
+            // 1. Kiểm tra bài viết tồn tại
+            var newsExists = await newsRepo.GetByIdAsync(dto.NewsId);
+            if (newsExists == null) throw new KeyNotFoundException("Bài viết không tồn tại.");
+
+            // 2. Kiểm tra ParentId (nếu là reply)
+            if (dto.ParentId.HasValue)
+            {
+                var parent = await commentRepo.GetByIdAsync(dto.ParentId.Value);
+                if (parent == null) throw new Exception("Bình luận gốc không tồn tại.");
+                if (parent.NewsId != dto.NewsId) throw new Exception("Bình luận trả lời không cùng bài viết.");
+                // Có thể chặn reply cấp 2 nếu muốn (chỉ cho phép 1 cấp)
+                if (parent.ParentId != null) throw new Exception("Hệ thống chỉ hỗ trợ trả lời 1 cấp.");
+            }
+
+            // 3. Map và Tạo mới
+            var comment = _mapper.Map<Comment>(dto);
             comment.UserId = userId;
             comment.CreatedAt = DateTime.UtcNow;
+            comment.Status = ReviewStatusEnum.Pending; // Mặc định chờ duyệt
 
-            // 5. Lưu vào DB
-            await _commentRepo.AddAsync(comment);
-            await _commentRepo.SaveChangesAsync();
+            await commentRepo.AddAsync(comment);
+            await _unitOfWork.SaveChangesAsync();
 
-            // 6. Trả về DTO
-            // Cần Eager Load User để hiển thị UserName ngay lập tức
-            var createdComment = await _commentRepo.GetByIdAsync(comment.Id); // Tải lại để lấy User (nếu cần)
-                                                                              // Hoặc gán thủ công nếu đã có thông tin User
+            // Load lại kèm User để trả về DTO hiển thị ngay
+            var createdComment = await commentRepo.GetFirstOrDefaultAsync(
+                c => c.Id == comment.Id,
+                includeProperties: "User"
+            );
 
-            return _mapper.Map<CommentReadDto>(comment);
+            return _mapper.Map<CommentReadDto>(createdComment);
+        }
+
+        public async Task<bool> DeleteCommentAsync(int commentId, int userId)
+        {
+            var commentRepo = _unitOfWork.Repository<Comment>();
+
+            // Tìm comment (Phải đúng chủ sở hữu)
+            var comment = await commentRepo.GetFirstOrDefaultAsync(c => c.Id == commentId && c.UserId == userId);
+
+            if (comment == null) return false;
+
+            // Soft Delete
+            comment.Status = ReviewStatusEnum.Deleted;
+            comment.DeletedAt = DateTime.UtcNow;
+
+            commentRepo.Update(comment);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
         }
     }
 }

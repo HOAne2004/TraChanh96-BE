@@ -1,33 +1,39 @@
-﻿// Dtos/StoreDtos/StoreCreateDto.cs
+﻿// File: Dtos/StoreDtos/StoreCreateDto.cs
+
 using System.ComponentModel.DataAnnotations;
-using System;
+using drinking_be.Enums;
 
 namespace drinking_be.Dtos.StoreDtos
 {
     public class StoreCreateDto
     {
-        [Required]
+        [Required(ErrorMessage = "Tên cửa hàng không được để trống.")]
         [MaxLength(200)]
         public string Name { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(200)]
-        public string Address { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Mã Brand không được để trống.")]
+        public int BrandId { get; set; }
 
-        [Required]
-        public int BrandId { get; set; } // Liên kết đến Brand
+        // ⭐ AddressId là bắt buộc, phải trỏ tới một bản ghi Address đã tồn tại
+        [Required(ErrorMessage = "Mã địa chỉ không được để trống.")]
+        public long AddressId { get; set; }
 
         public string? ImageUrl { get; set; }
 
-        public double? Latitude { get; set; }
-        public double? Longitude { get; set; }
+        // Giờ hoạt động
+        public TimeSpan? OpenTime { get; set; }
+        public TimeSpan? CloseTime { get; set; }
+        public DateTime? OpenDate { get; set; } // Ngày khai trương
 
-        [Required]
-        public TimeSpan OpenTime { get; set; } // Sử dụng TimeSpan cho giờ mở cửa
+        // Cấu hình phí ship
+        public decimal? ShippingFeeFixed { get; set; } = 0m;
+        public decimal? ShippingFeePerKm { get; set; } = 0m;
 
-        [Required]
-        public TimeSpan CloseTime { get; set; } // Sử dụng TimeSpan cho giờ đóng cửa
+        public StoreStatusEnum Status { get; set; } = StoreStatusEnum.ComingSoon;
 
-        public bool IsActive { get; set; } = true; // Mặc định là Active
+        public byte? SortOrder { get; set; }
+        public bool? MapVerified { get; set; } = false;
+
+        // Slug sẽ được Service Layer tính toán
     }
 }

@@ -1,5 +1,6 @@
 ﻿using drinking_be.Dtos.ReservationDtos;
-using drinking_be.Interfaces.ReservationInterfaces;
+using drinking_be.Enums;
+using drinking_be.Interfaces.StoreInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -17,22 +18,30 @@ namespace drinking_be.Controllers
             _reservationService = reservationService;
         }
 
-        // POST: api/Reservation
+        // --- Helper lấy UserID ---
+        private int GetUserId()
+        {
+            var claim = User.FindFirst("nameid") ?? User.FindFirst("sub") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            if (claim != null && int.TryParse(claim.Value, out int userId)) return userId;
+            return 0; // Trả về 0 nếu không tìm thấy (cho khách vãng lai)
+        }
+
+        // POST: api/reservation
         [HttpPost]
-        public async Task<IActionResult> CreateReservation([FromBody] ReservationCreateDto createDto)
+        public async Task<IActionResult> CreateReservation([FromBody] ReservationCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // Nếu user đã đăng nhập, tự động gán UserId nếu DTO chưa có
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim != null && createDto.UserId == null)
+            // Tự động gán UserId nếu đang đăng nhập
+            var userId = GetUserId();
+            if (userId > 0 && dto.UserId == null)
             {
-                createDto.UserId = int.Parse(userIdClaim.Value);
+                dto.UserId = userId;
             }
 
             try
             {
-                var result = await _reservationService.CreateReservationAsync(createDto);
+                var result = await _reservationService.CreateReservationAsync(dto);
                 return CreatedAtAction(nameof(GetReservationById), new { id = result.Id }, result);
             }
             catch (Exception ex)
@@ -41,7 +50,7 @@ namespace drinking_be.Controllers
             }
         }
 
-        // GET: api/Reservation/{id}
+        // GET: api/reservation/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetReservationById(long id)
         {
@@ -50,37 +59,37 @@ namespace drinking_be.Controllers
             return Ok(result);
         }
 
-        // GET: api/Reservation/my-history
-        // API này yêu cầu User phải đăng nhập (Authorize)
+        // GET: api/reservation/my-history
         [HttpGet("my-history")]
         [Authorize]
         public async Task<IActionResult> GetMyHistory()
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var userId = GetUserId();
+            if (userId == 0) return Unauthorized();
+
             var result = await _reservationService.GetHistoryByUserIdAsync(userId);
             return Ok(result);
         }
 
-        // GET: api/Reservation/store/{storeId}
-        // Dành cho Admin/Staff quán xem danh sách
+        // GET: api/reservation/store/{storeId}
         [HttpGet("store/{storeId}")]
-        public async Task<IActionResult> GetByStore(int storeId, [FromQuery] DateTime? date)
+        [Authorize(Roles = "Admin,Manager,Staff")] // Chỉ nhân viên mới được xem danh sách quán
+        public async Task<IActionResult> GetByStore(int storeId, [FromQuery] DateTime? date, [FromQuery] ReservationStatusEnum? status)
         {
-            var result = await _reservationService.GetReservationsByStoreAsync(storeId, date);
+            var result = await _reservationService.GetReservationsByStoreAsync(storeId, date, status);
             return Ok(result);
         }
 
-        // PUT: api/Reservation/{id}
-        // Admin cập nhật trạng thái hoặc gán bàn
+        // PUT: api/reservation/{id} (Admin/Manager update)
         [HttpPut("{id}")]
-        // [Authorize(Roles = "Admin,Staff")] // Uncomment nếu có phân quyền
+        [Authorize(Roles = "Admin,Manager,Staff")]
         public async Task<IActionResult> UpdateReservation(long id, [FromBody] ReservationUpdateDto updateDto)
         {
             try
             {
                 var result = await _reservationService.UpdateReservationAsync(id, updateDto);
-                if (!result) return NotFound();
-                return Ok(new { message = "Cập nhật thành công." });
+                if (result == null) return NotFound();
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -88,17 +97,16 @@ namespace drinking_be.Controllers
             }
         }
 
-        // PUT: api/Reservation/{id}/cancel
-        // User tự hủy đơn
+        // PUT: api/reservation/{id}/cancel (User hủy)
         [HttpPut("{id}/cancel")]
         [Authorize]
-        public async Task<IActionResult> CancelReservation(long id)
+        public async Task<IActionResult> CancelReservation(long id, [FromBody] string reason)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var userId = GetUserId();
             try
             {
-                var result = await _reservationService.CancelReservationAsync(id, userId);
-                if (!result) return BadRequest(new { message = "Không thể hủy đơn này (sai thông tin hoặc sai trạng thái)." });
+                var result = await _reservationService.CancelReservationAsync(id, userId, reason);
+                if (!result) return BadRequest(new { message = "Không thể hủy đơn này." });
                 return Ok(new { message = "Đã hủy đặt bàn thành công." });
             }
             catch (Exception ex)

@@ -1,129 +1,76 @@
-﻿// Controllers/AuthController.cs
-using drinking_be.Dtos.UserDtos;
-using drinking_be.Interfaces.UserInterfaces;
+﻿using drinking_be.Dtos.UserDtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims; // Cần thiết để lấy thông tin từ JWT
+using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.EntityFrameworkCore;
+using drinking_be.Interfaces.AuthInterfaces;
 
 namespace drinking_be.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // 🔒 Bắt buộc đăng nhập cho tất cả các hàm bên dưới
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
 
         public UsersController(IUserService userService)
         {
-
             _userService = userService;
         }
 
-        // --- PUBLIC ENDPOINTS (Không cần xác thực) ---
-
-        /// <summary>
-        /// Đăng ký người dùng mới.
-        /// </summary>
-        [HttpPost("register")]
-        [AllowAnonymous] // Cho phép truy cập mà không cần Token
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(UserReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Register([FromBody] UserRegisterDto registerDto)
+        // Helper function để lấy PublicId từ Token
+        private Guid GetUserPublicId()
         {
-            if (!ModelState.IsValid)
+            var subClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (Guid.TryParse(subClaim, out var publicId))
             {
-                return BadRequest(ModelState);
+                return publicId;
             }
-
-            try
-            {
-                var newUser = await _userService.RegisterAsync(registerDto);
-                // Trả về 201 Created
-                return CreatedAtAction(nameof(GetCurrentUser), new { id = newUser.PublicId }, newUser);
-            }
-            catch (Exception ex)
-            {
-                if (ex is DbUpdateException dbEx)
-                {
-                    // Lấy lỗi gốc từ SQL Server (nếu có)
-                    var innerEx = dbEx.InnerException;
-                    string errorMessage = "Lỗi CSDL: ";
-
-                    if (innerEx != null)
-                    {
-                        errorMessage += innerEx.Message; // Lỗi thật nằm ở đây!
-                    }
-                    else
-                    {
-                        errorMessage += dbEx.Message; // Lỗi chung
-                    }
-
-                    // Trả về lỗi chi tiết
-                    return BadRequest(errorMessage);
-                }
-                // Xử lý lỗi nghiệp vụ (ví dụ: "Email đã được sử dụng.")
-                return BadRequest(ex.Message);
-            }
+            throw new UnauthorizedAccessException("Token không hợp lệ.");
         }
 
         /// <summary>
-        /// Đăng nhập và nhận Token JWT.
+        /// Xem hồ sơ cá nhân (Profile)
         /// </summary>
-        [HttpPost("login")]
-        [AllowAnonymous]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))] // Trả về Token (chuỗi)
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Login([FromBody] UserLoginDto loginDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                var token = await _userService.LoginAsync(loginDto);
-                // Trả về Token JWT thành công
-                return Ok(token);
-            }
-            catch (Exception ex)
-            {
-                // Xử lý lỗi xác thực mật khẩu/tên đăng nhập
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
-            }
-        }
-
-        // --- SECURE ENDPOINT (Cần xác thực) ---
-
-        /// <summary>
-        /// Lấy thông tin người dùng hiện tại từ Token JWT.
-        /// </summary>
-        [Authorize] // Bắt buộc phải có Token hợp lệ
         [HttpGet("me")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserReadDto))]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> GetCurrentUser()
+        public async Task<IActionResult> GetMe()
         {
-            // Tìm ID trong claim "sub" (nếu đã Clear map) hoặc "nameidentifier" (mặc định của .NET)
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)
-                           ?? User.FindFirst(ClaimTypes.NameIdentifier);
-
-            // Kiểm tra nếu không tìm thấy hoặc không phải Guid hợp lệ
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid publicId))
-            {
-                return Unauthorized("Token không hợp lệ hoặc lỗi phiên bản Token.");
-            }
-
+            var publicId = GetUserPublicId();
             var user = await _userService.GetUserByPublicIdAsync(publicId);
 
-            if (user == null)
-            {
-                return NotFound("Không tìm thấy thông tin người dùng.");
-            }
-
+            if (user == null) return NotFound();
             return Ok(user);
+        }
+
+        /// <summary>
+        /// Cập nhật hồ sơ cá nhân
+        /// </summary>
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateMe([FromBody] UserUpdateDto updateDto)
+        {
+            var publicId = GetUserPublicId();
+
+            // Ngăn chặn User tự sửa Role hoặc Status thông qua API này
+            // (DTO đã xử lý 1 phần, nhưng ở đây có thể check thêm nếu cần)
+
+            var updatedUser = await _userService.UpdateUserByPublicIdAsync(publicId, updateDto);
+
+            if (updatedUser == null) return NotFound();
+            return Ok(updatedUser);
+        }
+
+        /// <summary>
+        /// Xóa tài khoản (Tự xóa)
+        /// </summary>
+        [HttpDelete("me")]
+        public async Task<IActionResult> DeleteMe()
+        {
+            var publicId = GetUserPublicId();
+            var result = await _userService.DeleteUserByPublicIdAsync(publicId);
+
+            if (!result) return NotFound();
+            return NoContent();
         }
     }
 }

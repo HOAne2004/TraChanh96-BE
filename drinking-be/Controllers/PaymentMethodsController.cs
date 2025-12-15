@@ -1,6 +1,6 @@
-﻿// Controllers/PaymentMethodController.cs
-using drinking_be.Dtos.PaymentMethodDtos;
-using drinking_be.Interfaces;
+﻿using drinking_be.Dtos.PaymentMethodDtos;
+using drinking_be.Interfaces.OrderInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace drinking_be.Controllers
@@ -16,45 +16,68 @@ namespace drinking_be.Controllers
             _methodService = methodService;
         }
 
-        // --- PUBLIC ENDPOINT (Khách hàng) ---
+        // --- PUBLIC API ---
 
-        /// <summary>
-        /// Lấy danh sách các phương thức thanh toán đang hoạt động.
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<PaymentMethodReadDto>))]
+        [HttpGet("active")]
+        [AllowAnonymous] // Khách vãng lai cũng cần xem để chọn thanh toán
         public async Task<IActionResult> GetActiveMethods()
         {
             var methods = await _methodService.GetActiveMethodsAsync();
             return Ok(methods);
         }
 
-        // --- ADMIN ENDPOINT ---
+        // --- ADMIN API ---
 
-        /// <summary>
-        /// [ADMIN] Tạo phương thức thanh toán mới.
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(PaymentMethodReadDto))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreatePaymentMethod([FromBody] PaymentMethodCreateDto methodDto)
+        [HttpGet("admin")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> GetAllMethods()
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var methods = await _methodService.GetAllMethodsAsync();
+            return Ok(methods);
+        }
+
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var method = await _methodService.GetByIdAsync(id);
+            if (method == null) return NotFound();
+            return Ok(method);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create([FromBody] PaymentMethodCreateDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             try
             {
-                var createdMethod = await _methodService.CreatePaymentMethodAsync(methodDto);
-
-                // Trả về 201 Created (có thể dùng GetById nếu có)
-                return StatusCode(StatusCodes.Status201Created, createdMethod);
+                var result = await _methodService.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Update(int id, [FromBody] PaymentMethodUpdateDto dto)
+        {
+            var result = await _methodService.UpdateAsync(id, dto);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _methodService.DeleteAsync(id);
+            if (!result) return NotFound();
+            return NoContent();
         }
     }
 }

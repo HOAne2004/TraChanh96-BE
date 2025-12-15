@@ -1,78 +1,103 @@
-﻿// Services/MembershipLevelService.cs
+﻿using AutoMapper;
 using drinking_be.Dtos.MembershipLevelDtos;
+using drinking_be.Enums;
 using drinking_be.Interfaces;
+using drinking_be.Interfaces.MarketingInterfaces;
 using drinking_be.Models;
-using AutoMapper;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace drinking_be.Services
 {
     public class MembershipLevelService : IMembershipLevelService
     {
-        private readonly IMembershipLevelRepository _levelRepo;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public MembershipLevelService(IMembershipLevelRepository levelRepo, IMapper mapper)
+        public MembershipLevelService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _levelRepo = levelRepo;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        // --- PUBLIC API ---
-
         public async Task<IEnumerable<MembershipLevelReadDto>> GetAllLevelsAsync()
         {
-            var levels = await _levelRepo.GetAllSortedAsync();
+            var repo = _unitOfWork.Repository<MembershipLevel>();
+
+            // Lấy danh sách, sắp xếp theo mức chi tiêu yêu cầu (MinSpendRequired)
+            // Lọc Status Active nếu cần (nhưng Admin thì nên thấy hết)
+            var levels = await repo.GetAllAsync(
+                filter: l => l.Status != PublicStatusEnum.Inactive, // Ví dụ lọc cái đã xóa
+                orderBy: q => q.OrderBy(l => l.MinSpendRequired)
+            );
+
             return _mapper.Map<IEnumerable<MembershipLevelReadDto>>(levels);
         }
 
-        // --- ADMIN API ---
-
-        public async Task<MembershipLevelReadDto?> GetLevelByIdAsync(byte id)
+        public async Task<MembershipLevelReadDto?> GetByIdAsync(byte id)
         {
-            // Do IGenericRepository.GetByIdAsync(int id) nhận int, ta cần ép kiểu
-            var level = await _levelRepo.GetByIdAsync(id);
-            if (level == null)
-            {
-                throw new KeyNotFoundException("Không tìm thấy cấp độ thành viên.");
-            }
-            return _mapper.Map<MembershipLevelReadDto>(level);
+            var repo = _unitOfWork.Repository<MembershipLevel>();
+
+            // Include Memberships và VoucherTemplates để đếm số lượng (cho Admin dashboard)
+            var level = await repo.GetFirstOrDefaultAsync(
+                filter: l => l.Id == id,
+                includeProperties: "Memberships,VoucherTemplates"
+            );
+
+            return level == null ? null : _mapper.Map<MembershipLevelReadDto>(level);
         }
 
-        public async Task<MembershipLevelReadDto> CreateLevelAsync(MembershipLevelCreateDto levelDto)
+        public async Task<MembershipLevelReadDto> CreateLevelAsync(MembershipLevelCreateDto dto)
         {
-            // Kiểm tra tên trùng lặp (nếu cần)
-            var existing = await _levelRepo.FindAsync(l => l.Name.ToLower() == levelDto.Name.ToLower());
-            if (existing.Any())
+            var repo = _unitOfWork.Repository<MembershipLevel>();
+
+            // 1. Kiểm tra tên trùng lặp
+            var existing = await repo.GetFirstOrDefaultAsync(l => l.Name.ToLower() == dto.Name.ToLower());
+            if (existing != null)
             {
                 throw new Exception("Tên cấp độ này đã tồn tại.");
             }
 
-            var level = _mapper.Map<MembershipLevel>(levelDto);
+            // 2. Map và Tạo mới
+            var level = _mapper.Map<MembershipLevel>(dto);
+            level.CreatedAt = DateTime.UtcNow;
 
-            await _levelRepo.AddAsync(level);
-            await _levelRepo.SaveChangesAsync();
+            await repo.AddAsync(level);
+            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<MembershipLevelReadDto>(level);
         }
 
-        public async Task<MembershipLevelReadDto> UpdateLevelAsync(byte id, MembershipLevelCreateDto levelDto)
+        public async Task<MembershipLevelReadDto?> UpdateLevelAsync(byte id, MembershipLevelUpdateDto dto)
         {
-            var existingLevel = await _levelRepo.GetByIdAsync(id);
-            if (existingLevel == null)
-            {
-                throw new KeyNotFoundException("Không tìm thấy cấp độ thành viên để cập nhật.");
-            }
+            var repo = _unitOfWork.Repository<MembershipLevel>();
+            var level = await repo.GetByIdAsync(id);
 
-            // Ánh xạ DTO sang Entity đã tồn tại
-            _mapper.Map(levelDto, existingLevel);
+            if (level == null) return null;
 
-            _levelRepo.Update(existingLevel);
-            await _levelRepo.SaveChangesAsync();
+            // Map dữ liệu update
+            _mapper.Map(dto, level);
+            level.UpdatedAt = DateTime.UtcNow;
 
-            return _mapper.Map<MembershipLevelReadDto>(existingLevel);
+            repo.Update(level);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<MembershipLevelReadDto>(level);
+        }
+
+        public async Task<bool> DeleteLevelAsync(byte id)
+        {
+            var repo = _unitOfWork.Repository<MembershipLevel>();
+            var level = await repo.GetByIdAsync(id);
+
+            if (level == null) return false;
+
+            // Soft Delete
+            level.Status = PublicStatusEnum.Inactive;
+            level.DeletedAt = DateTime.UtcNow;
+
+            repo.Update(level);
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
         }
     }
 }
